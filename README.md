@@ -69,21 +69,34 @@ identified from the loader code (see each game's `docs/`), PC port
 toolchain proven working (both `port/` scaffolds configure, build, and
 link cleanly with `port/build.bat`).
 
+**Going Mobile's phase 1 is done**: all 9 decompiled classes read
+through, understood, and renamed into a compile-checked
+`goingmobile/src/` reference tree (zero errors against the real
+MIDP/CLDC/Nokia-UI stub jars) -- see `goingmobile/docs/CLASS_MAP.md` and
+`goingmobile/src/README.md`. Confirmed along the way: the full level
+tile legend, the byte-exact 220-byte save-game layout, the weapon system
+(projectile type = `3*weapon + level`; 7 guns + unlockable RYNO), the
+128x128 screen, and two phase-0 guesses corrected (`f2.v` is the bitmap
+font, `/o` is the menu-definition table).
+
 What's already understood without further RE (see the `ASSET_FORMATS.md`
 files for the full write-ups):
 
 - Going Mobile's level tilemaps (`n1..n12`: 28x18-byte grids, tile id =
-  byte - 0x20), string tables (`m*.txt`), save-game layout (RMS record
-  store `RANDCSm`), and the manifest's boss-tuning attributes.
+  byte - 0x20, full tile legend), string tables (`m*.txt`), bitmap font
+  (`f2.v`), menu table (`/o`), enemy/player animation tables (`/p`,
+  `/r`), enemy geometry (`/q`), save-game layout (RMS record store
+  `RANDCSm`), and the manifest's boss-tuning attributes.
 - Clone Home's `RP1`/`RP2`/`RP3` container format (parsed from
   `a.java`'s own loader), its embedded-PNG and UTF-8 string-table
   resource types, and the complete 218-byte save-game layout from
   `RatchetMIDlet`'s serializer.
 
-**Neither game's phase 1 (read-through and renaming) has started.**
-Suggested starting points are in each `docs/ROADMAP.md`; Going Mobile's
-cross-build diffing (canonical vs `a` vs `a1`) should recover the class
-mappings for two builds at once.
+**Clone Home's phase 1 (read-through and renaming) has not started.**
+Suggested starting point: `RatchetMIDlet.java` (small, already readable)
+-> `a.java` (the engine base + resource loader) -> `b.java`. Going
+Mobile's remaining phase-1 follow-up is cross-build diffing
+(`decompiled_a`/`decompiled_a1`) to settle the few unconfirmed members.
 
 ## Building the ports
 

@@ -23,6 +23,12 @@ tracked (see `.gitignore`).
   (`find_java()` tries `$JAVA_HOME`, then `java` on PATH, then installed
   Temurin JDKs -- the PATH java on this machine is 1.8, too old for
   Vineflower 1.12). Run with no args to do all four builds.
+- **`rename_gm.py`** -- goingmobile phase 1: renames
+  `goingmobile/decompiled/` into the compile-checked
+  `goingmobile/src/` reference tree (class-level mapping plus confirmed
+  member renames, the mapping tables live in the script; see
+  `goingmobile/docs/CLASS_MAP.md`). Regenerates `src/` except the three
+  hand-written files (`Entity.java`, `MenuItem.java`, `SoundPlayer.java`).
 
 ## Why Vineflower and not Ghidra
 

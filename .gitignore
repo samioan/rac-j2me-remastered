@@ -25,4 +25,7 @@ __pycache__/
 /clonehome/port/build/
 /clonehome/port/build-dist/
 /clonehome/port/dist/
+# goingmobile phase-1 compile-check output (regenerable, see
+# goingmobile/src/README.md)
+/build_src/
 *.log

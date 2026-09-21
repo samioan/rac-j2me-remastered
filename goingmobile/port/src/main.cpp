@@ -22,7 +22,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow) {
 
   HWND hwnd = CreateWindowExW(
       0, kClassName, L"Ratchet and Clank: Going Mobile Port", WS_OVERLAPPEDWINDOW,
-      CW_USEDEFAULT, CW_USEDEFAULT, 176, 208,
+      CW_USEDEFAULT, CW_USEDEFAULT, 128, 128,
       nullptr, nullptr, hInstance, nullptr);
   if (!hwnd) return 0;
 

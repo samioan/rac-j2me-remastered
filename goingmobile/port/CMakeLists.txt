@@ -14,7 +14,8 @@ endif()
 # ../docs/ROADMAP.md phase 1/2 (source read-through, asset formats) is
 # done. Software-rendered raw Win32 (no SDL/D3D/GL dependency), matching
 # the sibling tes-travels-decomp ports' platform layer. Window size is
-# the original game's Nokia FullCanvas resolution.
+# the original game's screen: 128x128 (Nokia Series 40 FullCanvas,
+# confirmed in phase 1 -- a 20px HUD row over a 128x108 play area).
 add_executable(goingmobile_port WIN32
   src/main.cpp
 )

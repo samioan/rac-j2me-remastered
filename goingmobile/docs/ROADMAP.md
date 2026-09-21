@@ -13,19 +13,22 @@ MIDlet reads at startup via `getAppProperty` in
 `BOSS_HIT_POINT_SHELL=35`, `BOSS_HIT_POINT_KERNEL=100`, `BOSS_FIRE_RATE=22`
 -- stored straight into `f.f`/`f.g`/`f.h`.
 
-The engine is a single big obfuscated class plus helpers:
+The engine is a single big obfuscated class plus helpers (roles confirmed
+by the phase-1 read-through; full write-up in [`CLASS_MAP.md`](CLASS_MAP.md)):
 
-| Class | Role (evidence) |
+| Class | Role (confirmed) |
 |---|---|
-| `ratchetandclank` | MIDlet; owns RMS save handling (record store `RANDCSm`: 3 x 220-byte save slots + one 3-byte settings record), the `.txt` string-table loaders, and a `fillRect`-based bitmap font renderer |
-| `f` (127KB source) | the game: `extends com.nokia.mid.ui.FullCanvas implements Runnable` -- renderer, input, main loop, level flow; loads `/o` on every level start |
-| `a` (40KB) | entity/actor class (`extends h`), with baked-in enemy/weapon tuning tables; loads `/r`; Nokia `DirectUtils` pixel manipulation |
-| `c` (20KB) | level tilemaps: reads `/n<level>` into `byte[12][28][18]` (28x18 cells, one byte per cell, tile id = raw byte - 0x20) and the tile renderer (22px columns, 14px rows) |
-| `d` (21KB) | sprite/animation data: `extends h`, loads `/p` and `/q` |
-| `g`, `b`, `e`, `h` | smaller helpers; `h` is the entity base class |
+| `ratchetandclank` | MIDlet; owns RMS save handling (record store `RANDCSm`: 3 x 220-byte save slots + one 3-byte settings record), the `.txt` string-table loaders, the word-wrap reader, and the `f2.v` bitmap font (a `fillRect`-based glyph renderer) |
+| `f` (127KB source) | the game: `extends com.nokia.mid.ui.FullCanvas implements Runnable` -- 128x128 screen, tick loop via `callSerially`, renderer, input, menus, scoring, boss fight, save/load; owns the player/enemy/projectile pools |
+| `a` (40KB) | **the player** (Ratchet): platformer physics, weapons (projectile type = `3*weapon + level`), melee, ladders/ledges/zip lines/swings, animation from `/r`; loads `/r` |
+| `c` (20KB) | level tilemaps: reads `/n<level>` into `byte[12][28][18]` (28x18 cells, one byte per cell, tile id = raw byte - 0x20), the full tile legend, and the tile renderer (22px columns, 14px rows) |
+| `d` (21KB) | **the enemies**: 5-slot pool, 5 types, per-type animation tables from `/p` and hitbox/geometry tables from `/q`; walk/fly/wall-crawl AI |
+| `g` (17KB) | **projectiles**: both pools (player + enemy shots, 10 each), 33 types with per-type speed/size/damage tables, rotated rendering |
+| `b`, `e`, `h` | the MMAPI sound player, one menu row, and the Player/Enemy base class |
 
 It's a 2D side-scrolling platformer/shooter (scrolling 28x18 tile grids,
-bolts, weapon store, boss) with Nokia-UI-specific rendering
+616x252 world vs 128x128 view, bolts, weapon store with 7 guns + RYNO,
+boss level) with Nokia-UI-specific rendering
 (`com.nokia.mid.ui.DirectGraphics`/`DirectUtils`/`FullCanvas`) -- a PC port
 needs a MIDP+Nokia-UI shim layer or a straight C++ reimplementation.
 
@@ -58,12 +61,17 @@ readable-but-unrenamed Java via [`../../tools/decompile.py`](../../tools/decompi
 (9 + 9 + 11 source files). Clean recovery -- obfuscation is
 minifier-style single-letter names only, control flow and types intact.
 
-**Phase 1 (not started): read through and rename**, starting from
-`ratchetandclank.java` -> `f.java` (the engine), cross-checking against
-`decompiled_a1/h.java` (same engine, different obfuscation pass, so
-matching method bodies between the two recovers each build's mapping for
-free) and `decompiled_a/` (same code as canonical, different
-obfuscation -- a pure diff target).
+**Phase 1 is done for the canonical build**: all 9 classes read through,
+renamed into a compile-checked [`../src/`](../src/) reference tree (zero
+errors against the real MIDP/CLDC/Nokia-UI stub jars), with the complete
+class/member mapping, everything that kept an obfuscated name and why, and
+the open questions in [`CLASS_MAP.md`](CLASS_MAP.md). Notable phase-1
+findings beyond the initial read: `f2.v` is the **bitmap font** (not a
+video), `/o` is the **menu-definition table**, the save record layout is
+now byte-exact (see `ASSET_FORMATS.md`), and the engine runs on a
+128x128 screen. Still open from phase 1: cross-build diffing against
+`decompiled_a`/`decompiled_a1` to settle the remaining unconfirmed
+members (Game's `bk`/`bl`, Player's `q`, the dead-looking `t` asset).
 
 **Phase 2 (partially done from phase-0 read-through, see
 [`ASSET_FORMATS.md`](ASSET_FORMATS.md)):** the level tilemap format
