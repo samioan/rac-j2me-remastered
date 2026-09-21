@@ -41,7 +41,7 @@ original filenames):
 | Build | Jar | Layout | Notes |
 |---|---|---|---|
 | canonical | `RAC-GoingMobile.jar` | 69 entries, 9 classes (`a`..`h`, `ratchetandclank`) | `.mid` sounds, obfuscated asset names (`n1`..`n12`, `o`, `p`, `q`, `r`, `t`, `f2.v`) |
-| alt-a | `RAC-GoingMobile-a.jar` | same 69 entries, same names | 10 files differ from canonical (manifest, 8 class files, `icon.png`, `a.png`); the other 59 -- all level data `n1`..`n12`, all sounds, all string tables, `f2.v` -- are **byte-identical**. Same code recompiled (near-identical class sizes), different obfuscation/build. |
+| alt-a | `RAC-GoingMobile-a.jar` | same 69 entries, same names | **A 128x160 screen-port of the same revision**: vertical constants retargeted (`-124`->`-92` camera clamp, `108`->`140` play area), no multi-tap name-entry feature; the other 59 files -- all level data `n1`..`n12`, sounds, string tables, `f2.v` -- are **byte-identical**. |
 | alt-a1 | `RAC-GoingMobile-a1.jar` | 85 entries, 12 classes | a genuinely different build: **unobfuscated asset names** (`level0`..`level12.bin`, `enemy.bin`, `player.bin`, `mapData.txt`, `txt_*.txt`, per-thing `.png` sprites), `.wav` sounds (MIDP-2.0) instead of some `.mid`s, an extra `f3.v` video, and the engine split differently (`h.java` 195KB is the engine, not `f.java`). `f2.v`, `menu.mid` and `icon.png` are byte-identical to the canonical build's. |
 
 The canonical build is the decompilation target (`extracted/`,
@@ -69,9 +69,19 @@ the open questions in [`CLASS_MAP.md`](CLASS_MAP.md). Notable phase-1
 findings beyond the initial read: `f2.v` is the **bitmap font** (not a
 video), `/o` is the **menu-definition table**, the save record layout is
 now byte-exact (see `ASSET_FORMATS.md`), and the engine runs on a
-128x128 screen. Still open from phase 1: cross-build diffing against
-`decompiled_a`/`decompiled_a1` to settle the remaining unconfirmed
-members (Game's `bk`/`bl`, Player's `q`, the dead-looking `t` asset).
+128x128 screen.
+
+**The phase-1 cross-build follow-up is done too** (see
+[`BUILD_COMPARISON.md`](BUILD_COMPARISON.md)): the `(a)` build proved to be
+a **128x160 screen-port of the same revision** (no name-entry feature, all
+game data byte-identical), and the a1 build mapped onto the canonical
+class names (it's a newer, restructured MIDP-2.0 trial version with an
+unlock-code registration UI -- `a` = the font, `b` = Player, `c` =
+SoundPlayer, `d` = LevelMap, `e` = canvas shell, `f` = Enemy, `g` =
+intro/unlock manager, `h` = Game, `i` = Entity, `j` = Projectile). The
+last open members were settled by it: `bk`/`bl` are the infolink
+("Level N unlocked") tables, `Player.q` is the post-ladder-jump grace
+timer, and the `t` asset is dead data.
 
 **Phase 2 (partially done from phase-0 read-through, see
 [`ASSET_FORMATS.md`](ASSET_FORMATS.md)):** the level tilemap format

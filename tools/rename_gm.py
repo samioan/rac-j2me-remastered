@@ -206,6 +206,7 @@ PLAYER_FIELDS = {
     "N": "weaponLevel", "B": "invulnTimer", "D": "onLadder",
     "E": "platformUnder", "F": "meleeActive", "C": "swingTargetType",
     "A": "weaponPose", "z": "attackTimer", "p": "jumpPhase",
+    "q": "ladderExitTimer", "r": "actionState", "s": "specialTimer",
     "t": "swingTargetX", "u": "swingTargetY", "v": "swingCurX",
     "w": "swingCurY", "x": "swingStepX", "y": "swingStepY",
     "O": "swingVelX", "P": "swingVelY", "Q": "swingEndX",
@@ -281,6 +282,11 @@ GAME_MEMBERS = {
     "bX": "playerDamaged", "bI": "specialKills",
     # per-level enemy bookkeeping
     "bY": "enemiesRemainingPerLevel", "bZ": "enemiesCountedPerLevel",
+    # infolink tiles (77-96): the "Level N unlocked." messages (m*.txt
+    # strings 75-90) they show, and each message's tick timer; the bounds
+    # test in L() uses INFOLINK_MESSAGE_IDS[0] / [15]+TICKS[15] to decide
+    # whether advancing the message completes the level
+    "bl": "INFOLINK_MESSAGE_IDS", "bk": "INFOLINK_MESSAGE_TICKS",
     # menus / ui
     "ce": "PORTRAIT_TABLE", "cn": "menuSoftLeft", "co": "menuSoftRight",
     "cp": "menuTitle", "cq": "menuBackTarget", "cb": "repaintDelay",

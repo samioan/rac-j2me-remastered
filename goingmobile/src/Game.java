@@ -147,10 +147,10 @@ public final class Game extends FullCanvas implements Runnable {
    public int bh;
    public int bi = 0;
    public int bj = 0;
-   public static final byte[] bk = new byte[]{
+   public static final byte[] INFOLINK_MESSAGE_TICKS = new byte[]{
       1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1
    };
-   public static final short[] bl = new short[]{
+   public static final short[] INFOLINK_MESSAGE_IDS = new short[]{
       75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
    };
    public boolean weaponOverlayOpen = false;
@@ -1393,7 +1393,7 @@ public final class Game extends FullCanvas implements Runnable {
             this.e = false;
          }
 
-         if (this.player.r == -1) {
+         if (this.player.actionState == -1) {
             var1.setClip(59, 20, 11, 12);
             var1.drawImage(hudIconImage, 59, -64, 0);
          }
@@ -1893,7 +1893,7 @@ public final class Game extends FullCanvas implements Runnable {
 
    private void h(int var1) {
       x();
-      this.player.r = -2;
+      this.player.actionState = -2;
       this.by = false;
       this.A();
       this.Q = (byte)var1;
@@ -1949,7 +1949,7 @@ public final class Game extends FullCanvas implements Runnable {
 
    private void i(int var1) {
       x();
-      this.player.r = -2;
+      this.player.actionState = -2;
       this.by = false;
       this.Q = (byte)var1;
       this.N.a(var1);
@@ -2055,7 +2055,7 @@ public final class Game extends FullCanvas implements Runnable {
          a.soundPlayer.queue(0, 1);
       }
 
-      this.player.r = -2;
+      this.player.actionState = -2;
       this.P = this.V;
       this.f(this.P);
       this.N.a(this.V, false);
@@ -2103,7 +2103,7 @@ public final class Game extends FullCanvas implements Runnable {
       this.player.swingStepY = (this.player.swingTargetY - this.player.swingCurY) / 6;
       if (this.player.swingTargetY < this.player.swingCurY) {
          this.player.swingTargetType = (byte)var3;
-         this.player.r = 0;
+         this.player.actionState = 0;
          this.player.setAnimState((byte)5);
          this.player.animRestart = 2;
       }
@@ -2123,7 +2123,7 @@ public final class Game extends FullCanvas implements Runnable {
    public final short e() {
       short var1 = 252;
       int var2 = 0;
-      if (this.player.q != 0) {
+      if (this.player.ladderExitTimer != 0) {
          return 252;
       }
 
@@ -2301,7 +2301,7 @@ public final class Game extends FullCanvas implements Runnable {
                }
 
                byte var3 = 0;
-               if (this.player.r == -1) {
+               if (this.player.actionState == -1) {
                   this.player.l();
                } else {
                   label289:
@@ -2387,7 +2387,7 @@ public final class Game extends FullCanvas implements Runnable {
                         this.player.onLadder = false;
                         this.player.row++;
                         this.player.i();
-                        this.player.q = 10;
+                        this.player.ladderExitTimer = 10;
                         if ((this.player.ownedWeapons & 1) > 0 && this.player.animState != 14) {
                            this.player.meleeActive = false;
                            this.bi = 0;
@@ -2493,7 +2493,7 @@ public final class Game extends FullCanvas implements Runnable {
                if (var1 == 55) {
                   if (j) {
                      if (this.Q != 12) {
-                        this.e(bl[this.Q - 1], this.Q == 3 ? 11 : (this.Q == 10 ? 9 : -1));
+                        this.e(INFOLINK_MESSAGE_IDS[this.Q - 1], this.Q == 3 ? 11 : (this.Q == 10 ? 9 : -1));
                         this.b(this.Q - 1);
                         return;
                      }
@@ -2530,7 +2530,7 @@ public final class Game extends FullCanvas implements Runnable {
                      return;
                   }
 
-                  if (this.player.r >= 0) {
+                  if (this.player.actionState >= 0) {
                      return;
                   }
 
@@ -2558,7 +2558,7 @@ public final class Game extends FullCanvas implements Runnable {
                      return;
                   }
 
-                  if (this.player.r >= 0) {
+                  if (this.player.actionState >= 0) {
                      return;
                   }
 
@@ -4119,7 +4119,7 @@ public final class Game extends FullCanvas implements Runnable {
             return;
          }
 
-         if (this.Q != 3 && this.Q != 10 || this.messageStringId < bl[0] || this.messageStringId > bl[15] + bk[15]) {
+         if (this.Q != 3 && this.Q != 10 || this.messageStringId < INFOLINK_MESSAGE_IDS[0] || this.messageStringId > INFOLINK_MESSAGE_IDS[15] + INFOLINK_MESSAGE_TICKS[15]) {
             if (this.Q == 12) {
                this.s();
                return;
@@ -4133,7 +4133,7 @@ public final class Game extends FullCanvas implements Runnable {
             return;
          }
 
-         if (this.messageStringId < bl[0] || this.messageStringId > bl[15] + bk[15]) {
+         if (this.messageStringId < INFOLINK_MESSAGE_IDS[0] || this.messageStringId > INFOLINK_MESSAGE_IDS[15] + INFOLINK_MESSAGE_TICKS[15]) {
             return;
          }
       }

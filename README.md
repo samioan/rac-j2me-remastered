@@ -95,8 +95,10 @@ files for the full write-ups):
 **Clone Home's phase 1 (read-through and renaming) has not started.**
 Suggested starting point: `RatchetMIDlet.java` (small, already readable)
 -> `a.java` (the engine base + resource loader) -> `b.java`. Going
-Mobile's remaining phase-1 follow-up is cross-build diffing
-(`decompiled_a`/`decompiled_a1`) to settle the few unconfirmed members.
+Mobile's phase 1 -- including the cross-build comparison that settled
+every open member (`docs/BUILD_COMPARISON.md`; the `(a)` build is a
+128x160 port of the same revision, a1 is a newer trial build with the
+full class map recovered) -- is complete.
 
 ## Building the ports
 

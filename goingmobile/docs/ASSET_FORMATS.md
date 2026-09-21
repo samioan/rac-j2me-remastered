@@ -19,7 +19,7 @@ All paths below are relative to `extracted/` (regenerate with
 | `r` | **Player animation table, 50 bytes: 15 anims, each {frame count, extra byte, up to 4 frame indices}** | `Player.a("/r")` into `ANIM_FRAMES[1][15][5]` etc.; frame indices select rows of the geometry table `Player.c` (100 entries). |
 | `*.mid` (`box`, `bubble`, `death`, `killen`, `menu`, `port`, `shoot`) | Standard MIDI | No RE needed; needs a MIDI synth (or wave-table replacement) in the port. `menu.mid` byte-identical in the a1 build. Played one-at-a-time by `SoundPlayer` (MMAPI, `audio/midi`). |
 | `*.png` (`a`..`h`, `p`, `hhg`, `icon`, `logo`, `sony`, `uc`) | Standard PNG sprite sheets | No RE needed; confirmed roles (phase 1): `a` = tileset, `b` = rotating enemy segments, `c` = player, `d` = actors/platforms/boss, `e` = titanium-bolt boxes, `f` = weapon in hand, `g` = HUD icons, `h` = 8x8 projectiles/pickups, `p` = dialogue portraits, `uc` = digit strip, `sony`/`hhg`/`logo` = splash chain, `icon` = MIDlet icon. |
-| `t` | **Unknown -- 35 bytes, referenced nowhere in the decompiled code of any of the three builds.** | No `"/t"` string anywhere; possibly dead data or loaded via a computed name; open question in `CLASS_MAP.md`. |
+| `t` | **Dead data -- 35 bytes, referenced by no code path** | Byte-identical in the two builds that share this code (canonical and `(a)`), absent from the a1 build's file list, and every resource load in all three decompiled trees is accounted for without it (`/n*`, `/m*`, `/o`, `/p`, `/q`, `/r`, `/f2.v`, `/help`/`about`/`credits`, sounds, `.png`s). Leftover from an earlier build; the port should never load it. (Settled by the cross-build comparison, `../docs/BUILD_COMPARISON.md`.) |
 
 ## a1-build-only files (formats to document as they get read)
 

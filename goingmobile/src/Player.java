@@ -112,9 +112,9 @@ public final class Player extends Entity {
    public static final byte[] n = new byte[]{5, 8};
    public static final byte[] o = new byte[]{16, 13};
    public byte jumpPhase;
-   public byte q;
-   public byte r;
-   public byte s;
+   public byte ladderExitTimer;
+   public byte actionState;
+   public byte specialTimer;
    public int swingTargetX;
    public int swingTargetY;
    public int swingCurX;
@@ -144,11 +144,11 @@ public final class Player extends Entity {
       this.game = var1;
       k = 1280;
       jumpPhase = -1;
-      this.r = -2;
+      actionState = -2;
       attackTimer = -1;
       weaponPose = 0;
       onLadder = false;
-      this.q = 0;
+      ladderExitTimer = 0;
       platformUnder = 0;
       ammo = new short[8];
       weaponXp = new short[8];
@@ -275,7 +275,7 @@ public final class Player extends Entity {
    }
 
    private void s() {
-      if (this.r == 0) {
+      if (actionState == 0) {
          short var8 = this.a(true);
          super.velY = (short)(super.velY - 128);
          super.posInRow = super.posInRow - super.velY;
@@ -295,7 +295,7 @@ public final class Player extends Entity {
                   var19 = this;
                   var21 = 1;
                } else {
-                  this.r = 3;
+                  actionState = 3;
                   if (jumpPhase != -1) {
                      break label80;
                   }
@@ -305,7 +305,7 @@ public final class Player extends Entity {
                   var21 = 2;
                }
 
-               var19.r = var21;
+               actionState = var21;
             }
 
             byte var11 = 4;
@@ -321,7 +321,7 @@ public final class Player extends Entity {
             return;
          }
       } else {
-         if (this.r == 1) {
+         if (actionState == 1) {
             super.animFrame = 1;
             super.posX = super.posX + swingStepX;
             super.posInRow = super.posInRow + swingStepY;
@@ -332,41 +332,41 @@ public final class Player extends Entity {
             }
 
             this.setAnimState((byte)3);
-            this.r = -2;
-            this.s = 0;
+            actionState = -2;
+            specialTimer = 0;
             Game.u = false;
          } else {
-            if (this.r == 2) {
+            if (actionState == 2) {
                super.animFrame = 1;
                super.velY = (short)(super.velY - 128);
                super.posInRow = super.posInRow - super.velY;
                this.wrapRow();
                if (super.velY < 0) {
-                  this.r = 3;
+                  actionState = 3;
                   return;
                }
 
                return;
             }
 
-            if (this.r == 3) {
+            if (actionState == 3) {
                int var7 = (swingTargetY >> 8) - this.c();
                int var10 = (swingTargetX >> 8) - this.b();
                boolean var13 = false;
-               this.r = 5;
+               actionState = 5;
                super.velX = 0;
                super.velY = 0;
                if (var10 * var10 + var7 * var7 > 1530) {
                   super.velX = (short)(var10 << 4);
                   super.velY = (short)(var7 << 4);
-                  this.r = 4;
+                  actionState = 4;
                   return;
                }
 
                return;
             }
 
-            if (this.r == 4) {
+            if (actionState == 4) {
                int var6 = (swingTargetY >> 8) - this.c();
                int var9 = (swingTargetX >> 8) - this.b();
                boolean var12 = false;
@@ -377,13 +377,13 @@ public final class Player extends Entity {
                   return;
                }
 
-               this.r = 5;
+               actionState = 5;
                super.velY = 0;
                super.velX = 0;
                return;
             }
 
-            if (this.r != 5) {
+            if (actionState != 5) {
                return;
             }
 
@@ -454,8 +454,8 @@ public final class Player extends Entity {
 
             this.setAnimState((byte)2);
             super.animRestart = 0;
-            this.r = -1;
-            this.s = 15;
+            actionState = -1;
+            specialTimer = 15;
          }
 
          this.game.bi = this.game.bh = 0;
@@ -492,7 +492,7 @@ public final class Player extends Entity {
          super.animRestart = 1;
          this.setAnimState((byte)10);
          Game.bA++;
-      } else if (this.r >= 0) {
+      } else if (actionState >= 0) {
          this.s();
          this.v();
       } else if (super.animState == 6) {
@@ -831,7 +831,7 @@ public final class Player extends Entity {
 
             if (super.animState != 10) {
                this.v();
-               if (this.q == 0) {
+               if (ladderExitTimer == 0) {
                   int var8 = super.posX >> 8;
                   if (jumpPhase >= 0 && super.velY < 0) {
                      for (int var3 = 3; var3 >= 0; var3--) {
@@ -859,7 +859,7 @@ public final class Player extends Entity {
                      }
                   }
                } else {
-                  this.q--;
+                  ladderExitTimer--;
                }
 
                this.t();
@@ -871,12 +871,12 @@ public final class Player extends Entity {
    private void t() {
       byte var1 = this.column();
       byte var2 = (byte)((this.c() + 22) / 14);
-      if (this.s > 0) {
+      if (specialTimer > 0) {
          this.game.e = true;
          Game.u = true;
-         if (--this.s <= 0) {
-            this.r = -2;
-            this.s = 0;
+         if (--specialTimer <= 0) {
+            actionState = -2;
+            specialTimer = 0;
             Game.u = false;
          }
       }
@@ -885,8 +885,8 @@ public final class Player extends Entity {
       Game.v = false;
       if (var3 >= 56 && var3 <= 61) {
          if (this.game.Q != 10 || var1 != 17 || var2 != 12 || var3 != 58) {
-            this.r = -1;
-            this.s = 10;
+            actionState = -1;
+            specialTimer = 10;
          }
       } else if (var3 == 8) {
          super.velY = 2560;
@@ -928,8 +928,8 @@ public final class Player extends Entity {
             }
 
             if (var3 >= 77 && var3 <= 96 && this.game.c(var3 - 77)) {
-               this.game.messageTimer = Game.bk[var3 - 77];
-               this.game.e(Game.bl[var3 - 77], this.game.Q == 3 ? 11 : (this.game.Q == 10 ? 9 : -1));
+               this.game.messageTimer = Game.INFOLINK_MESSAGE_TICKS[var3 - 77];
+               this.game.e(Game.INFOLINK_MESSAGE_IDS[var3 - 77], this.game.Q == 3 ? 11 : (this.game.Q == 10 ? 9 : -1));
                this.game.b(var3 - 77);
                return;
             }
@@ -983,7 +983,7 @@ public final class Player extends Entity {
          var3 += 7;
       }
 
-      if (this.r >= 0) {
+      if (actionState >= 0) {
          byte var9 = 13;
          if (!super.facingRight) {
             var9 = 9;
@@ -994,7 +994,7 @@ public final class Player extends Entity {
          int var12 = var3 + 3 - 4 << 8;
          int var13 = swingCurX + (Game.r << 8);
          int var14 = swingCurY + (Game.s << 8);
-         if (this.r == 0) {
+         if (actionState == 0) {
             var12 += 2304;
          }
 

@@ -110,16 +110,17 @@ Renamed instance fields: `J`->`currentWeapon`, `K`->`ammo[8]`,
 `F`->`meleeActive`, `C`->`swingTargetType` (hyper-shot target tiles 97/98),
 `A`->`weaponPose` (muzzle table index), `z`->`attackTimer`,
 `p`->`jumpPhase` (-1 grounded, 0/1 rising/falling, 2 double jump),
+`q`->`ladderExitTimer` (10 ticks after a ladder jump; suppresses the
+platform-landing and zip-line grabs), `r`->`actionState` (-2 alive, -1
+dying, 0/3 hyper-shot swing), `s`->`specialTimer` (death/hyper timing),
 `t`/`u`->`swingTargetX/Y`, `v`/`w`->`swingCurX/Y`, `x`/`y`->`swingStepX/Y`,
 `O`/`P`->`swingVelX/Y`, `Q`->`swingEndX`, `ai`->`game`.
 
-Kept obfuscated (role understood but name collides with a method of the
-class, or not fully confirmed): `r` (action state: -2 alive, -1 dying,
-0/3 hyper-shot swing), `s` (death/hyper timer), `q` (10-tick lock after
-jump-from-ladder; exact role unconfirmed). Physics methods `i() j() k()`
-(jump, main update, tile interactions), fire `m()`, melee `n()`,
-hyper-shot search `l()`, ground calc `a(boolean)`, render `a(Graphics)`
-all keep their obfuscated names (documented here).
+Kept obfuscated (method names of the class collide, or role not fully
+confirmed): `Player.a`, `b` (15-entry hit/effect tables). Physics
+methods `i() j() k()` (jump, main update, tile interactions), fire
+`m()`, melee `n()`, hyper-shot search `l()`, ground calc `a(boolean)`,
+render `a(Graphics)` all keep their obfuscated names (documented here).
 
 ## Enemy (from `d`)
 
@@ -219,10 +220,13 @@ scoring block (labels confirmed against `m*.txt` strings 63-70/111:
 `PAR_TIME_MS` = 180000, ...).
 
 Kept obfuscated 2-letter members (unconfirmed): `bA` (player-death
-counter?), `bB`/`bG`/`bH` (intermediate score terms), `bk`/`bl` (the
-message-chain table: per-message id 75-90 and duration), `cs`/`ct`
+counter?), `bB`/`bG`/`bH` (intermediate score terms), `cs`/`ct`
 (the name-entry info-screen vectors), `cu`/`cv` (their cursor rows),
-`ca`, `cr` (previous menu selection).
+`ca`, `cr` (previous menu selection). Renamed since the cross-build
+pass: `bk`/`bl` -> **`INFOLINK_MESSAGE_TICKS`/`INFOLINK_MESSAGE_IDS`**
+(the infolink tiles 77-96 show "Level N unlocked." strings 75-84 with
+these ids/timers; advancing the message inside the `[75, 91]` bounds
+completes the level -- see `BUILD_COMPARISON.md`).
 
 ## ratchetandclank (the MIDlet)
 
@@ -265,11 +269,20 @@ These are decompiler bugs in `decompiled/`, fixed by `tools/rename_gm.py`
 
 - `Entity.fieldW` (old `W`): never read anywhere -- dead field?
 - `Entity.activeFlag` (old `Z`): set to 1 at spawn, never tested.
-- `Game.bk`/`bl` (message-chain table) and `Player.q` (post-ladder jump
-  lock): roles inferred but not fully confirmed.
-- The `t` asset (35 bytes) is still referenced by *no* code in any of the
-  three builds -- dead data, or loaded by a path not yet seen.
-- Cross-build diffing (`decompiled_a`, `decompiled_a1`) is still to be
-  done and may settle the remaining unconfirmed members.
+- `Game.bB`/`bG`/`bH`/`bA` (intermediate scoring terms) and
+  `cs`/`ct`/`cu`/`cv`/`ca`/`cr` (name-entry screens, menu cursors):
+  roles inferred but not confirmed.
+
+## Settled by the cross-build comparison (see `BUILD_COMPARISON.md`)
+
+- `Game.bk`/`bl` were the infolink tables -> renamed
+  `INFOLINK_MESSAGE_TICKS`/`INFOLINK_MESSAGE_IDS`.
+- `Player.q` was the post-ladder-jump grace timer -> renamed
+  `ladderExitTimer`.
+- The `t` asset is dead data (byte-identical in both builds that share
+  this code, absent from a1, referenced by no code path anywhere).
+- The `(a)` build is a 128x160 screen-port of the same revision; the
+  a1 build is a newer, restructured MIDP-2.0 trial version (unlock-code
+  registration UI) -- the full a1 class map is in `BUILD_COMPARISON.md`.
 
 
