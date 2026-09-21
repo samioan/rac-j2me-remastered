@@ -1,0 +1,28 @@
+# --- Copyrighted game data ---
+# Never commit the original .jar/.jad releases or anything extracted
+# straight from them (art, audio, level/script data, the class files
+# themselves).
+/roms/*.jar
+/roms/*.jad
+/goingmobile/extracted/
+/goingmobile/extracted_a/
+/goingmobile/extracted_a1/
+/clonehome/extracted/
+
+# --- Third-party tooling ---
+# Not project source; fetched locally, not tracked in git.
+/tools/vineflower.jar
+/tools/midp-stubs/
+
+# --- Python ---
+__pycache__/
+*.pyc
+
+# --- PC port build output (regenerable via port/build.bat / CMake) ---
+/goingmobile/port/build/
+/goingmobile/port/build-dist/
+/goingmobile/port/dist/
+/clonehome/port/build/
+/clonehome/port/build-dist/
+/clonehome/port/dist/
+*.log

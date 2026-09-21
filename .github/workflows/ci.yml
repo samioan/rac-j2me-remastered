@@ -1,0 +1,38 @@
+name: CI
+
+# Both games are at phase 0: the only thing this can prove on a machine
+# that has no game data is that each port scaffold configures and builds
+# cleanly (Debug). Once real game logic and (eventually) launchers land,
+# extend these jobs with smoke tests and shipping builds, following
+# tes-travels-decomp's ci.yml as the template.
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  windows-goingmobile:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # CMake is already on the runner image; Ninja is not guaranteed to
+      # be, and the port's build.bat asks for it by name.
+      - name: Install Ninja
+        run: choco install ninja -y --no-progress
+
+      - name: Build Going Mobile port (Debug)
+        run: .\goingmobile\port\build.bat
+
+  windows-clonehome:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Ninja
+        run: choco install ninja -y --no-progress
+
+      - name: Build Clone Home port (Debug)
+        run: .\clonehome\port\build.bat
