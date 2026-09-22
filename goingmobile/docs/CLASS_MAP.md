@@ -164,14 +164,21 @@ file; `tiles` (old `f`, `byte[28][18]`) = the active grid;
 `j`->**`BOLT_TILE_TYPES`** (4 entries, tiles 43-46); `a`/`b` kept
 (13-entry per-level tables; `b` selects the boss arena's 12 grids).
 
-Tile legend (from the level parser `a(int, boolean)`):
+Tile legend (from the level parser `a(int, boolean)`; tool-verified by
+`tools/parse_gm.py levels`):
 0-3 background, **4-13 solid** (rendered from `a.png`, 22x14 cells),
-14-35 solid specials/decoration, 36-42 + 77-96 foreground decoration,
-43-46 titanium-bolt boxes, 47-55 enemy spawns (9 direct types),
-56-61 hazard/death tiles, 62-69 zip-line endpoints (2 per line),
-70-76/-119 background, 97-98 hyper-shot targets, 101 marker,
-102-113 moving platforms, 114-127 enemies (14 types via the table),
--125 (raw 0x20) player start + camera, -124/-122/-127/-126 camera tiles.
+14-35 solid specials (35 = the level exit), 36-42 foreground decoration,
+43-46 titanium-bolt boxes, 47-55 enemy spawns (types 0/2/1; tiles 50-52
+also drop a bolt box), 56-61 hazards, 62-69 zip-line endpoints,
+70-76 background, 77-96 infolink tiles, 97-98 hyper-shot targets,
+99-101 markers, 102-113 moving platforms, 114-127 + 0x80 enemies (14
+types via the table), 0xA3 player start, 0xA1/0xA2/0xA4..0xC4 camera and
+marker tiles. Note: the shipped level set is **n1..n10 + n12** -- level
+11 is skipped by the level select (which maps 11 -> the boss 12), so
+the `Q == 11` 12-grid read is dead code in this build, and
+`LevelMap`'s special-tile continuation indexes `tiles[x][y+1]`,
+`[y+2]`/`[x+1]` -- a latent out-of-bounds the shipped levels never
+trigger (the port must bounds-check).
 
 ## Game (from `f`)
 

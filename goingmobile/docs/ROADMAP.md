@@ -83,14 +83,16 @@ last open members were settled by it: `bk`/`bl` are the infolink
 ("Level N unlocked") tables, `Player.q` is the post-ladder-jump grace
 timer, and the `t` asset is dead data.
 
-**Phase 2 (partially done from phase-0 read-through, see
-[`ASSET_FORMATS.md`](ASSET_FORMATS.md)):** the level tilemap format
-(`n1`..`n12`), string tables (`m*.txt`, `about/help/credits*.txt`) and the
-save-game layout (RMS records) are already understood from the loader
-code; `f2.v` (the intro video format), `o`, `p`, `r` and the a1-only
-formats (`mapData.txt`, `enemy.bin`, `player.bin`) still need their
-parsers read through. The a1 build's named files make the confirmations
-much easier.
+**Phase 2 is done.** Every canonical-build asset format is confirmed
+*and tool-verified*: `tools/parse_gm.py` replicates each loader
+byte-for-byte and all validations pass (exact consumption for every
+file, the font rendering readable text, the menu tree resolving every
+string, all 11 level maps with zero unexplained tiles) -- see
+[`ASSET_FORMATS.md`](ASSET_FORMATS.md). Two finds from writing the
+parsers: the shipped level set is `n1..n10` + `n12` (no n11 -- the level
+select maps 11 to the boss, so the 12-grid read is dead code), and the
+original's special-tile logic has a latent out-of-bounds that the shipped
+levels never trigger (the port must bounds-check).
 
 **Phase 3 (not started): PC port.** Scaffold is in `port/` (CMake + Ninja
 + MSVC, matching the `tes-travels-decomp` ports' toolchain) -- currently

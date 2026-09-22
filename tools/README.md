@@ -29,6 +29,12 @@ tracked (see `.gitignore`).
   member renames, the mapping tables live in the script; see
   `goingmobile/docs/CLASS_MAP.md`). Regenerates `src/` except the three
   hand-written files (`Entity.java`, `MenuItem.java`, `SoundPlayer.java`).
+- **`parse_gm.py`** -- goingmobile phase 2: parsers/validators for every
+  custom asset format of the canonical build (tilemaps, menu table,
+  bitmap font with ASCII rendering, animation/geometry tables). Each one
+  replicates its loader byte-for-byte and asserts exact byte
+  consumption; `all` runs everything. Output goes to stdout (derived
+  from copyrighted game data -- never commit it).
 
 ## Why Vineflower and not Ghidra
 

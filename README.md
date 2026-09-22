@@ -79,14 +79,24 @@ tile legend, the byte-exact 220-byte save-game layout, the weapon system
 128x128 screen, and two phase-0 guesses corrected (`f2.v` is the bitmap
 font, `/o` is the menu-definition table).
 
+**Going Mobile's phase 2 is done too**: `tools/parse_gm.py` parses every
+custom asset format by replicating its loader byte-for-byte, with all
+validations passing (exact consumption for every file, the font
+rendering readable text, the 22-page menu tree resolving every string,
+all 11 level maps with zero unexplained tiles) -- see
+`goingmobile/docs/ASSET_FORMATS.md`. It also proved the shipped level
+set is `n1..n10` + `n12` (level 11 is deliberately skipped for the boss)
+and found a latent out-of-bounds in the original's special-tile logic
+that the shipped levels never trigger.
+
 What's already understood without further RE (see the `ASSET_FORMATS.md`
 files for the full write-ups):
 
-- Going Mobile's level tilemaps (`n1..n12`: 28x18-byte grids, tile id =
-  byte - 0x20, full tile legend), string tables (`m*.txt`), bitmap font
-  (`f2.v`), menu table (`/o`), enemy/player animation tables (`/p`,
-  `/r`), enemy geometry (`/q`), save-game layout (RMS record store
-  `RANDCSm`), and the manifest's boss-tuning attributes.
+- Going Mobile's level tilemaps (`n1..n10` + `n12`: 28x18-byte grids, tile
+  id = byte - 0x20, full tool-verified tile legend), string tables
+  (`m*.txt`), bitmap font (`f2.v`), menu table (`/o`), enemy/player
+  animation tables (`/p`, `/r`), enemy geometry (`/q`), save-game layout
+  (RMS record store `RANDCSm`), and the manifest's boss-tuning attributes.
 - Clone Home's `RP1`/`RP2`/`RP3` container format (parsed from
   `a.java`'s own loader), its embedded-PNG and UTF-8 string-table
   resource types, and the complete 218-byte save-game layout from
