@@ -94,9 +94,13 @@ select maps 11 to the boss, so the 12-grid read is dead code), and the
 original's special-tile logic has a latent out-of-bounds that the shipped
 levels never trigger (the port must bounds-check).
 
-**Phase 3 (not started): PC port.** Scaffold is in `port/` (CMake + Ninja
-+ MSVC, matching the `tes-travels-decomp` ports' toolchain) -- currently
-just proves the build works, no game logic yet. Port strategy: behavioral
-reimplementation in C++, not byte-exact recompilation; the Nokia-UI
-full-screen canvas maps to a plain Win32 software-rendered window, the
-`.mid`/`.wav` soundtrack needs an audio backend decision.
+**Phase 3 (in progress): PC port.** Tracked milestone-by-milestone in
+[`PORT_ROADMAP.md`](PORT_ROADMAP.md), separately from this file. Milestone
+3.1 (boot/splash/menu/save surface -- MIDlet lifecycle, RMS saves, the
+string/font pipeline, every menu screen, the whole `game.h`/`.cpp` boot
+chain) is done and builds clean; gameplay itself (milestone 3.2 -- level
+loading, player/enemy/projectile physics and AI, the boss fight) is stubbed
+and not started. Port strategy: behavioral reimplementation in C++, not
+byte-exact recompilation; the Nokia-UI full-screen canvas maps to a plain
+Win32 software-rendered window (raw GDI `StretchDIBits`, no engine
+dependency), the `.mid` soundtrack plays through MCI.
