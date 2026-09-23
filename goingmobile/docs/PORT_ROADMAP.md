@@ -1,9 +1,22 @@
 # Port Roadmap
 
+> **Target changed 2026-09-22**: the port target is now
+> `roms/RAC-GoingMobile-a1.jar` (176x220), not the original
+> `RAC-GoingMobile.jar` (128x128) -- see `ROADMAP.md`'s target-change note.
+> Milestones 3.0-3.1 below were built against the *original* build, whose
+> reverse-engineering (phases 0-2) is fully done (`../src/`,
+> `CLASS_MAP.md`'s canonical section). That port code and the design
+> decisions under it are kept as a reference/pattern -- Win32+GDI,
+> `Game`/`Player`/`Enemy`/`LevelMap`/`Projectile` structure, the MIDP/RMS
+> shim -- but it is not the shipping port, since a1 is a different
+> revision (different screen size, engine split, asset formats) and its
+> own phase 1/2 (`ROADMAP.md`'s "Status") haven't started. Once a1's
+> phase 1 is far enough along, the port resumes as milestone **3.1a**
+> (re-base the 3.1 boot/menu/save slice onto a1's classes and 176x220
+> screen) before 3.2 (gameplay) is attempted for a1.
+
 Tracks `port/`, the actual PC port -- as opposed to [`ROADMAP.md`](ROADMAP.md),
-which tracks the reverse-engineering work that feeds it (now fully done:
-phases 0-2, all 9 canonical-build classes renamed and cross-referenced in
-[`../src/`](../src/), every asset format confirmed and tool-verified). Follows
+which tracks the reverse-engineering work that feeds it. Follows
 the sibling `tes-travels-decomp`/`shadowkey-decomp` projects' precedent (their
 own `docs/PORT_ROADMAP.md`): milestone by milestone, each one landing a real,
 buildable/runnable slice.
@@ -28,9 +41,11 @@ buildable/runnable slice.
 - **C++17, CMake + Ninja, MSVC**, matching the sibling ports' toolchain and
   this repo's existing `port/` scaffold (`build.bat`).
 - **Raw Win32 + GDI (`StretchDIBits`), no SDL2/D3D/GL** -- the original is a
-  software-rendered Nokia `FullCanvas`, so a Win32 window blitting a manually
-  computed 128x128 backbuffer reproduces that architecture directly with
-  zero external dependencies, same rationale as the sibling ports.
+  software-rendered canvas, so a Win32 window blitting a manually computed
+  backbuffer reproduces that architecture directly with zero external
+  dependencies, same rationale as the sibling ports. Backbuffer size
+  matches the target build's screen: 128x128 for milestones 3.0-3.1
+  (legacy build), **176x220 for a1** (milestone 3.1a onward).
 - **Assets stay out of the repo.** The port reads resources (`/n1`, `/r`,
   `/f2.v`, `.png`s, ...) from a configurable data directory at runtime
   (`setDataDir`/`resourcePath` in `midp.h`), defaulting to a handful of
@@ -136,14 +151,29 @@ buildable/runnable slice.
       stays up and responsive with no crash. No gameplay to verify yet by
       design -- `b==0` (in-level) is still fully stubbed.
 
-## Milestones remaining
+## Milestones remaining (re-based onto a1)
 
-- [ ] **3.2 -- gameplay.** Fill every stub `game.h`'s "gameplay internals"
-      section and `player.h`/`enemy.h`/`levelmap.h`/`projectile.h` declared
-      in 3.1: `LevelMap`'s `/n<level>` parser, tile activation and the 22x14
-      renderer; `Player`'s physics/animation/melee/weapon firing (loading
-      `/r`); `Enemy`'s AI/animation (loading `/p`+`/q`); `Projectile`'s
-      movement/collision/rendering; and `Game`'s own tick-loop internals
-      (player/enemy/projectile collision, the boss fight, the gameplay HUD
-      and overlay rendering). `docs/ASSET_FORMATS.md`'s confirmed,
-      tool-verified formats (phase 2) are the reference for every loader.
+3.2 (legacy-build gameplay) is superseded, not pursued -- 3.1 already
+proved the boot/menu/save architecture works, so the next real work is
+re-basing onto a1 rather than finishing the legacy build's gameplay.
+
+- [ ] **3.1a -- re-base boot/splash/menu/save onto a1.** Once a1's phase 1
+      (`ROADMAP.md`'s "Status") has produced a compile-checked, renamed
+      `src_a1/` tree for `ratchetandclank`/`a`(font)/`c`(SoundPlayer)/
+      `e`(canvas shell)/enough of `h`(engine) to cover the boot chain and
+      menus: re-transcribe the 3.1 C++ slice against a1's classes,
+      176x220 backbuffer, and MIDP `Canvas`+`CommandListener` input model
+      (replacing the legacy build's raw `FullCanvas` `keyPressed` menu
+      state machine) and RMS save format (confirm byte-for-byte against
+      `ratchetandclank`'s a1 save code -- may differ from the legacy
+      build's 220-byte/3-slot layout). Legacy build's `game.h`/`.cpp` etc.
+      stay in `port/` as a transcription reference, not deleted.
+
+- [ ] **3.2a -- gameplay.** Same scope as the legacy build's stubbed 3.2
+      (`LevelMap`'s level parser and 22x14-equivalent tile renderer at
+      a1's resolution, `Player`/`Enemy`/`Projectile` physics/AI/rendering,
+      `Game`'s tick-loop internals, boss fight, HUD), transcribed from
+      a1's `h`/`b`/`f`/`j`/`d` instead of the legacy build's `f`/`a`/`d`/
+      `g`/`c`, and reading a1's asset formats (`ROADMAP.md`'s phase 2 for
+      a1: `enemy.bin`/`player.bin` state scripts, `mapData.txt`, the
+      13-level `level*.bin` set) once confirmed and tool-verified there.

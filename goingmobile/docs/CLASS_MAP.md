@@ -1,6 +1,279 @@
 # Going Mobile -- class map (phase 1)
 
-`src/` is the phase-1 renamed reference tree for the **canonical build**
+> **Target changed 2026-09-22** to `roms/RAC-GoingMobile-a1.jar` -- see
+> `ROADMAP.md`. This file's original content (below, "Class mapping"
+> onward) is the **legacy build's** complete phase-1 map, kept as-is: it's
+> a reference/pattern library for a1's read-through (shared physics/tile/
+> font conventions per `BUILD_COMPARISON.md`), not itself the a1 mapping.
+> a1's own phase-1 progress is tracked in a new section right below,
+> **"a1 class map (in progress)"**, output to `../src_a1/` instead of
+> `../src/`. Read that section first if you're working on a1.
+
+## a1 class map (in progress)
+
+Class-level mapping (from `BUILD_COMPARISON.md`'s cross-build comparison):
+`a`=Font (standalone, not MIDlet-embedded like the legacy build),
+`b`=Player, `c`=SoundPlayer, `d`=LevelMap, `e`=CanvasShell (`extends
+Canvas implements CommandListener`, not `FullCanvas`), `f`=Enemy,
+`g`=IntroManager (splash + unlock-code UI), `h`=Game (the engine, 195KB,
+the big one), `i`=Entity, `j`=Projectile, `ratchetandclank`=MIDlet (name
+kept). **Policy**: class-level renames are applied in every file as soon
+as they're confirmed (here, straight from the table above), even in
+classes whose own member-level phase-1 pass hasn't happened yet -- same
+approach the legacy build's `tools/rename_gm.py` used (one pass, every
+cross-file reference included). So e.g. `Entity.java` already says
+`Game.F`/`Game.G`, not `h.F`/`h.G`, well before `Game` itself is done;
+only *members* of an unfinished class stay obfuscated (documented at the
+call site, or in that class's own not-yet-written section here). Output
+tree: `../src_a1/`, mirroring `../src/`'s layout and hand-written-vs-
+generated split once a renamer script exists (none yet -- current files
+below were renamed by hand, not by `tools/rename_gm.py`, since a1's
+structure differs enough from the legacy build's that the existing
+script's per-file qualifier tables don't apply).
+
+### Entity (from a1's `i`) -- done, in `../src_a1/Entity.java`
+
+Same three methods as the legacy build's Entity (`column()`/
+`setAnimState(byte)`/`wrapRow()`), confirmed structurally identical, plus
+cross-checks against `b.java` (Player)/`f.java` (Enemy)/`h.java`/`g.java`
+use sites. 17 fields total (same count as the legacy build's Entity), 14
+renamed:
+
+| Old | New | Evidence |
+|---|---|---|
+| `Z` | `kind` | `f.java` sets `-1` at spawn (same latent bug as the legacy build's Enemy) then indexes every per-type table 0-4; `b.java` also reads it (always effectively 0 for Player) |
+| `aa` | `row` | `i.v()` (`wrapRow`) increments/decrements it on `ag` overflow |
+| `ab` | `posX` | `i.u()` (`column`) derives column from it; `b.java` adds `ad` (velX) to it every tick |
+| `ac` | `velY` | `b.java` subtracts it from `ag` (posInRow) every tick, clamped against a terminal-fall constant |
+| `ad` | `velX` | `b.java` adds it to `ab` (posX) every tick |
+| `ag` | `posInRow` | `i.v()`/`i.u()` (wrapRow/column math) |
+| `ah` | `activeFlag` | set to `1` at spawn sites in `h.java`/`g.java` (int here, byte in the legacy build) |
+| `ai` | `health` | initialized to 20 in `b.java`'s ctor, decremented by damage tables, `<=0` triggers the death anim |
+| `aj` | `animFrame` | zeroed by `setAnimState`; short here (byte in the legacy build) |
+| `ak` | `animCounter` | zeroed by `setAnimState`; short here (byte in the legacy build) |
+| `al` | `animState` | set by `setAnimState`; indexes every per-anim table |
+| `am` | `animRestart` | **tentative**: same 0/1/2-valued, set-alongside-death-anim shape as the legacy build's field, not independently confirmed |
+| `an` | `animHold` | **tentative**: incremented/reset alongside anim-state changes, same shape as the legacy build's field, not independently confirmed |
+| `ao` | `facingRight` | the only `boolean` field, matching the legacy build's |
+
+Kept obfuscated (role not confirmed): `ae`/`af` (assigned from
+column/row-helper method calls and read back immediately -- look like
+transient collision-check scratch, not persistent per-object state like
+the legacy build's `fieldW`/`spawnRow`), `ap` (zeroed at spawn/reset,
+tested `== 0` in `b.java` physics, no other role evidence yet).
+
+### SoundPlayer (from a1's `c`) -- done, in `../src_a1/SoundPlayer.java`
+
+Same MMAPI background-thread design as the legacy build's SoundPlayer, but
+6 cues instead of 7 (no PORT/KILLEN-equivalent) and mixed formats: `death`/
+`bubble`/`shoot`/`msound`/`box` are `.wav`, only `menu` is `.mid` --
+confirms `BUILD_COMPARISON.md`'s ".wav sound variants" note. One method
+(`a(boolean)`, renamed `playMenuLoop` provisionally) forces the menu cue
+to loop regardless of its unused boolean argument -- signature suggests a
+listener/callback adapter; not confirmed. `playerUpdate`'s `endOfMedia`
+check evaluates but discards its result (a real no-op in this build, not
+a decompiler artifact) -- loop-end cleanup instead happens inline in
+`run()`'s `getState() == 400` branch, unlike the legacy build which relied
+on `playerUpdate` setting a pending-cleanup sentinel.
+
+### Font (from a1's `a`) -- done, in `../src_a1/Font.java`
+
+Unlike the legacy build (font embedded directly in `ratchetandclank`), a1
+factors it into its own class, instantiated **twice**: confirmed at
+`decompiled_a1/h.java:714,716` -- `ratchetandclank.h = new a("/f2.v", 10,
+1)` and `ratchetandclank.f = new a("/f3.v", 13, 1)` (line height 10 vs
+13, both spacing 1). `f2.v` is the same byte-identical asset as the
+legacy build's; `f3.v` is new to a1. Same `fillRect`-glyph format and
+same `charToGlyphIndex` two-range mapping (32-127 -> 0-95, 160-255 ->
+96-191) as the legacy build's font -- this is the one class so far
+that's a near-verbatim carry-over of legacy logic into a1's smaller
+obfuscation pass, just repackaged as a standalone, dual-instantiated
+class. All fields/methods renamed with high confidence (structural +
+call-site evidence, no open questions).
+
+### CanvasShell (from a1's `e`) -- done, in `../src_a1/CanvasShell.java`
+
+The `Canvas`+`CommandListener` shell mentioned in `BUILD_COMPARISON.md`
+-- confirms that write-up's note directly (a1 drops `FullCanvas` for a
+real MIDP `Canvas`). Delegates every callback to one of two controller
+objects on the MIDlet depending on a boolean gate: `ratchetandclank.b`
+(type `g`, the intro/unlock manager) while not yet playing, or
+`ratchetandclank.c` (type `h`, `Game`) once playing. **Field-letter note:
+a1's MIDlet uses `b`/`c` for these in the *opposite* sense of what the
+"a1 class map" table above implies from the legacy build's convention --
+confirmed directly against `ratchetandclank.java`'s own declarations
+(`public g b; public h c;`)**, so don't assume the legacy build's
+letter-to-role habits carry over. Also pre-confirms one `ratchetandclank`
+member ahead of that class's own phase-1: `public boolean i = false;` ->
+`gameStarted` (defaults false = intro/unlock flow active), verified
+directly in `ratchetandclank.java`. `ratchetandclank.b()`/`.c` clash
+the same way `Game`'s legacy single-letter members did (field `b` +
+method `b()` on the same class) -- left obfuscated here, to be settled
+when `ratchetandclank.java` itself gets its phase-1 pass.
+
+### ratchetandclank (a1's MIDlet) -- done, in `../src_a1/ratchetandclank.java`
+
+Same RMS/settings/string-table role as the legacy build's MIDlet, high
+confidence throughout (the RMS-quadruplet methods, settings byte layout,
+and string loader are near-verbatim carry-overs, just different letters
+and a 214- vs 220-byte save record). Two real findings:
+
+- **Four static `Font` fields, not two**: `e`/`f`/`g`/`h` on the MIDlet.
+  Only `h`->`smallFont` (`/f2.v`) and `f`->`largeFont` (`/f3.v`) are
+  actually constructed (`new a(...)`, confirmed at `h.java:714,716`);
+  `g`->`smallFontAlias` is set once, right between those two
+  constructions (`h.java:715`, `ratchetandclank.g = ratchetandclank.h;`)
+  and never reassigned anywhere else in any of the three decompiled
+  trees -- so it's a permanent alias of `smallFont`. `e`->`currentFont`
+  is the pointer actually passed to draw calls, reassigned between the
+  other three throughout `g.java` (the intro/unlock/menu rendering). One
+  conditional at `g.java:1185` picks between `smallFontAlias` and
+  `smallFont` based on a boolean -- since they're always equal, that
+  branch is dead code (same flavor of finding as the legacy build's `t`
+  dead asset).
+- **CanvasShell's `b()`/`c()` no-arg methods (here `stopSoundHard()`/
+  `stopSoundHardOnLevelStart()`) have byte-identical decompiled bodies**
+  (both just `this.soundPlayer.haltPlayer();`) -- kept as two separate
+  renamed methods rather than merged, since the original bytecode had
+  them as genuinely distinct obfuscated names; documented as a decompiler-
+  confirmed duplicate, not a rename mistake.
+
+The **game-flow orchestration methods are tentative**
+(`startNewGame`/`continueGame`/`returnToIntro`/`playSoundIfEnabled`):
+named from call shape (what they call and when), not confirmed against
+`Game`'s (`h`) or `IntroManager`'s (`g`) own confirmed behavior, since
+neither has had its phase-1 pass yet. Revisit once `g`/`h` are done --
+in particular confirm `Game.c(int,int)`, `Game.m()`, and
+`IntroManager.a(boolean)`/`.c()`.
+
+**Retroactive fix to `SoundPlayer.java`**: its hard-stop method (a1's
+`c.a()`, no-arg) was initially renamed `stopPlayer()` and marked
+*private* -- wrong, since `ratchetandclank` calls it directly from
+outside the class. Renamed `haltPlayer()` and made `public`, matching
+the real (confirmed-by-compile-requirement) visibility.
+
+### LevelMap (from a1's `d`) -- done, in `../src_a1/LevelMap.java`
+
+Same core shape as the legacy build's LevelMap (28x18 byte-per-cell
+grids, a `columnSolidMasks` bitmask, `PLATFORM_TILE_TYPES`/
+`ENEMY_TILE_TYPES`/`BOLT_TILE_TYPES` tables that are an **exact 12/14/4-
+entry match** to the legacy build's equivalents, tile ranges 43-46/
+102-113/114-127 lining up too) plus a new layer: each level
+(`/level0.bin`..`/level12.bin`) is split into up to 12 "rooms" (sub-
+grids), with a compiled-in per-level table (`LEVEL_ROOM_TABLES`, 13
+entries) describing room count, a room-to-room neighbor/connectivity
+table, and a room-id-to-file-index map. This is **not** the `mapData.txt`
+asset (that's loaded separately by `Game`, confirmed at
+`decompiled_a1/h.java:2648` -- a world-map screen, unrelated to
+`LEVEL_ROOM_TABLES`).
+
+Only `LevelMap`'s own members are renamed; every `this.game.xxx` in the
+giant room-activation method is Game's own obfuscated member (~30 of
+them touched -- enemy pool, projectiles, moving platforms, pickups, zip
+lines, exit tile, infolink state), intentionally left alone since `Game`
+hasn't had its phase-1 pass. The tile legend (which id does what) is
+**tentative** -- read off this method's own branches, not yet
+cross-checked with a tool-verified parser the way the legacy build's
+`tools/parse_gm.py levels` validated its tile legend; worth a dedicated
+pass once enough of `Game` is confirmed to write an a1 equivalent of
+that tool.
+
+### Projectile (from a1's `j`) -- done, in `../src_a1/Projectile.java`
+
+Same two-10-slot-pool design as the legacy build (confirmed by the two
+spawn methods on `Game`: `e(int,int,int)` at `h.java:5500` for enemy
+shots -> `Game.ak[]`, `a(int,int,int,boolean,boolean,int,byte)` at
+`h.java:5533` for player shots -> `Game.al[]`), same 33 types, same
+five-table shape (`DAMAGE_BY_TYPE`/`HALF_WIDTHS`/`HALF_HEIGHTS`/`SPEEDS`/
+`RENDER_MODES`) -- confirms `BUILD_COMPARISON.md`'s "evolved tuning"
+note (`RENDER_MODES` here really does use 13-24 with -1 sentinels vs.
+the legacy build's 8-11). `halfWidth`/`halfHeight`/`sourceAnim`/
+`playerOffsetX` all confirmed by tracing their spawn-time assignment in
+`h.java` (not just from this file alone -- the first class here where
+that cross-file spawn-site check was needed to pin a field down).
+
+One field-reuse finding worth flagging for anyone reading `update()`:
+the decoy drone (type 32) reuses `vx`/`prevY`/`prev2Y` for a bounce
+countdown and min/max Y bounds -- unrelated to those fields' meaning for
+every other type (velocity, trail history). Documented inline; caught a
+transcription slip during this pass (`prev2Y` mistyped as `prev2X`,
+fixed before commit) -- worth double-checking this kind of per-type
+field reuse carefully in `Player`/`Enemy` too, since `Entity` already
+has a few fields whose role shifts by subclass.
+
+`homingSeek(int)` (from `a(int)`) has a parameter that's never read in
+the original method body -- genuinely unused/vestigial, not a
+transcription gap; kept for signature fidelity and documented.
+
+`Enemy.b`/`Enemy.d` are referenced here (in the homing-seek center-y
+calculation) as class-renamed-only -- strong circumstantial evidence
+they're Enemy's per-type y-offset/height hitbox pair (mirroring the
+legacy build's `Enemy` statics), but left obfuscated pending Enemy's own
+phase-1.
+
+### Enemy (from a1's `f`) -- done, in `../src_a1/Enemy.java`
+
+Same 5-slot pool / 5-type shape as the legacy build, and the hitbox
+table split confirms `BUILD_COMPARISON.md`'s note that canonical `/q` is
+byte-identical to a1's `enemy_spr_box.bin`: `HITBOX_*`/`ATTACK_*` (both
+x/y/w/h groups) load from there, `ANIM_FRAMES`/`ANIM_FRAME_COUNTS`/
+`ANIM_FRAME_EXTRA` from `/enemy.bin` -- same three-table shape as the
+legacy build's `p`/`q`/`r` from `/p`, just `[5][8][5]` instead of
+`[5][6][5]`. `HP_BY_ANIM`/`DAMAGE_BY_ANIM`/`BOLTS_DROPPED_BY_ANIM`/
+`ATTACK_WINDUP_TICKS` all confirmed by grepping *other* files (`Game`
+sets spawned enemies' health from `HP_BY_ANIM`, `Player`/`Game` loop
+`BOLTS_DROPPED_BY_ANIM[kind]` times on death) -- the first class here
+where pinning a table down needed cross-file evidence beyond its own
+source.
+
+**Self-review caught two real mistakes before this was done**, both from
+the same failure mode (assuming an obfuscated member's role by analogy
+to the legacy build or to *this* class's own confirmed fields, instead
+of checking what class actually owns it):
+
+1. Called `Player`'s own `b()`/`c()` methods (accessed as
+   `this.game.aj.b()`/`.c()`, `aj` = `Game`'s player field) `.y()`/`.x()`
+   as if they'd already been renamed -- they're Enemy's *own* method
+   names being renamed here, not inherited, and `Player` hasn't had its
+   phase-1 pass yet. Also renamed two more of `Player`'s own
+   not-yet-confirmed fields (`E`, `s`) to `invulnTimer`/`specialTimer` by
+   analogy to the legacy build's `Player` field roles, without checking
+   a1's actual `Player` source. All reverted to obfuscated
+   (`this.game.aj.b()`/`.c()`/`.E`/`.s`).
+2. Wrote `this.game.kind` in two spots -- confusing `Game`'s own
+   obfuscated field `Z` with `Entity.kind` (same letter, unrelated
+   field: `Entity.kind` is confirmed because `Enemy`/`Player` *extend*
+   `Entity`, but `Game` does not). Reverted to `this.game.Z`.
+
+**Lesson for `Player`/`IntroManager`/`Game`'s own passes**: a field
+letter matching an already-confirmed name elsewhere is not evidence by
+itself -- only inheritance (via `extends`) carries a confirmed member
+name across files; every other same-letter member needs its own
+evidence from the class that actually declares it.
+
+Two more findings, both documented inline: a genuinely-unreachable
+`else if` branch in `rangedAttack()` (`animKind == 7 || 10 || 13` is
+already caught by the branch above it -- source-faithful, likely a
+copy-paste bug in the original, not touched) and a dead static
+initializer (`static { byte[] var10000 = new byte[]{10,10,10,10,10}; }`,
+never stored anywhere -- same flavor as the legacy build's Vineflower
+artifacts).
+
+### Not started yet
+
+`b` (Player, 41KB), `g` (IntroManager, 58KB), `h` (Game, 195KB) are the
+remaining classes, `h` by a wide margin (it's larger than the legacy
+build's entire `f.java` engine class, 127KB). All 8 done files already
+reference the not-yet-started classes by their renamed class names per
+this section's class-level-rename policy note -- but per the lesson
+above, only *inherited* (Entity) members of those classes are trustworthy
+until each one gets its own phase-1 pass.
+
+---
+
+## Legacy build's class map (done, reference only)
+
+`src/` is the phase-1 renamed reference tree for the **legacy build**
 (`roms/RAC-GoingMobile.jar`, decompiled in `../decompiled/`). All 9 classes
 were read through in full, given real names, and the result
 **compiles with zero errors against the real MIDP-2.0 / CLDC / Nokia-UI stub
