@@ -357,21 +357,77 @@ the legacy build's menu system lived *inside* `Game`/`f`; in a1 it moved
 entirely into this separate class, meaning a1's `Game` is presumably
 gameplay-only. Worth confirming once `Game`'s own phase-1 is done.
 
-### Not started yet
+### Game (from a1's `h`) -- done, in `../src_a1/Game.java`
 
-`h` (Game, 195KB) is the only remaining class -- larger than the legacy
-build's entire `f.java` engine class (127KB) by itself. Given
-`IntroManager` apparently absorbed the legacy build's menu system, a1's
-`Game` may turn out to be *smaller* in scope than its raw size suggests
-(more gameplay ticks/state, less menu code) -- or the size difference is
-something else entirely; no assumption either way until it's read.
-`Player.java`'s lesson (full `this.<letter>` ground-truth grep before
-trusting any bare-field rename) and `IntroManager.java`'s lesson (if
-using scripted substitution, re-grep the *output*, and check every
-type-only rename for missed field/method accesses through it) both
-apply -- `Game` is large enough that a mixed approach (scripted safe
-renames + hand verification, like `IntroManager`) is probably the right
-call rather than fully hand-transcribing 195KB.
+**11 of 11 a1 classes now done.** By far the largest (6622 lines, 195KB --
+roughly as big as every other a1 class combined), and confirmed
+gameplay-only: `IntroManager` absorbed the legacy build's in-`Game` menu
+system, so this class is the tick/render/collision engine plus save-data
+serialization, nothing else.
+
+**Scoping decision**: same mixed approach as `IntroManager` (scripted
+substitution over `decompiled_a1/h.java`, not hand-transcribed), for the
+same reason -- size and member density make full hand transcription both
+impractical and more error-prone than a script + thorough re-verification.
+~150 of this class's own single/double-letter members stay obfuscated on
+purpose (documented in the file's own header comment), matching the
+legacy build's and `IntroManager`'s precedent for their own dense
+internals.
+
+**Renamed (confirmed)**: class + constructor; `midlet`/`levelMap`/
+`random`/`enemies`/`player` (instance fields, confirmed by declared type:
+`ratchetandclank`/`LevelMap`/`Random`/`Enemy[]`/`Player`);
+`playerProjectiles`/`enemyProjectiles` (**tentative** naming/ordering, by
+analogy with the legacy build's confirmed `Game.playerShots`/
+`enemyShots`, matching pool-creation order and pool size);
+`tileWidth`/`tileHeight`/`hudHeight` (statics, independently confirmed
+already by `Entity`/`Enemy`/`Player`/`Projectile`/`LevelMap` each copying
+them out of `Game.F`/`G`/`H`); `enemyPoolSize` (static, confirmed via the
+enemy-array allocation and already referenced elsewhere as `Game.ba`);
+`sleep(int)`/`abs(int)` (confirmed utility wrappers, same shape as
+Player/Enemy's own `abs`); `runBootStep(int)` (confirmed: the ~39-case
+boot switch `IntroManager.java`'s header comment already predicted before
+`Game`'s own phase-1 existed to confirm it); `writeSaveData(byte[])`/
+`readSaveData(byte[])` (confirmed via bodies that exclusively call
+`ratchetandclank`'s already-confirmed `writeInt`/`writeShort`/
+`writeSoundAndLanguageSettings` or `readInt`/`readShort`); `pause()`/
+`resume()`/`render(Graphics)`/`tick()`/`keyPressed(int)`/
+`keyReleased(int)` (confirmed via `CanvasShell.java`'s already-committed
+dispatch calls); `updateCamera()` (confirmed via body: recomputes the
+camera-scroll statics toward a player-centered target, clamped to level
+bounds).
+
+**New collision class found while scripting this one**: `F`/`G`/`H`
+(statics) and `V`/`W` (fields) are *each* also reused as a zero-arg or
+`Graphics`-arg method name on this same class -- the same "obfuscator
+reuses a letter for a field AND a method" trap already known from
+Enemy/Player, except at Game's density it's frequent enough that it's
+safer to catch mechanically (blanket rename, then grep the output for
+`<newName>(` and revert those specific call/declaration sites) than to
+try to spot every instance by eye. Caught and fixed: `this.H()` (a real
+method, distinct from the `hudHeight` static) had been corrupted to
+`this.hudHeight()` by the blanket field rename, same for `F()`/`G()` and
+`this.V()`/`this.W()`. All reverted; the *value* uses of
+`tileWidth`/`tileHeight`/`hudHeight`/`levelMap`/`random` (never followed
+by `(`) were untouched and are correct.
+
+**Known follow-ups, not done here** (flagged in the file's own header
+comment too): `CanvasShell.java`'s 6 dispatch call sites and
+`SoundPlayer.java`'s one `Game.e(30)` still reference the now-renamed
+pause/resume/render/tick/keyPressed/keyReleased/sleep by their old
+obfuscated letters -- consistent with how `Enemy.java` was never
+retroactively touched up after `Player.java` renamed its own `b()`/`c()`
+to `x()`/`y()`; a dedicated cross-file consistency pass could fix all of
+these at once later. Separately, this class's own boot-step and
+save-serialize methods surfaced that **`ratchetandclank.java`'s phase-1
+is incomplete**: `Game` calls `midlet.c(int)`, `midlet.d(int)`/`d()`,
+`midlet.e(int)`/`e()`, and `midlet.k()`, none of which match any method
+already documented on `ratchetandclank` -- i.e. there are more
+undocumented methods there than just the earlier-found
+`playMenuLoopSound` gap. And `Projectile.java`'s header comment's guess
+about `Game.e(int,int,int)` being enemy-shot-specific is a *different*
+overload from the `sleep(int)` confirmed here (different arity) and is
+still unconfirmed.
 
 ---
 

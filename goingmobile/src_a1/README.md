@@ -22,17 +22,29 @@ confidence levels, and open questions are in
 | `Projectile.java` | `j.java` | both projectile pools | done |
 | `Player.java` | `b.java` | Ratchet: physics, weapons, melee | done |
 | `IntroManager.java` | `g.java` | splash + full menu system + unlock-code UI | done (mostly obfuscated -- see CLASS_MAP.md) |
-| `Game.java` | `h.java` | the engine (195KB, the big one) | not started |
+| `Game.java` | `h.java` | the engine (195KB, the big one) | done (mostly obfuscated -- see CLASS_MAP.md) |
 
-10 of 11 classes done (all the small ones, plus `LevelMap`/`Projectile`/
-`Enemy`/`Player`/`IntroManager`). Remaining
-orchestration methods on `ratchetandclank` (`startNewGame`/
-`continueGame`/`returnToIntro`/`playSoundIfEnabled`) and most of
-`LevelMap`'s tile legend are tentative pending `IntroManager`/`Game`'s
-own phase-1 -- see `../docs/CLASS_MAP.md`. Class-level renames
-(`Player`/`Enemy`/`IntroManager`/`Game`/`Projectile`) are already used
-throughout the done files even though those classes' own members aren't
-renamed yet -- see CLASS_MAP.md's policy note.
+**11 of 11 classes done.** `Game`'s own phase-1 confirmed the structural
+finding `IntroManager.java` had already predicted: a1 moved the legacy
+build's in-`Game` menu system entirely into `IntroManager`, so `Game`
+itself is gameplay-only (tick/render/collision engine + save-data
+serialization). Remaining orchestration methods on `ratchetandclank`
+(`startNewGame`/`continueGame`/`returnToIntro`/`playSoundIfEnabled`) and
+most of `LevelMap`'s tile legend are still tentative -- confirming them
+would need tracing through `Game`'s own obfuscated internals, which
+weren't fully derived (see CLASS_MAP.md's "Game" section for what was
+and wasn't renamed, and its "known follow-ups" list, including several
+`ratchetandclank` methods `Game` calls that aren't in that class's own
+phase-1 yet). Class-level renames (`Player`/`Enemy`/`IntroManager`/
+`Game`/`Projectile`) are already used throughout the done files even
+though those classes' own members aren't all renamed yet -- see
+CLASS_MAP.md's policy note. `CanvasShell.java`'s 6 dispatch calls into
+`Game` and `SoundPlayer.java`'s one call into `Game` still use `Game`'s
+pre-rename letter names (`.p()`/`.q()`/`.w()`/`.r()`/`.b()`/`.c()`/
+`.e(30)`) rather than its now-confirmed `pause`/`resume`/`render`/`tick`/
+`keyPressed`/`keyReleased`/`sleep` -- a known, not-yet-done cross-file
+cleanup, same as `Enemy.java` never being touched up after `Player.java`
+renamed its own `b()`/`c()`.
 
 ## Compile check
 
