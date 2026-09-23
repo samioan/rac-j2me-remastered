@@ -300,16 +300,78 @@ One cross-class finding worth flagging for `Game`'s own phase-1:
 comment should be corrected once `Game`'s phase-1 clarifies what it
 actually does.
 
+### IntroManager (from a1's `g`) -- done, in `../src_a1/IntroManager.java`
+
+**Scoping decision, different from every class so far**: at 58KB with
+dozens of densely-interacting single-letter fields across a 1754-line
+menu/splash/unlock-code state machine, this file's *own* members
+(`b`/`c`/`d`/`e`/`f`/`g`/`h`/`i`/`j`/`k`/`l`/`m`/`n`/`o`/`p`/`q`/`r`/`s`/
+`t`/`u`/`v`/`w`/`x`/`y`/`A`/`B`/`D`/`E`/`F`/`G`/`H`/`I`/`J`/`M`, and most
+of the per-screen render/input-handler methods) are **left obfuscated on
+purpose** -- the same treatment the legacy build gave its own `Game`
+class. Attempting a full member-level rename here, at this size and
+density, risked repeating `Player.java`'s `u`/`v`/`t` mix-up at a much
+larger scale. What *is* renamed: the class itself, cross-references to
+every already-confirmed member of other classes (`Game`/
+`ratchetandclank`/`Projectile`/`CanvasShell`), and a handful of
+IntroManager's own unambiguous fields (`splashImages`, `display`,
+`midlet`, `recentKeyHistory`, `CHEAT_CODE_KEYS`).
+
+**Produced mechanically** (a small Python find/replace script over
+`decompiled_a1/g.java`, not hand-transcribed) to avoid manual-copy
+transcription errors at this size -- then verified with the same
+bare-`this.<letter>` grep discipline as `Player.java`'s recovery, applied
+*before* trusting the output this time rather than after. Caught three
+more real bugs this way: (1) the script's `h.` -> `Game.` substitution
+ran before the `ratchetandclank.h` -> `ratchetandclank.smallFont`
+substitution, so the two literal occurrences of `ratchetandclank.h.a`
+(a `Font` field access, `.a` = `Font.lineHeight`) got corrupted into
+`ratchetandclank.Game.a` -- fixed to `ratchetandclank.smallFont.
+lineHeight`; (2) a decorative-background-projectile method
+(`a(Projectile)`) had its parameter *type* renamed by the script but not
+its field accesses (`var1.f`/`.g`/`.h`/`.m`/`.n`/`.o`) or method calls
+(`var1.a()`, `var1.a(1)`) to `Projectile`'s already-confirmed names --
+fixed by hand to `.type`/`.posX`/`.posY`/`.vx`/`.vy`/`.age`/`.reset()`/
+`.homingSeek(1)`; (3) one `this.midlet.c != null` null-check used `!=`
+where the script's regex only covered `==`, leaving a stray
+`this.midlet.c` -- fixed to `this.midlet.game`. **Lesson for `Game`'s
+phase-1** (also large enough that scripted substitution may be worth
+it): run the substitution, then grep the *output* for every remaining
+bare single-letter access before considering it done, and specifically
+check every "type gets renamed but field accesses through it don't"
+spot -- that failure mode didn't show up in the earlier hand-written
+files because there was no type-only rename step to miss.
+
+**What this class actually is**, confirmed by reading the whole file:
+the MIDlet's pre-game controller. A splash sequence (3 logo images), a
+step-by-step boot sequence that constructs `Game` over ~39 ticks
+(calling an unidentified `Game.a(int)` init-step method once per tick),
+the entire menu system (~20 screens: main menu, language, sound toggle,
+new-game slot picker, delete-save picker, a shared save-slot confirm
+screen, credits/help/about, and the trial's unlock-code `Form`/
+`TextField` UI), a decorative animated background of real `Projectile`
+instances during the menu, and a Konami-style 4-key cheat sequence
+unlocking `Game.r` -- almost certainly the same "invincibility cheat"
+role as the legacy build's `Game.i`/`Game.j`. **Structural finding**:
+the legacy build's menu system lived *inside* `Game`/`f`; in a1 it moved
+entirely into this separate class, meaning a1's `Game` is presumably
+gameplay-only. Worth confirming once `Game`'s own phase-1 is done.
+
 ### Not started yet
 
-`g` (IntroManager, 58KB), `h` (Game, 195KB) are the remaining classes,
-`h` by a wide margin (it's larger than the legacy build's entire
-`f.java` engine class, 127KB). All 9 done files already reference the
-not-yet-started classes by their renamed class names per this section's
-class-level-rename policy note -- but per the lessons above, only
-*inherited* (Entity) members of those classes are trustworthy until each
-one gets its own phase-1 pass, and every bare-field rename should start
-from a full `this.<letter>` grep, not an in-context skim.
+`h` (Game, 195KB) is the only remaining class -- larger than the legacy
+build's entire `f.java` engine class (127KB) by itself. Given
+`IntroManager` apparently absorbed the legacy build's menu system, a1's
+`Game` may turn out to be *smaller* in scope than its raw size suggests
+(more gameplay ticks/state, less menu code) -- or the size difference is
+something else entirely; no assumption either way until it's read.
+`Player.java`'s lesson (full `this.<letter>` ground-truth grep before
+trusting any bare-field rename) and `IntroManager.java`'s lesson (if
+using scripted substitution, re-grep the *output*, and check every
+type-only rename for missed field/method accesses through it) both
+apply -- `Game` is large enough that a mixed approach (scripted safe
+renames + hand verification, like `IntroManager`) is probably the right
+call rather than fully hand-transcribing 195KB.
 
 ---
 

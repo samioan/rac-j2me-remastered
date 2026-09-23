@@ -157,6 +157,20 @@ public class ratchetandclank extends MIDlet {
       }
    }
 
+   // Gap fix: this method was missing from the initial transcription of
+   // this file (caught while writing IntroManager.java, which calls it
+   // as `this.midlet.playMenuLoopSound(...)`). `introManager.p` is
+   // IntroManager's own not-yet-renamed field (set/cleared around
+   // splash-image loading, per IntroManager.java's header -- read here
+   // as a "still busy loading" guard).
+   public final boolean playMenuLoopSound(boolean var1) {
+      if (!this.soundEnabled) {
+         return true;
+      } else {
+         return !this.gameStarted && !this.introManager.p ? this.soundPlayer.playMenuLoop(var1) : true;
+      }
+   }
+
    // Tentative: same body as stopSoundHard() (decompiler-confirmed
    // duplicate, not a rename artifact) -- kept as a distinct method since
    // the original bytecode had it as a separate obfuscated name (`c()`);
