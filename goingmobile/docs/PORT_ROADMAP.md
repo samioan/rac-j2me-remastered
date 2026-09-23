@@ -157,11 +157,12 @@ buildable/runnable slice.
 proved the boot/menu/save architecture works, so the next real work is
 re-basing onto a1 rather than finishing the legacy build's gameplay.
 
-- [ ] **3.1a -- re-base boot/splash/menu/save onto a1.** Once a1's phase 1
-      (`ROADMAP.md`'s "Status") has produced a compile-checked, renamed
-      `src_a1/` tree for `ratchetandclank`/`a`(font)/`c`(SoundPlayer)/
-      `e`(canvas shell)/enough of `h`(engine) to cover the boot chain and
-      menus: re-transcribe the 3.1 C++ slice against a1's classes,
+- [ ] **3.1a -- re-base boot/splash/menu/save onto a1.** Prerequisite now
+      met: `src_a1/` is a compile-checked, renamed tree (zero errors,
+      `ROADMAP.md`'s "Status", `src_a1/README.md`) covering the boot chain
+      and menus (`ratchetandclank`, `Font`, `SoundPlayer`, `CanvasShell`,
+      and the boot/menu-relevant slice of `Game`/`IntroManager`). Not
+      started: re-transcribe the 3.1 C++ slice against a1's classes,
       176x220 backbuffer, and MIDP `Canvas`+`CommandListener` input model
       (replacing the legacy build's raw `FullCanvas` `keyPressed` menu
       state machine) and RMS save format (confirm byte-for-byte against

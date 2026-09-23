@@ -101,8 +101,8 @@ public final class IntroManager {
       this.midlet = var1;
       this.c = true;
       this.midlet.loadStrings();
-      A = Game.F;
-      B = Game.G;
+      A = Game.tileWidth;
+      B = Game.tileHeight;
       this.display = Display.getDisplay(var1);
       this.e = 0;
       this.D = 0;
@@ -134,7 +134,7 @@ public final class IntroManager {
       try {
          Game.aF = null;
          System.gc();
-         Game.e(20);
+         Game.sleep(20);
          Game.aF = Image.createImage(Game.aR[3]);
       } catch (IOException var2) {
       }
@@ -145,7 +145,7 @@ public final class IntroManager {
 
    public final void a(boolean var1) {
       System.gc();
-      Game.e(20);
+      Game.sleep(20);
       this.o = true;
       this.r = true;
    }
@@ -246,7 +246,7 @@ public final class IntroManager {
          }
 
          try {
-            this.midlet.game.a(this.M);
+            this.midlet.game.runBootStep(this.M);
             this.M++;
          } catch (Exception var2) {
          }
@@ -260,9 +260,9 @@ public final class IntroManager {
       }
 
       if (this.p) {
-         Game.e(100);
+         Game.sleep(100);
       } else if (this.u > 0 && --this.u > 0) {
-         Game.e(10);
+         Game.sleep(10);
       } else {
          if (System.currentTimeMillis() - this.F > 33L) {
             this.F = System.currentTimeMillis();
@@ -315,93 +315,93 @@ public final class IntroManager {
       this.f = 3;
       if (var1 == 1) {
          this.midlet.game.dX = -1;
-         this.midlet.game.aj.ao = true;
+         this.midlet.game.player.facingRight = true;
          d = 90;
-         this.midlet.game.aj.L = 1;
-         this.midlet.game.aj.a((byte)1);
-         this.midlet.game.aj.am = 0;
-         this.midlet.game.aj.aa = 6;
-         this.midlet.game.aj.ab = -30720;
-         this.midlet.game.aj.ac = 0;
-         this.midlet.game.aj.ad = 1536;
-         this.midlet.game.aj.E = 0;
-         this.midlet.game.aj.ag = -2048;
-         this.midlet.game.ai[0].Z = 1;
-         this.midlet.game.ai[0].v = 0;
-         this.midlet.game.ai[0].ao = true;
-         this.midlet.game.ai[0].u = false;
-         this.midlet.game.ai[0].a((byte)1);
-         this.midlet.game.ai[0].am = 0;
-         this.midlet.game.ai[0].aa = 6;
-         this.midlet.game.ai[0].ab = -10752;
-         this.midlet.game.ai[0].ac = 0;
-         this.midlet.game.ai[0].ad = 1536;
-         this.midlet.game.ai[0].ai = 1;
-         this.midlet.game.ai[0].ah = 1;
-         this.midlet.game.ai[0].ap = 0;
-         this.midlet.game.ai[0].ag = -2048;
-         this.midlet.game.ai[1].Z = 1;
-         this.midlet.game.ai[1].v = 0;
-         this.midlet.game.ai[1].ao = false;
-         this.midlet.game.ai[1].u = false;
-         this.midlet.game.ai[1].a((byte)1);
-         this.midlet.game.ai[1].am = 0;
-         this.midlet.game.ai[1].aa = 6;
-         this.midlet.game.ai[1].ab = 9 * A << 8;
-         this.midlet.game.ai[1].ac = 0;
-         this.midlet.game.ai[1].ad = 0;
-         this.midlet.game.ai[1].ai = 1;
-         this.midlet.game.ai[1].ah = 1;
-         this.midlet.game.ai[1].ap = 0;
-         this.midlet.game.ai[1].ag = -2048;
-         this.midlet.game.ai[2].Z = 1;
-         this.midlet.game.ai[2].v = 0;
-         this.midlet.game.ai[2].ao = false;
-         this.midlet.game.ai[2].u = false;
-         this.midlet.game.ai[2].a((byte)1);
-         this.midlet.game.ai[2].am = 0;
-         this.midlet.game.ai[2].aa = 6;
-         this.midlet.game.ai[2].ab = 10 * A << 8;
-         this.midlet.game.ai[2].ac = 0;
-         this.midlet.game.ai[2].ad = 0;
-         this.midlet.game.ai[2].ai = 1;
-         this.midlet.game.ai[2].ah = 1;
-         this.midlet.game.ai[2].ap = 0;
-         this.midlet.game.ai[2].ag = -2048;
-         this.midlet.game.ai[3].Z = 1;
-         this.midlet.game.ai[3].v = 0;
-         this.midlet.game.ai[3].ao = false;
-         this.midlet.game.ai[3].u = false;
-         this.midlet.game.ai[3].a((byte)1);
-         this.midlet.game.ai[3].am = 0;
-         this.midlet.game.ai[3].aa = 6;
-         this.midlet.game.ai[3].ab = 11 * A << 8;
-         this.midlet.game.ai[3].ac = 0;
-         this.midlet.game.ai[3].ad = 0;
-         this.midlet.game.ai[3].ai = 1;
-         this.midlet.game.ai[3].ah = 1;
-         this.midlet.game.ai[3].ap = 0;
-         this.midlet.game.ai[3].ag = -2048;
+         this.midlet.game.player.currentWeapon = 1;
+         this.midlet.game.player.setAnimState((byte)1);
+         this.midlet.game.player.animRestart = 0;
+         this.midlet.game.player.row = 6;
+         this.midlet.game.player.posX = -30720;
+         this.midlet.game.player.velY = 0;
+         this.midlet.game.player.velX = 1536;
+         this.midlet.game.player.invulnTimer = 0;
+         this.midlet.game.player.posInRow = -2048;
+         this.midlet.game.enemies[0].kind = 1;
+         this.midlet.game.enemies[0].animKind = 0;
+         this.midlet.game.enemies[0].facingRight = true;
+         this.midlet.game.enemies[0].wallCrawlFlipped = false;
+         this.midlet.game.enemies[0].setAnimState((byte)1);
+         this.midlet.game.enemies[0].animRestart = 0;
+         this.midlet.game.enemies[0].row = 6;
+         this.midlet.game.enemies[0].posX = -10752;
+         this.midlet.game.enemies[0].velY = 0;
+         this.midlet.game.enemies[0].velX = 1536;
+         this.midlet.game.enemies[0].health = 1;
+         this.midlet.game.enemies[0].activeFlag = 1;
+         this.midlet.game.enemies[0].ap = 0;
+         this.midlet.game.enemies[0].posInRow = -2048;
+         this.midlet.game.enemies[1].kind = 1;
+         this.midlet.game.enemies[1].animKind = 0;
+         this.midlet.game.enemies[1].facingRight = false;
+         this.midlet.game.enemies[1].wallCrawlFlipped = false;
+         this.midlet.game.enemies[1].setAnimState((byte)1);
+         this.midlet.game.enemies[1].animRestart = 0;
+         this.midlet.game.enemies[1].row = 6;
+         this.midlet.game.enemies[1].posX = 9 * A << 8;
+         this.midlet.game.enemies[1].velY = 0;
+         this.midlet.game.enemies[1].velX = 0;
+         this.midlet.game.enemies[1].health = 1;
+         this.midlet.game.enemies[1].activeFlag = 1;
+         this.midlet.game.enemies[1].ap = 0;
+         this.midlet.game.enemies[1].posInRow = -2048;
+         this.midlet.game.enemies[2].kind = 1;
+         this.midlet.game.enemies[2].animKind = 0;
+         this.midlet.game.enemies[2].facingRight = false;
+         this.midlet.game.enemies[2].wallCrawlFlipped = false;
+         this.midlet.game.enemies[2].setAnimState((byte)1);
+         this.midlet.game.enemies[2].animRestart = 0;
+         this.midlet.game.enemies[2].row = 6;
+         this.midlet.game.enemies[2].posX = 10 * A << 8;
+         this.midlet.game.enemies[2].velY = 0;
+         this.midlet.game.enemies[2].velX = 0;
+         this.midlet.game.enemies[2].health = 1;
+         this.midlet.game.enemies[2].activeFlag = 1;
+         this.midlet.game.enemies[2].ap = 0;
+         this.midlet.game.enemies[2].posInRow = -2048;
+         this.midlet.game.enemies[3].kind = 1;
+         this.midlet.game.enemies[3].animKind = 0;
+         this.midlet.game.enemies[3].facingRight = false;
+         this.midlet.game.enemies[3].wallCrawlFlipped = false;
+         this.midlet.game.enemies[3].setAnimState((byte)1);
+         this.midlet.game.enemies[3].animRestart = 0;
+         this.midlet.game.enemies[3].row = 6;
+         this.midlet.game.enemies[3].posX = 11 * A << 8;
+         this.midlet.game.enemies[3].velY = 0;
+         this.midlet.game.enemies[3].velX = 0;
+         this.midlet.game.enemies[3].health = 1;
+         this.midlet.game.enemies[3].activeFlag = 1;
+         this.midlet.game.enemies[3].ap = 0;
+         this.midlet.game.enemies[3].posInRow = -2048;
          this.s = 3;
       }
 
       if (var1 == 5) {
-         for (int var2 = 0; var2 < Game.ba; var2++) {
-            this.midlet.game.ai[var2].Z = -1;
+         for (int var2 = 0; var2 < Game.enemyPoolSize; var2++) {
+            this.midlet.game.enemies[var2].kind = -1;
          }
 
-         this.midlet.game.aj.ao = true;
-         this.midlet.game.aj.L = 0;
-         this.midlet.game.aj.a((byte)8);
-         this.midlet.game.aj.am = 1;
-         this.midlet.game.aj.ah = 1;
-         this.midlet.game.aj.ab = 22528;
-         this.midlet.game.aj.ac = 0;
-         this.midlet.game.aj.ad = 0;
-         this.midlet.game.aj.E = 0;
-         this.midlet.game.aj.aa = 2;
-         this.midlet.game.aj.ag = -1280;
-         this.midlet.game.aj.O = -1;
+         this.midlet.game.player.facingRight = true;
+         this.midlet.game.player.currentWeapon = 0;
+         this.midlet.game.player.setAnimState((byte)8);
+         this.midlet.game.player.animRestart = 1;
+         this.midlet.game.player.activeFlag = 1;
+         this.midlet.game.player.posX = 22528;
+         this.midlet.game.player.velY = 0;
+         this.midlet.game.player.velX = 0;
+         this.midlet.game.player.invulnTimer = 0;
+         this.midlet.game.player.row = 2;
+         this.midlet.game.player.posInRow = -1280;
+         this.midlet.game.player.ownedWeapons = -1;
          this.I = 0;
       }
 
@@ -464,7 +464,7 @@ public final class IntroManager {
             this.l = null;
             System.gc();
             this.q = true;
-            this.midlet.canvas.a = -1;
+            this.midlet.canvas.canvasState = -1;
             this.display.setCurrent(this.midlet.canvas);
          }
       }
@@ -492,13 +492,13 @@ public final class IntroManager {
       this.midlet.game.a(var1, var3, Game.aF.getHeight() / 16, Game.aF.getWidth(), Game.aF.getHeight() / 16);
       var1.drawImage(Game.aF, var3, Game.aF.getHeight() / 16, 0);
       this.midlet.game.a(var1, 176 - var3 - Game.aF.getWidth(), 0, Game.aF.getWidth(), Game.aF.getHeight() / 16);
-      e.b.drawImage(Game.aF, 176 - var3 - Game.aF.getWidth(), 0, 20, 8192);
+      CanvasShell.directGraphics.drawImage(Game.aF, 176 - var3 - Game.aF.getWidth(), 0, 20, 8192);
       this.midlet.game.a(var1, 176 - var3 - Game.aF.getWidth(), Game.aF.getHeight() / 16, Game.aF.getWidth(), Game.aF.getHeight() / 16);
-      e.b.drawImage(Game.aF, 176 - var3 - Game.aF.getWidth(), Game.aF.getHeight() / 16, 20, 8192);
+      CanvasShell.directGraphics.drawImage(Game.aF, 176 - var3 - Game.aF.getWidth(), Game.aF.getHeight() / 16, 20, 8192);
       this.midlet.game.a(var1, var3, 2 * Game.aF.getHeight() / 16, Game.aF.getWidth(), Game.aF.getHeight() / 16);
       var1.drawImage(Game.aF, var3, Game.aF.getHeight() / 16, 0);
       this.midlet.game.a(var1, 176 - var3 - Game.aF.getWidth(), 2 * Game.aF.getHeight() / 16, Game.aF.getWidth(), Game.aF.getHeight() / 16);
-      e.b.drawImage(Game.aF, 176 - var3 - Game.aF.getWidth(), Game.aF.getHeight() / 16, 20, 8192);
+      CanvasShell.directGraphics.drawImage(Game.aF, 176 - var3 - Game.aF.getWidth(), Game.aF.getHeight() / 16, 20, 8192);
       int var5 = Game.aF.getHeight() / 16;
 
       for (int var4 = 3 * var5; var4 < 220 - Game.aF.getHeight() / 16; var4 += var5) {
@@ -509,13 +509,13 @@ public final class IntroManager {
          this.midlet.game.a(var1, var3, var4, Game.aF.getWidth(), var5);
          var1.drawImage(Game.aF, var3, var4 - 2 * Game.aF.getHeight() / 16, 0);
          this.midlet.game.a(var1, 176 - var3 - Game.aF.getWidth(), var4, Game.aF.getWidth(), var5);
-         e.b.drawImage(Game.aF, 176 - var3 - Game.aF.getWidth(), var4 - 2 * Game.aF.getHeight() / 16, 0, 8192);
+         CanvasShell.directGraphics.drawImage(Game.aF, 176 - var3 - Game.aF.getWidth(), var4 - 2 * Game.aF.getHeight() / 16, 0, 8192);
       }
 
       this.midlet.game.a(var1, var3, 220 - Game.aF.getHeight() / 16, Game.aF.getWidth(), Game.aF.getHeight() / 16);
       var1.drawImage(Game.aF, var3, 220 - Game.aF.getHeight() / 16 - 3 * Game.aF.getHeight() / 16, 0);
       this.midlet.game.a(var1, 176 - var3 - Game.aF.getWidth(), 220 - Game.aF.getHeight() / 16, Game.aF.getWidth(), Game.aF.getHeight() / 16);
-      e.b.drawImage(Game.aF, 176 - var3 - Game.aF.getWidth(), 220 - 4 * Game.aF.getHeight() / 16, 20, 8192);
+      CanvasShell.directGraphics.drawImage(Game.aF, 176 - var3 - Game.aF.getWidth(), 220 - 4 * Game.aF.getHeight() / 16, 20, 8192);
 
       for (int var6 = var3 + Game.aF.getWidth(); var6 < 176 - var3 - Game.aF.getWidth(); var6 += Game.aF.getWidth()) {
          this.midlet.game.a(var1, var6, 220 - Game.aF.getHeight() / 16, Game.aF.getWidth(), Game.aF.getHeight() / 16);
@@ -733,7 +733,7 @@ public final class IntroManager {
             ratchetandclank.language = this.G;
             this.midlet.writeSoundAndLanguageSettings((byte)(this.midlet.soundEnabled ? 1 : 0));
             System.gc();
-            Game.e(20);
+            Game.sleep(20);
             this.midlet.loadStrings();
             this.f = (byte)(this.f | 3);
             if (var3) {
@@ -798,17 +798,17 @@ public final class IntroManager {
          } else {
             this.G++;
             if (this.G > 3 && this.G < 11) {
-               this.midlet.game.aj.L++;
+               this.midlet.game.player.currentWeapon++;
             } else if (this.G == 3) {
-               this.midlet.game.aj.L = 0;
-               this.midlet.game.aj.a((byte)8);
-               this.midlet.game.aj.am = 1;
+               this.midlet.game.player.currentWeapon = 0;
+               this.midlet.game.player.setAnimState((byte)8);
+               this.midlet.game.player.animRestart = 1;
             } else if (this.G == 11) {
-               this.midlet.game.aj.L = 8;
+               this.midlet.game.player.currentWeapon = 8;
             }
 
             for (int var4 = 9; var4 >= 0; var4--) {
-               this.midlet.game.ak[var4].a();
+               this.midlet.game.playerProjectiles[var4].reset();
             }
 
             this.J = 0;
@@ -820,17 +820,17 @@ public final class IntroManager {
       } else {
          this.G--;
          if (this.G > 3 && this.G < 11) {
-            this.midlet.game.aj.L--;
+            this.midlet.game.player.currentWeapon--;
          } else if (this.G == 3) {
-            this.midlet.game.aj.L = 0;
-            this.midlet.game.aj.a((byte)8);
-            this.midlet.game.aj.am = 1;
+            this.midlet.game.player.currentWeapon = 0;
+            this.midlet.game.player.setAnimState((byte)8);
+            this.midlet.game.player.animRestart = 1;
          } else if (this.G == 11) {
-            this.midlet.game.aj.L = 8;
+            this.midlet.game.player.currentWeapon = 8;
          }
 
          for (int var3 = 9; var3 >= 0; var3--) {
-            this.midlet.game.ak[var3].a();
+            this.midlet.game.playerProjectiles[var3].reset();
          }
 
          this.J = 0;
@@ -1034,57 +1034,57 @@ public final class IntroManager {
                return;
             }
 
-            this.midlet.game.aj.n();
-            this.midlet.game.ai[0].i();
-            this.midlet.game.ai[1].i();
-            this.midlet.game.ai[2].i();
-            this.midlet.game.ai[3].i();
+            this.midlet.game.player.updateAnimation();
+            this.midlet.game.enemies[0].updateAnimation();
+            this.midlet.game.enemies[1].updateAnimation();
+            this.midlet.game.enemies[2].updateAnimation();
+            this.midlet.game.enemies[3].updateAnimation();
             this.f = (byte)(this.f | 1);
-            this.midlet.game.aj.ab = this.midlet.game.aj.ab + this.midlet.game.aj.ad;
-            this.midlet.game.ai[0].ab = this.midlet.game.ai[0].ab + this.midlet.game.ai[0].ad;
-            this.midlet.game.ai[1].ab = this.midlet.game.ai[1].ab + this.midlet.game.ai[1].ad;
-            this.midlet.game.ai[2].ab = this.midlet.game.ai[2].ab + this.midlet.game.ai[2].ad;
-            this.midlet.game.ai[3].ab = this.midlet.game.ai[3].ab + this.midlet.game.ai[3].ad;
-            if (this.midlet.game.aj.ab >> 8 > 7 * A && this.midlet.game.aj.ao) {
-               this.midlet.game.aj.ao = false;
-               this.midlet.game.aj.ad = (short)(this.midlet.game.aj.ad * -1);
-               this.midlet.game.ai[0].ao = false;
-               this.midlet.game.ai[0].ad = (short)(this.midlet.game.ai[0].ad * -1);
-               this.midlet.game.ai[0].ab = 12 * A << 8;
-               this.midlet.game.ai[1].ad = -1536;
-               this.midlet.game.ai[2].ad = -1536;
-               this.midlet.game.ai[3].ad = -1536;
+            this.midlet.game.player.posX = this.midlet.game.player.posX + this.midlet.game.player.velX;
+            this.midlet.game.enemies[0].posX = this.midlet.game.enemies[0].posX + this.midlet.game.enemies[0].velX;
+            this.midlet.game.enemies[1].posX = this.midlet.game.enemies[1].posX + this.midlet.game.enemies[1].velX;
+            this.midlet.game.enemies[2].posX = this.midlet.game.enemies[2].posX + this.midlet.game.enemies[2].velX;
+            this.midlet.game.enemies[3].posX = this.midlet.game.enemies[3].posX + this.midlet.game.enemies[3].velX;
+            if (this.midlet.game.player.posX >> 8 > 7 * A && this.midlet.game.player.facingRight) {
+               this.midlet.game.player.facingRight = false;
+               this.midlet.game.player.velX = (short)(this.midlet.game.player.velX * -1);
+               this.midlet.game.enemies[0].facingRight = false;
+               this.midlet.game.enemies[0].velX = (short)(this.midlet.game.enemies[0].velX * -1);
+               this.midlet.game.enemies[0].posX = 12 * A << 8;
+               this.midlet.game.enemies[1].velX = -1536;
+               this.midlet.game.enemies[2].velX = -1536;
+               this.midlet.game.enemies[3].velX = -1536;
                return;
             }
 
-            if (this.midlet.game.ai[0].ab >> 8 < 0 && !this.midlet.game.ai[0].ao) {
+            if (this.midlet.game.enemies[0].posX >> 8 < 0 && !this.midlet.game.enemies[0].facingRight) {
                d = 0;
-               this.midlet.game.aj.ao = true;
-               this.midlet.game.aj.ad = (short)(this.midlet.game.aj.ad * -1);
-               this.midlet.game.aj.ab = -30720;
-               this.midlet.game.ai[0].ad = (short)(this.midlet.game.ai[0].ad * -1);
-               this.midlet.game.ai[0].ao = true;
-               this.midlet.game.ai[0].ab = -10752;
-               this.midlet.game.ai[1].ab = 9 * A << 8;
-               this.midlet.game.ai[1].ad = 0;
-               this.midlet.game.ai[2].ab = 10 * A << 8;
-               this.midlet.game.ai[2].ad = 0;
-               this.midlet.game.ai[3].ab = 11 * A << 8;
-               this.midlet.game.ai[3].ad = 0;
+               this.midlet.game.player.facingRight = true;
+               this.midlet.game.player.velX = (short)(this.midlet.game.player.velX * -1);
+               this.midlet.game.player.posX = -30720;
+               this.midlet.game.enemies[0].velX = (short)(this.midlet.game.enemies[0].velX * -1);
+               this.midlet.game.enemies[0].facingRight = true;
+               this.midlet.game.enemies[0].posX = -10752;
+               this.midlet.game.enemies[1].posX = 9 * A << 8;
+               this.midlet.game.enemies[1].velX = 0;
+               this.midlet.game.enemies[2].posX = 10 * A << 8;
+               this.midlet.game.enemies[2].velX = 0;
+               this.midlet.game.enemies[3].posX = 11 * A << 8;
+               this.midlet.game.enemies[3].velX = 0;
                return;
             }
             break;
          case 5:
             this.f = (byte)(this.f | 1);
-            this.midlet.game.aj.n();
+            this.midlet.game.player.updateAnimation();
             if (this.G == 3) {
                if (this.I > 70) {
-                  this.midlet.game.aj.a((byte)0);
-                  this.midlet.game.aj.am = 0;
+                  this.midlet.game.player.setAnimState((byte)0);
+                  this.midlet.game.player.animRestart = 0;
                   this.I = 0;
                } else if (this.I == 1 || this.I == 10 || this.I == 20) {
-                  this.midlet.game.aj.a((byte)8);
-                  this.midlet.game.aj.am = 1;
+                  this.midlet.game.player.setAnimState((byte)8);
+                  this.midlet.game.player.animRestart = 1;
                }
 
                this.I++;
@@ -1093,13 +1093,13 @@ public final class IntroManager {
 
             if (this.J < 3) {
                if (this.G > 3 && this.G < 11 && this.I > 10) {
-                  this.midlet.game.aj.p();
+                  this.midlet.game.player.fire();
                   this.I = 0;
                   this.J++;
 
                   for (int var1 = 0; var1 < 8; var1++) {
-                     if (this.midlet.game.aj.M[var1] == 0) {
-                        this.midlet.game.aj.M[var1] = 30;
+                     if (this.midlet.game.player.ammo[var1] == 0) {
+                        this.midlet.game.player.ammo[var1] = 30;
                      }
                   }
                }
@@ -1107,14 +1107,14 @@ public final class IntroManager {
                this.J = 0;
                this.I = 0;
             } else if (this.I == 1) {
-               this.midlet.game.aj.a((byte)0);
-               this.midlet.game.aj.am = 0;
+               this.midlet.game.player.setAnimState((byte)0);
+               this.midlet.game.player.animRestart = 0;
             }
 
             this.I++;
 
             for (int var2 = 9; var2 >= 0; var2--) {
-               this.a(this.midlet.game.ak[var2]);
+               this.a(this.midlet.game.playerProjectiles[var2]);
             }
       }
    }
@@ -1201,22 +1201,22 @@ public final class IntroManager {
       ratchetandclank.currentFont = ratchetandclank.largeFont;
       if (var2 >= 0) {
          String var5 = ratchetandclank.strings[var2];
-         int var6 = ratchetandclank.largeFont.a;
+         int var6 = ratchetandclank.largeFont.lineHeight;
          int var7 = 220 - var6;
-         ratchetandclank.largeFont.a(var5);
+         ratchetandclank.largeFont.textWidth(var5);
          var1.setColor(6580223);
          var1.setColor(14474495);
-         ratchetandclank.currentFont.a(var1, var5, 1, var7 + 1, 20);
+         ratchetandclank.currentFont.drawText(var1, var5, 1, var7 + 1, 20);
       }
 
       if (var3 >= 0) {
          String var9 = ratchetandclank.strings[var3];
-         int var10 = ratchetandclank.largeFont.a;
+         int var10 = ratchetandclank.largeFont.lineHeight;
          int var11 = 220 - var10;
-         int var8 = ratchetandclank.largeFont.a(var9);
+         int var8 = ratchetandclank.largeFont.textWidth(var9);
          var1.setColor(6580223);
          var1.setColor(14474495);
-         ratchetandclank.currentFont.a(var1, var9, 176 - var8 - 1, var11 + 1, 20);
+         ratchetandclank.currentFont.drawText(var1, var9, 176 - var8 - 1, var11 + 1, 20);
       }
    }
 
@@ -1293,7 +1293,7 @@ public final class IntroManager {
       Object[] var4 = new Object[]{new Integer(var2), new Integer(var3)};
       String var5 = this.midlet.game.a(ratchetandclank.strings[36], var4);
       ratchetandclank.currentFont = ratchetandclank.smallFont;
-      this.a(var1, var5, 88, 220 - ratchetandclank.currentFont.a + 1, 17, false);
+      this.a(var1, var5, 88, 220 - ratchetandclank.currentFont.lineHeight + 1, 17, false);
    }
 
    public final String c(int var1) {
@@ -1322,7 +1322,7 @@ public final class IntroManager {
             try {
                if (this.splashImages[0] == null) {
                   this.splashImages[0] = Image.createImage("/intro_publisher.png");
-                  Game.e(30);
+                  Game.sleep(30);
                }
             } catch (Exception var5) {
             }
@@ -1332,7 +1332,7 @@ public final class IntroManager {
             var1.drawImage(this.splashImages[this.D], 88, 220 - this.splashImages[this.D].getHeight() >> 1, 17);
             this.splashImages[this.D] = null;
             System.gc();
-            Game.e(20);
+            Game.sleep(20);
          }
 
          var1.setClip(0, 110, 176, 110);
@@ -1359,7 +1359,7 @@ public final class IntroManager {
    public final void d(int var1) {
       b = (this.M - 4) * 100 / 39;
       System.gc();
-      Game.e(10);
+      Game.sleep(10);
 
       try {
          Thread.yield();
@@ -1370,11 +1370,11 @@ public final class IntroManager {
    private void d(Graphics var1) {
       int var2 = 0;
       this.a(var1, (byte)0);
-      this.midlet.game.aj.a(var1, this.midlet.game.aj.ah, 0, 11);
-      this.midlet.game.ai[0].a(var1, 0, this.midlet.game.ai[0].ah, 0, 11);
-      this.midlet.game.ai[1].a(var1, 1, this.midlet.game.ai[1].ah, 0, 11);
-      this.midlet.game.ai[2].a(var1, 1, this.midlet.game.ai[1].ah, 0, 11);
-      this.midlet.game.ai[3].a(var1, 1, this.midlet.game.ai[1].ah, 0, 11);
+      this.midlet.game.player.render(var1, this.midlet.game.player.activeFlag, 0, 11);
+      this.midlet.game.enemies[0].render(var1, 0, this.midlet.game.enemies[0].activeFlag, 0, 11);
+      this.midlet.game.enemies[1].render(var1, 1, this.midlet.game.enemies[1].activeFlag, 0, 11);
+      this.midlet.game.enemies[2].render(var1, 1, this.midlet.game.enemies[1].activeFlag, 0, 11);
+      this.midlet.game.enemies[3].render(var1, 1, this.midlet.game.enemies[1].activeFlag, 0, 11);
       var1.setClip(0, 0, 176, 220);
       var1.drawImage(Game.as, 88, 4, 17);
       var2 = 4 + Game.as.getHeight() + 4;
@@ -1429,26 +1429,26 @@ public final class IntroManager {
          this.midlet.game.a(var1, ratchetandclank.strings[284], 88, var3, 17, 176 - 2 * this.b());
       } else if (var2 == 1) {
          var3 = this.midlet.game.a(var1, ratchetandclank.strings[86], 88, var3, 17, 176 - 2 * this.b());
-         var3 = this.midlet.game.a(var1, ratchetandclank.strings[87], 176, var3, 17, 176 - 2 * this.b()) + ratchetandclank.currentFont.a * 2;
+         var3 = this.midlet.game.a(var1, ratchetandclank.strings[87], 176, var3, 17, 176 - 2 * this.b()) + ratchetandclank.currentFont.lineHeight * 2;
          this.midlet.game.a(var1, ratchetandclank.strings[88], 88, var3, 17, 176 - 2 * this.b());
       } else if (var2 == 2) {
          var3 = this.midlet.game.a(var1, ratchetandclank.strings[89], 88, var3, 17, 176 - 2 * this.b());
-         var3 = this.midlet.game.a(var1, ratchetandclank.strings[90], 88, var3, 17, 176 - 2 * this.b()) + ratchetandclank.currentFont.a;
+         var3 = this.midlet.game.a(var1, ratchetandclank.strings[90], 88, var3, 17, 176 - 2 * this.b()) + ratchetandclank.currentFont.lineHeight;
          var3 = this.midlet.game.a(var1, ratchetandclank.strings[91], 88, var3, 17, 176 - 2 * this.b());
-         var3 = this.midlet.game.a(var1, ratchetandclank.strings[92], 88, var3, 17, 176 - 2 * this.b()) + ratchetandclank.currentFont.a;
+         var3 = this.midlet.game.a(var1, ratchetandclank.strings[92], 88, var3, 17, 176 - 2 * this.b()) + ratchetandclank.currentFont.lineHeight;
          var3 = this.midlet.game.a(var1, ratchetandclank.strings[93], 88, var3, 17, 176 - 2 * this.b());
          this.midlet.game.a(var1, ratchetandclank.strings[94], 88, var3, 17, 176 - 2 * this.b());
       } else if (var2 == 3) {
          var3 = this.midlet.game.a(var1, ratchetandclank.strings[95], 88, var3, 17, 176 - 2 * this.b());
-         var3 = this.midlet.game.a(var1, ratchetandclank.strings[96], 88, var3, 17, 176 - 2 * this.b()) + ratchetandclank.currentFont.a;
+         var3 = this.midlet.game.a(var1, ratchetandclank.strings[96], 88, var3, 17, 176 - 2 * this.b()) + ratchetandclank.currentFont.lineHeight;
          var3 = this.midlet.game.a(var1, ratchetandclank.strings[97], 88, var3, 17, 176 - 2 * this.b());
-         var3 = this.midlet.game.a(var1, ratchetandclank.strings[98], 88, var3, 17, 176 - 2 * this.b()) + ratchetandclank.currentFont.a;
+         var3 = this.midlet.game.a(var1, ratchetandclank.strings[98], 88, var3, 17, 176 - 2 * this.b()) + ratchetandclank.currentFont.lineHeight;
          var3 = this.midlet.game.a(var1, ratchetandclank.strings[99], 88, var3, 17, 176 - 2 * this.b());
          this.midlet.game.a(var1, ratchetandclank.strings[100], 88, var3, 17, 176 - 2 * this.b());
       } else if (var2 == 4) {
          var3 = this.midlet.game.a(var1, ratchetandclank.strings[101], 88, var3, 17, 176 - 2 * this.b());
          var3 = this.midlet.game.a(var1, ratchetandclank.strings[102], 176, var3, 17, 176 - 2 * this.b());
-         var3 = this.midlet.game.a(var1, ratchetandclank.strings[103], 88, var3, 17, 176 - 2 * this.b()) + ratchetandclank.currentFont.a * 2;
+         var3 = this.midlet.game.a(var1, ratchetandclank.strings[103], 88, var3, 17, 176 - 2 * this.b()) + ratchetandclank.currentFont.lineHeight * 2;
          var3 = this.midlet.game.a(var1, ratchetandclank.strings[84], 88, var3, 17, 176 - 2 * this.b());
          String var4;
          int var5;
@@ -1485,11 +1485,11 @@ public final class IntroManager {
       ratchetandclank.currentFont = ratchetandclank.smallFont;
       var2 += ratchetandclank.smallFont.lineHeight / 2;
       var2 = this.a(var1, ratchetandclank.strings[290], -1, var2, 17, false);
-      var2 = this.a(var1, this.m, -1, var2, 17, false) + ratchetandclank.currentFont.a / 2;
+      var2 = this.a(var1, this.m, -1, var2, 17, false) + ratchetandclank.currentFont.lineHeight / 2;
       ratchetandclank.currentFont = ratchetandclank.largeFont;
       var1.setColor(14474495);
-      var2 = this.c(var1, 1, var2) + ratchetandclank.currentFont.a / 2;
-      var2 = this.c(var1, 0, var2) + ratchetandclank.currentFont.a / 2;
+      var2 = this.c(var1, 1, var2) + ratchetandclank.currentFont.lineHeight / 2;
+      var2 = this.c(var1, 0, var2) + ratchetandclank.currentFont.lineHeight / 2;
       this.a(var1, ratchetandclank.strings[288], -1, var2, 17, false);
       this.a(var1, 39, 8, this);
    }
@@ -1562,83 +1562,83 @@ public final class IntroManager {
 
       var3 = this.midlet.game.k() - 3;
       if (var2 == 0) {
-         var3 += ratchetandclank.currentFont.a;
+         var3 += ratchetandclank.currentFont.lineHeight;
          var3 = this.midlet.game.a(var1, ratchetandclank.strings[77], var4, var3, 0, var5);
          var3 = this.midlet.game.a(var1, ratchetandclank.strings[78], var4, var3, 0, var5);
          var3 = this.midlet.game.a(var1, ratchetandclank.strings[79], var4, var3, 0, var5);
          this.midlet.game.a(var1, ratchetandclank.strings[80], var4, var3, 0, var5);
       } else if (var2 == 1) {
-         var3 += ratchetandclank.currentFont.a;
+         var3 += ratchetandclank.currentFont.lineHeight;
          var3 = this.midlet.game.a(var1, ratchetandclank.strings[258], var4, var3, 0, var5);
          var3 = this.midlet.game.a(var1, ratchetandclank.strings[259], var4, var3, 0, var5);
          this.midlet.game.a(var1, ratchetandclank.strings[81], var4, var3, 0, var5);
       } else if (var2 == 2) {
-         var3 += ratchetandclank.currentFont.a;
+         var3 += ratchetandclank.currentFont.lineHeight;
          var3 = this.midlet.game.a(var1, ratchetandclank.strings[82], var4, var3, 0, var5);
          var3 = this.midlet.game.a(var1, ratchetandclank.strings[83], var4, var3, 0, var5);
          this.midlet.game.a(var1, ratchetandclank.strings[260], var4, var3, 0, var5);
       } else if (var2 == 3) {
-         var3 += ratchetandclank.currentFont.a;
-         var3 = this.a(var1, ratchetandclank.strings[48], 0 + (A >> 1), var3, 0, false) + ratchetandclank.currentFont.a;
+         var3 += ratchetandclank.currentFont.lineHeight;
+         var3 = this.a(var1, ratchetandclank.strings[48], 0 + (A >> 1), var3, 0, false) + ratchetandclank.currentFont.lineHeight;
          this.midlet.game.a(var1, ratchetandclank.strings[263], var4, var3, 0, var5);
       } else if (var2 == 4) {
-         var3 += ratchetandclank.currentFont.a;
-         var3 = this.a(var1, ratchetandclank.strings[49], 0 + (A >> 1), var3, 0, false) + ratchetandclank.currentFont.a;
+         var3 += ratchetandclank.currentFont.lineHeight;
+         var3 = this.a(var1, ratchetandclank.strings[49], 0 + (A >> 1), var3, 0, false) + ratchetandclank.currentFont.lineHeight;
          this.midlet.game.a(var1, ratchetandclank.strings[264], var4, var3, 0, var5);
       } else if (var2 == 5) {
-         var3 += ratchetandclank.currentFont.a;
-         var3 = this.a(var1, ratchetandclank.strings[50], 0 + (A >> 1), var3, 0, false) + ratchetandclank.currentFont.a;
+         var3 += ratchetandclank.currentFont.lineHeight;
+         var3 = this.a(var1, ratchetandclank.strings[50], 0 + (A >> 1), var3, 0, false) + ratchetandclank.currentFont.lineHeight;
          this.midlet.game.a(var1, ratchetandclank.strings[265], var4, var3, 0, var5);
       } else if (var2 == 6) {
-         var3 += ratchetandclank.currentFont.a;
-         var3 = this.a(var1, ratchetandclank.strings[51], 0 + (A >> 1), var3, 0, false) + ratchetandclank.currentFont.a;
+         var3 += ratchetandclank.currentFont.lineHeight;
+         var3 = this.a(var1, ratchetandclank.strings[51], 0 + (A >> 1), var3, 0, false) + ratchetandclank.currentFont.lineHeight;
          this.midlet.game.a(var1, ratchetandclank.strings[266], var4, var3, 0, var5);
       } else if (var2 == 7) {
-         var3 += ratchetandclank.currentFont.a;
-         var3 = this.a(var1, ratchetandclank.strings[52], 0 + (A >> 1), var3, 0, false) + ratchetandclank.currentFont.a;
+         var3 += ratchetandclank.currentFont.lineHeight;
+         var3 = this.a(var1, ratchetandclank.strings[52], 0 + (A >> 1), var3, 0, false) + ratchetandclank.currentFont.lineHeight;
          this.midlet.game.a(var1, ratchetandclank.strings[267], var4, var3, 0, var5);
       } else if (var2 == 8) {
-         var3 += ratchetandclank.currentFont.a;
-         var3 = this.a(var1, ratchetandclank.strings[53], 0 + (A >> 1), var3, 0, false) + ratchetandclank.currentFont.a;
+         var3 += ratchetandclank.currentFont.lineHeight;
+         var3 = this.a(var1, ratchetandclank.strings[53], 0 + (A >> 1), var3, 0, false) + ratchetandclank.currentFont.lineHeight;
          this.midlet.game.a(var1, ratchetandclank.strings[268], var4, var3, 0, var5);
       } else if (var2 == 9) {
-         var3 += ratchetandclank.currentFont.a;
-         var3 = this.a(var1, ratchetandclank.strings[54], 0 + (A >> 1), var3, 0, false) + ratchetandclank.currentFont.a;
+         var3 += ratchetandclank.currentFont.lineHeight;
+         var3 = this.a(var1, ratchetandclank.strings[54], 0 + (A >> 1), var3, 0, false) + ratchetandclank.currentFont.lineHeight;
          this.midlet.game.a(var1, ratchetandclank.strings[269], var4, var3, 0, var5);
       } else if (var2 == 10) {
-         var3 += ratchetandclank.currentFont.a;
-         var3 = this.a(var1, ratchetandclank.strings[55], 0 + (A >> 1), var3, 0, false) + ratchetandclank.currentFont.a;
+         var3 += ratchetandclank.currentFont.lineHeight;
+         var3 = this.a(var1, ratchetandclank.strings[55], 0 + (A >> 1), var3, 0, false) + ratchetandclank.currentFont.lineHeight;
          this.midlet.game.a(var1, ratchetandclank.strings[270], var4, var3, 0, var5);
       } else if (var2 == 11) {
          var1.setClip(176 - var6 >> 1, 2 * B - (B >> 1) - 2, var6, var7);
          var1.drawImage(Game.aJ, 176 - var6 >> 1, 2 * B - (B >> 1) - 2, 0);
          var1.setClip(0, 0, 176, 220);
-         var3 += ratchetandclank.currentFont.a;
-         var3 = this.a(var1, ratchetandclank.strings[272], 0 + (A >> 1), var3, 0, false) + ratchetandclank.currentFont.a;
+         var3 += ratchetandclank.currentFont.lineHeight;
+         var3 = this.a(var1, ratchetandclank.strings[272], 0 + (A >> 1), var3, 0, false) + ratchetandclank.currentFont.lineHeight;
          this.midlet.game.a(var1, ratchetandclank.strings[275], var4, var3, 0, var5);
       } else if (var2 == 12) {
          var1.setClip(176 - var6 >> 1, 2 * B - (B >> 1) - 2, var6, var7);
          var1.drawImage(Game.aJ, 176 - var6 >> 1, 2 * B - (B >> 1) - var7 - 2, 0);
          var1.setClip(0, 0, 176, 220);
-         var3 += ratchetandclank.currentFont.a;
-         var3 = this.a(var1, ratchetandclank.strings[273], 0 + (A >> 1), var3, 0, false) + ratchetandclank.currentFont.a;
+         var3 += ratchetandclank.currentFont.lineHeight;
+         var3 = this.a(var1, ratchetandclank.strings[273], 0 + (A >> 1), var3, 0, false) + ratchetandclank.currentFont.lineHeight;
          this.midlet.game.a(var1, ratchetandclank.strings[276], var4, var3, 0, var5);
       } else if (var2 == 13) {
          var1.setClip(176 - var6 >> 1, 2 * B - (B >> 1) - 2, var6, var7);
          var1.drawImage(Game.aJ, 176 - var6 >> 1, 2 * B - (B >> 1) - 2 * var7 - 2, 0);
          var1.setClip(0, 0, 176, 220);
-         var3 += ratchetandclank.currentFont.a;
-         var3 = this.a(var1, ratchetandclank.strings[274], 0 + (A >> 1), var3, 0, false) + ratchetandclank.currentFont.a;
+         var3 += ratchetandclank.currentFont.lineHeight;
+         var3 = this.a(var1, ratchetandclank.strings[274], 0 + (A >> 1), var3, 0, false) + ratchetandclank.currentFont.lineHeight;
          this.midlet.game.a(var1, ratchetandclank.strings[277], var4, var3, 0, var5);
       }
 
       this.b(var1, var2 + 1, 14);
       this.a(var1, 9, 8, this);
       if (var2 > 2 && var2 < 11) {
-         this.midlet.game.aj.a(var1, this.midlet.game.aj.ah, 0, -4);
+         this.midlet.game.player.render(var1, this.midlet.game.player.activeFlag, 0, -4);
          if (var2 > 3) {
             for (int var8 = 9; var8 >= 0; var8--) {
-               this.midlet.game.ak[var8].a(var1);
+               this.midlet.game.playerProjectiles[var8].render(var1);
             }
          }
       }
@@ -1713,7 +1713,7 @@ public final class IntroManager {
    // simplified duplicate of Projectile.update()'s own logic (only an
    // x>176 offscreen check, no y-height check except types 3-5), reusing
    // Projectile's confirmed field/method names directly since this
-   // operates on real Game.ak[]/al[] Projectile instances.
+   // operates on real Game.playerProjectiles[]/al[] Projectile instances.
    public final void a(Projectile var1) {
       if (var1.type != -1) {
          if (var1.type >= 6 && var1.type <= 8) {

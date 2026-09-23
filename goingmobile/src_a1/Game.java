@@ -495,7 +495,7 @@ public final class Game {
    public int dl;
    public static int dm;
    public static int dn;
-   public static int do;
+   public static int do_;
    public static int dp;
    public static int dq;
    public static int dr;
@@ -611,8 +611,8 @@ public final class Game {
    }
 
    public final void a() {
-      short var1 = this.player.b();
-      int var2 = this.player.c() + L;
+      short var1 = this.player.x();
+      int var2 = this.player.y() + L;
       boolean var3 = false;
       boolean var4 = false;
       boolean var5 = false;
@@ -627,11 +627,11 @@ public final class Game {
          short var9 = this.bj[var7];
          short var10 = this.bk[var7];
          if (this.a(var1 - 11, var2 + 7, 18, 37, var9 - var8 + 10, var10 - var8, (var8 << 1) - 20, var8 << 1)) {
-            this.player.ad = 0;
-            this.player.ac = (short)(-b.n);
-            this.player.a((byte)3);
-            this.player.t = 10;
-            this.player.s = 0;
+            this.player.velX = 0;
+            this.player.velY = (short)(-Player.currentWalkSpeed);
+            this.player.setAnimState((byte)3);
+            this.player.zipGrabRetryDelay = 10;
+            this.player.jumpPhase = 0;
             return;
          }
       }
@@ -657,7 +657,7 @@ public final class Game {
          boolean var2 = false;
          int var3 = this.bX * tileWidth;
          int var4 = this.bY * tileHeight;
-         if (this.a(this.player.b() - 11, this.player.c() + L + 7, 18, 37, var3, var4, 19, 19)) {
+         if (this.a(this.player.x() - 11, this.player.y() + L + 7, 18, 37, var3, var4, 19, 19)) {
             this.bX = this.bY = -1;
             this.bZ = false;
             this.cC = true;
@@ -704,7 +704,7 @@ public final class Game {
       dp = 10000;
       dn = 0;
       dm = 0;
-      do = 0;
+      do_ = 0;
       du = 0;
       dq = 0;
       dr = 0;
@@ -725,7 +725,7 @@ public final class Game {
       int var1 = 0;
 
       for (int var2 = this.enemies.length - 1; var2 >= 0; var2--) {
-         if (this.enemies[var2].Z != 4 && this.enemies[var2].Z != -1) {
+         if (this.enemies[var2].kind != 4 && this.enemies[var2].kind != -1) {
             var1++;
          }
       }
@@ -754,7 +754,7 @@ public final class Game {
                dF = true;
             }
 
-            if (do == 0) {
+            if (do_ == 0) {
                dG = true;
             }
 
@@ -764,11 +764,11 @@ public final class Game {
                }
             }
 
-            if (du == do && do > 0 && dn == 0) {
+            if (du == do_ && do_ > 0 && dn == 0) {
                dH = true;
             }
 
-            dp = do * 100;
+            dp = do_ * 100;
             dz = dz + dp;
             ds = dq * 1;
             dt = dr * 1000;
@@ -969,7 +969,7 @@ public final class Game {
             return;
          case 39:
             this.player = new Player(this);
-            this.player.a();
+            this.player.loadAssets();
             this.midlet.introManager.d(5);
             return;
          case 40:
@@ -979,7 +979,7 @@ public final class Game {
                this.enemies[var2] = new Enemy(this);
             }
 
-            this.enemies[0].a();
+            this.enemies[0].loadAssets();
             this.midlet.introManager.d(5);
             this.playerProjectiles = new Projectile[10];
 
@@ -1162,15 +1162,15 @@ public final class Game {
    }
 
    public final void d(Graphics var1) {
-      ratchetandclank.largeFont.a(ratchetandclank.strings[7]);
+      ratchetandclank.largeFont.textWidth(ratchetandclank.strings[7]);
       boolean var3 = false;
-      ratchetandclank.largeFont.a(ratchetandclank.strings[8]);
+      ratchetandclank.largeFont.textWidth(ratchetandclank.strings[8]);
       boolean var4 = false;
       this.midlet.introManager.a(var1, (byte)0);
       var1.setClip(0, 0, 176, 220);
       int var2 = this.midlet.introManager.a(var1, ratchetandclank.strings[38]);
       ratchetandclank.currentFont = ratchetandclank.smallFont;
-      var2 += ratchetandclank.smallFont.a;
+      var2 += ratchetandclank.smallFont.lineHeight;
       int var6;
       this.dc[0] = var6 = ap.getHeight() / 2 + var2;
       this.dc[1] = var2 = ap.getHeight() / 2 + this.midlet.introManager.a(var1, ratchetandclank.strings[39], tileWidth + (tileWidth >> 1), var6, 0, this.cu == 0);
@@ -1211,7 +1211,7 @@ public final class Game {
    public final void f(Graphics var1) {
       this.midlet.introManager.a(var1, (byte)0);
       var1.setClip(0, 0, 176, 220);
-      this.sleep(var1);
+      this.e(var1);
       this.midlet.introManager.a(var1, ratchetandclank.strings[27]);
       ratchetandclank.currentFont = ratchetandclank.smallFont;
       this.dc[0] = 100;
@@ -1223,7 +1223,7 @@ public final class Game {
    public final void g(Graphics var1) {
       this.midlet.introManager.a(var1, (byte)0);
       var1.setClip(0, 0, 176, 220);
-      this.sleep(var1);
+      this.e(var1);
       this.midlet.introManager.a(var1, ratchetandclank.strings[283]);
       ratchetandclank.currentFont = ratchetandclank.smallFont;
       this.dc[0] = 104;
@@ -1240,34 +1240,34 @@ public final class Game {
       int var2 = 0;
       this.midlet.introManager.a(var1, (byte)0);
       var1.setClip(0, 0, 176, 220);
-      this.sleep(var1);
+      this.e(var1);
       this.midlet.introManager.a(var1, ratchetandclank.strings[47]);
       ratchetandclank.currentFont = ratchetandclank.smallFont;
       if (this.ec != 7) {
-         this.player.L = (byte)(this.ec + 1);
+         this.player.currentWeapon = (byte)(this.ec + 1);
       }
 
-      this.player.a(var1, 0, 0, -20);
+      this.player.render(var1, 0, 0, -20);
       var1.setClip(0, 0, 176, 220);
       if (this.ec == 7) {
          var2 = this.midlet.introManager.a(var1, ratchetandclank.strings[58], tileWidth + (tileWidth >> 1), 85, 0, false);
          var2 = this.midlet.introManager.a(var1, ratchetandclank.strings[295], tileWidth + (tileWidth >> 1), var2, 0, true);
          var2 = this.midlet.introManager.a(var1, 56, this.aX, tileWidth + (tileWidth >> 1), var2, 0, false);
          var2 = this.midlet.introManager.a(var1, 57, this.player.Q, tileWidth + (tileWidth >> 1), var2, 0, false);
-      } else if ((this.player.O & 1 << this.ec + 1) != 0) {
+      } else if ((this.player.ownedWeapons & 1 << this.ec + 1) != 0) {
          var2 = this.midlet.introManager.a(var1, ratchetandclank.strings[58], tileWidth + (tileWidth >> 1), 85, 0, false);
          var2 = this.midlet.introManager.a(var1, ratchetandclank.strings[49 + this.ec], tileWidth + (tileWidth >> 1), var2, 0, true);
          var2 = this.midlet.introManager.a(var1, 56, this.aX, tileWidth + (tileWidth >> 1), var2, 0, false);
          var2 = this.midlet.introManager.a(var1, 57, this.aZ[this.ec + 1], tileWidth + (tileWidth >> 1), var2, 0, false);
       } else {
-         var2 = 85 + ratchetandclank.currentFont.a;
+         var2 = 85 + ratchetandclank.currentFont.lineHeight;
          var2 = this.midlet.introManager.a(var1, ratchetandclank.strings[49 + this.ec], tileWidth + (tileWidth >> 1), var2, 0, true);
          var2 = this.midlet.introManager.a(var1, 56, this.aX, tileWidth + (tileWidth >> 1), var2, 0, false);
-         var2 = this.midlet.introManager.a(var1, 57, b.h[this.ec], tileWidth + (tileWidth >> 1), var2, 0, false);
+         var2 = this.midlet.introManager.a(var1, 57, Player.h[this.ec], tileWidth + (tileWidth >> 1), var2, 0, false);
       }
 
       int var13;
-      this.dc[0] = var13 = var2 + ratchetandclank.currentFont.a / 2;
+      this.dc[0] = var13 = var2 + ratchetandclank.currentFont.lineHeight / 2;
       this.dc[1] = var2 = this.midlet.introManager.a(var1, ratchetandclank.strings[11], tileWidth + (tileWidth >> 1), var13, 0, this.cu == 0) + 3;
       this.midlet.introManager.a(var1, ratchetandclank.strings[10], tileWidth + (tileWidth >> 1), var2, 0, this.cu == 1);
       ratchetandclank.currentFont = ratchetandclank.smallFontAlias;
@@ -1286,13 +1286,13 @@ public final class Game {
       var1.setClip(0, 0, 176, 220);
       this.midlet.introManager.a(var1, ratchetandclank.strings[26]);
       ratchetandclank.currentFont = ratchetandclank.smallFont;
-      this.sleep(var1);
+      this.e(var1);
       var2 = 85 + var4 + 4;
       if (this.cu != 7) {
-         this.player.L = (byte)(this.cu + 1);
+         this.player.currentWeapon = (byte)(this.cu + 1);
       }
 
-      this.player.a(var1, 0, 0, -20);
+      this.player.render(var1, 0, 0, -20);
       var1.setClip(0, 0, 176, 220);
       if ((this.cu != 2 || !this.h(3) || !this.h(8)) && (this.cu != 3 || !this.h(8))) {
          if (this.cu == 7) {
@@ -1303,13 +1303,13 @@ public final class Game {
             if (this.player.Q <= 0) {
                this.midlet.introManager.a(var1, ratchetandclank.strings[257], tileWidth + (tileWidth >> 1), var2, 0, false);
             }
-         } else if ((this.player.O & 1 << this.cu + 1) > 0) {
+         } else if ((this.player.ownedWeapons & 1 << this.cu + 1) > 0) {
             var2 = this.midlet.introManager.a(var1, ratchetandclank.strings[58], tileWidth + (tileWidth >> 1), var2, 0, false);
             var2 = this.midlet.introManager.a(var1, ratchetandclank.strings[49 + this.cu], tileWidth + (tileWidth >> 1), var2, 0, true);
             var2 = this.midlet.introManager.a(var1, 56, this.aX, tileWidth + (tileWidth >> 1), var2, 0, false);
             var2 = this.midlet.introManager.a(var1, 57, this.aZ[this.cu + 1], tileWidth + (tileWidth >> 1), var2, 0, false);
-            if (this.player.M[this.cu + 1] < b.d[3 * (this.cu + 1) + this.player.P[this.cu + 1]]) {
-               Object[] var27 = new Object[]{new Integer(this.player.M[this.cu + 1]), new Integer(b.d[3 * (this.cu + 1) + this.player.P[this.cu + 1]])};
+            if (this.player.ammo[this.cu + 1] < Player.AMMO_CAPACITY[3 * (this.cu + 1) + this.player.weaponLevel[this.cu + 1]]) {
+               Object[] var27 = new Object[]{new Integer(this.player.ammo[this.cu + 1]), new Integer(Player.AMMO_CAPACITY[3 * (this.cu + 1) + this.player.weaponLevel[this.cu + 1]])};
                String var29 = this.a(ratchetandclank.strings[255], var27);
                this.midlet.introManager.a(var1, var29, tileWidth + (tileWidth >> 1), var2, 0, false);
             } else {
@@ -1319,7 +1319,7 @@ public final class Game {
             var2 += 15;
             var2 = this.midlet.introManager.a(var1, ratchetandclank.strings[49 + this.cu], tileWidth + (tileWidth >> 1), var2, 0, true);
             var2 = this.midlet.introManager.a(var1, 56, this.aX, tileWidth + (tileWidth >> 1), var2, 0, false);
-            this.midlet.introManager.a(var1, 57, b.h[this.cu], tileWidth + (tileWidth >> 1), var2, 0, false);
+            this.midlet.introManager.a(var1, 57, Player.h[this.cu], tileWidth + (tileWidth >> 1), var2, 0, false);
          }
       } else {
          var2 += 15;
@@ -1335,48 +1335,48 @@ public final class Game {
 
       if ((var3 = this.cu + 1) == 7) {
          var3--;
-         if ((this.player.O & 32) == 0) {
+         if ((this.player.ownedWeapons & 32) == 0) {
             var3--;
          }
       }
 
       if (this.cu == 7) {
          var3--;
-         if ((this.player.O & 128) == 0) {
+         if ((this.player.ownedWeapons & 128) == 0) {
             var3--;
          }
 
-         if ((this.player.O & 32) == 0) {
+         if ((this.player.ownedWeapons & 32) == 0) {
             var3--;
          }
       }
 
-      this.midlet.introManager.b(var1, var3, 5 + ((this.player.O & 32) > 0 ? 1 : 0) + ((this.player.O & 128) > 0 ? 1 : 0));
+      this.midlet.introManager.b(var1, var3, 5 + ((this.player.ownedWeapons & 32) > 0 ? 1 : 0) + ((this.player.ownedWeapons & 128) > 0 ? 1 : 0));
       this.midlet.introManager.a(var1, 254, 8, this);
       var1.setClip(0, 85, 176, var4);
       if (this.dj > 6) {
-         e.b.fillTriangle(42, 86, 37, 85 + (var4 >> 1), 42, 85 + var4 - 1, -14894388);
-         e.b.drawTriangle(43, 85, 36, 85 + (var4 >> 1), 43, 85 + var4, -14581353);
+         CanvasShell.directGraphics.fillTriangle(42, 86, 37, 85 + (var4 >> 1), 42, 85 + var4 - 1, -14894388);
+         CanvasShell.directGraphics.drawTriangle(43, 85, 36, 85 + (var4 >> 1), 43, 85 + var4, -14581353);
       }
 
-      for (int var28 = 0; var28 < 4 + ((this.player.O & 32) > 0 ? 1 : 0); var28++) {
+      for (int var28 = 0; var28 < 4 + ((this.player.ownedWeapons & 32) > 0 ? 1 : 0); var28++) {
          var1.drawImage(aE, var6, 85 - var28 * var4, 0);
          var6 += var5;
       }
 
-      if ((this.player.O & 32) <= 0) {
+      if ((this.player.ownedWeapons & 32) <= 0) {
          var6 += var5;
       }
 
-      if ((this.player.O & 128) > 0) {
+      if ((this.player.ownedWeapons & 128) > 0) {
          var1.drawImage(aE, var6, 85 - 6 * var4, 0);
       }
 
       var6 += var5;
       var1.drawImage(aE, var6, 85 - 11 * var4, 0);
       if (this.dj > 6) {
-         e.b.fillTriangle(var6 + var5 + 9, 86, var6 + var5 + 9, 85 + var4, var6 + var5 + 15, 85 + (var4 >> 1), -14894388);
-         e.b.drawTriangle(var6 + var5 + 9, 85, var6 + var5 + 9, 85 + var4, var6 + var5 + 16, 85 + (var4 >> 1), -14581353);
+         CanvasShell.directGraphics.fillTriangle(var6 + var5 + 9, 86, var6 + var5 + 9, 85 + var4, var6 + var5 + 15, 85 + (var4 >> 1), -14894388);
+         CanvasShell.directGraphics.drawTriangle(var6 + var5 + 9, 85, var6 + var5 + 9, 85 + var4, var6 + var5 + 16, 85 + (var4 >> 1), -14581353);
       }
 
       var1.setColor(16777215);
@@ -1393,7 +1393,7 @@ public final class Game {
       boolean var5 = false;
       this.midlet.introManager.a(var1, (byte)0);
       var1.setClip(0, 0, 176, 220);
-      this.sleep(var1);
+      this.e(var1);
       this.midlet.introManager.a(var1, ratchetandclank.strings[296]);
       var1.setColor(16777215);
       ratchetandclank.currentFont = ratchetandclank.smallFont;
@@ -1405,7 +1405,7 @@ public final class Game {
             break;
          case 1:
             var1.setClip(0, 0, 176, 220);
-            var3 = this.a(var1, ratchetandclank.strings[297] + " " + do, 88, 85, 17, this.i());
+            var3 = this.a(var1, ratchetandclank.strings[297] + " " + do_, 88, 85, 17, this.i());
             var3 = this.a(var1, ratchetandclank.strings[298] + " " + dq, 88, var3, 17, this.i());
             var3 = this.a(var1, ratchetandclank.strings[299] + " " + dr, 88, var3, 17, this.i());
             var3 = this.a(var1, ratchetandclank.strings[300] + " " + this.midlet.introManager.c((int)dw), 88, var3, 17, this.i());
@@ -1542,7 +1542,7 @@ public final class Game {
             byte var25 = T[this.cQ[this.cu] - 1];
             var1.drawImage(aA, this.midlet.introManager.b() / 2, 120 + var14, 0);
             var1.setColor(1370860);
-            ratchetandclank.currentFont.a(var1, this.i(this.cQ[this.cu]) + "/" + var25, 7 + this.midlet.introManager.b() / 2, 137 + var14, 0);
+            ratchetandclank.currentFont.drawText(var1, this.i(this.cQ[this.cu]) + "/" + var25, 7 + this.midlet.introManager.b() / 2, 137 + var14, 0);
          }
       } catch (Exception var19) {
       }
@@ -1553,7 +1553,7 @@ public final class Game {
    public final void k(Graphics var1) {
       this.midlet.introManager.a(var1, (byte)0);
       var1.setClip(0, 0, 176, 220);
-      this.sleep(var1);
+      this.e(var1);
       this.midlet.introManager.a(var1, ratchetandclank.strings[43]);
       ratchetandclank.currentFont = ratchetandclank.smallFont;
       this.a(var1, ratchetandclank.strings[285], 88, 110, 17, this.i());
@@ -1569,11 +1569,11 @@ public final class Game {
       var1.fillRect(0, 0, 176, 220);
       this.midlet.introManager.a(var1, (byte)0);
       var1.setClip(0, 0, 176, 220);
-      var2 = this.midlet.introManager.a(var1, ratchetandclank.strings[75]) + (ratchetandclank.currentFont.a >> 1);
+      var2 = this.midlet.introManager.a(var1, ratchetandclank.strings[75]) + (ratchetandclank.currentFont.lineHeight >> 1);
       var1.setClip(66, var2, 44, 44);
       var1.drawImage(az, 66, var2 - this.p * 44, 0);
       var1.setClip(0, 0, 176, 220);
-      this.sleep(var1);
+      this.e(var1);
       var1.setColor(16777215);
       ratchetandclank.currentFont = ratchetandclank.smallFont;
       var2 = this.midlet.introManager.a(var1, ratchetandclank.strings[306] + " " + this.midlet.introManager.c(this.cr), 88, 85, 17, false);
@@ -1586,7 +1586,7 @@ public final class Game {
    public final void m(Graphics var1) {
       this.midlet.introManager.a(var1, (byte)0);
       var1.setClip(0, 0, 176, 220);
-      this.sleep(var1);
+      this.e(var1);
       this.midlet.introManager.a(var1, ratchetandclank.strings[308]);
       ratchetandclank.currentFont = ratchetandclank.smallFont;
       this.a(var1, ratchetandclank.strings[309], 88, 131, 33, this.i());
@@ -1596,7 +1596,7 @@ public final class Game {
    public final void n(Graphics var1) {
       this.midlet.introManager.a(var1, (byte)0);
       var1.setClip(0, 0, 176, 220);
-      this.sleep(var1);
+      this.e(var1);
       this.midlet.introManager.a(var1, ratchetandclank.strings[75]);
       ratchetandclank.currentFont = ratchetandclank.smallFont;
       int var2;
@@ -1616,7 +1616,7 @@ public final class Game {
    public final void o(Graphics var1) {
       this.midlet.introManager.a(var1, (byte)0);
       var1.setClip(0, 0, 176, 220);
-      this.sleep(var1);
+      this.e(var1);
       this.midlet.introManager.a(var1, ratchetandclank.strings[24]);
       int var2 = 87;
       ratchetandclank.currentFont = ratchetandclank.smallFont;
@@ -1630,7 +1630,7 @@ public final class Game {
 
       var2 = this.a(var1, ratchetandclank.strings[229], (176 - this.i()) / 2, var2, 0, this.i());
       if (this.cZ) {
-         Object[] var3 = new Object[]{new String(ratchetandclank.strings[this.player.L + 48])};
+         Object[] var3 = new Object[]{new String(ratchetandclank.strings[this.player.currentWeapon + 48])};
          this.cE = null;
          this.cE = this.a(ratchetandclank.strings[231], var3);
          var2 = this.a(var1, this.cE, (176 - this.i()) / 2, var2, 0, this.i());
@@ -1649,7 +1649,7 @@ public final class Game {
       var1.fillRect(0, 0, 176, 220);
       this.midlet.introManager.a(var1, (byte)0);
       var1.setClip(0, 0, 176, 220);
-      this.sleep(var1);
+      this.e(var1);
       this.midlet.introManager.a(var1, ratchetandclank.strings[24]);
       int var3 = this.k() + this.h() / 10;
 
@@ -1660,7 +1660,7 @@ public final class Game {
                break;
             }
 
-            this.sleep(var1);
+            this.e(var1);
             var3 = this.k() + this.h() / 10;
          }
       }
@@ -1668,13 +1668,13 @@ public final class Game {
       if (this.cu != 11 && (this.cL & 1 << this.cu + 21) != 0) {
          int var4 = this.j() + this.g() - 7;
          int var6 = this.k() + this.h() - 20;
-         e.b.fillTriangle(var4, var6, var4 - 10, var6, var4 - 5, var6 + 10, -15222068);
+         CanvasShell.directGraphics.fillTriangle(var4, var6, var4 - 10, var6, var4 - 5, var6 + 10, -15222068);
       }
 
       if (this.cu != 0 && (this.cL & 1 << this.cu + 19) != 0) {
          int var5 = this.j() + this.g() - 7;
          int var7 = this.k() + 20;
-         e.b.fillTriangle(var5, var7, var5 - 10, var7, var5 - 5, var7 - 10, -15222068);
+         CanvasShell.directGraphics.fillTriangle(var5, var7, var5 - 10, var7, var5 - 5, var7 - 10, -15222068);
       }
 
       this.midlet.introManager.a(var1, 7, 8, this);
@@ -1683,7 +1683,7 @@ public final class Game {
    public final void p(Graphics var1) {
       this.midlet.introManager.a(var1, (byte)0);
       var1.setClip(0, 0, 176, 220);
-      this.sleep(var1);
+      this.e(var1);
       this.midlet.introManager.a(var1, ratchetandclank.strings[282]);
       ratchetandclank.currentFont = ratchetandclank.smallFont;
       this.dc[0] = 100;
@@ -1712,21 +1712,21 @@ public final class Game {
       int var9 = var7 - 116;
 
       for (int var10 = 1; var10 <= 7; var10++) {
-         if ((this.player.O & 1 << var10) == 0) {
+         if ((this.player.ownedWeapons & 1 << var10) == 0) {
             this.b(var1, 0 + dM[var10 - 1][0], var9 + dM[var10 - 1][1]);
          }
       }
 
-      if (this.player.L > 0) {
-         this.a(var1, 0 + dM[this.player.L - 1][0], var9 + dM[this.player.L - 1][1]);
+      if (this.player.currentWeapon > 0) {
+         this.a(var1, 0 + dM[this.player.currentWeapon - 1][0], var9 + dM[this.player.currentWeapon - 1][1]);
       }
 
-      int var2 = 110 - 3 * ratchetandclank.currentFont.a / 2 + var5;
+      int var2 = 110 - 3 * ratchetandclank.currentFont.lineHeight / 2 + var5;
       var1.setColor(16777215);
-      var2 = this.a(var1, ratchetandclank.strings[48 + this.player.L], 88, var2, 17, 2 * aB.getWidth() / 4);
-      var2 = this.a(var1, ratchetandclank.strings[310] + " " + (this.player.P[this.player.L] + 1), 88, var2, 17, 2 * aB.getWidth() / 4);
-      if (this.player.L != 6) {
-         this.a(var1, ratchetandclank.strings[232] + ": " + this.player.M[this.player.L], 88, var2, 17, 2 * aB.getWidth() / 4);
+      var2 = this.a(var1, ratchetandclank.strings[48 + this.player.currentWeapon], 88, var2, 17, 2 * aB.getWidth() / 4);
+      var2 = this.a(var1, ratchetandclank.strings[310] + " " + (this.player.weaponLevel[this.player.currentWeapon] + 1), 88, var2, 17, 2 * aB.getWidth() / 4);
+      if (this.player.currentWeapon != 6) {
+         this.a(var1, ratchetandclank.strings[232] + ": " + this.player.ammo[this.player.currentWeapon], 88, var2, 17, 2 * aB.getWidth() / 4);
       }
    }
 
@@ -1757,13 +1757,13 @@ public final class Game {
          this.eg[var4] = dS[var4] + var3;
       }
 
-      e.b.fillPolygon(this.ef, 0, this.eg, 0, 8, -14330774);
+      CanvasShell.directGraphics.fillPolygon(this.ef, 0, this.eg, 0, 8, -14330774);
    }
 
    public final void r(Graphics var1) {
       this.midlet.introManager.a(var1, (byte)0);
       var1.setClip(0, 0, 176, 220);
-      this.sleep(var1);
+      this.e(var1);
       this.midlet.introManager.a(var1, ratchetandclank.strings[59]);
       ratchetandclank.currentFont = ratchetandclank.smallFont;
       this.midlet.introManager.a(var1, -1, 8, this);
@@ -1772,7 +1772,7 @@ public final class Game {
    public final void s(Graphics var1) {
       this.midlet.introManager.a(var1, (byte)0);
       var1.setClip(0, 0, 176, 220);
-      this.sleep(var1);
+      this.e(var1);
       this.midlet.introManager.a(var1, ratchetandclank.strings[44]);
       ratchetandclank.currentFont = ratchetandclank.smallFont;
       this.dc[0] = 100;
@@ -1786,7 +1786,7 @@ public final class Game {
    public final void t(Graphics var1) {
       this.midlet.introManager.a(var1, (byte)0);
       var1.setClip(0, 0, 176, 220);
-      this.sleep(var1);
+      this.e(var1);
       this.midlet.introManager.a(var1, ratchetandclank.strings[281]);
       ratchetandclank.currentFont = ratchetandclank.smallFont;
       this.dc[0] = 100;
@@ -1800,7 +1800,7 @@ public final class Game {
    public final void u(Graphics var1) {
       this.midlet.introManager.a(var1, (byte)0);
       var1.setClip(0, 0, 176, 220);
-      this.sleep(var1);
+      this.e(var1);
       this.midlet.introManager.a(var1, ratchetandclank.strings[45]);
       ratchetandclank.currentFont = ratchetandclank.smallFont;
       this.dc[0] = 100;
@@ -1814,7 +1814,7 @@ public final class Game {
    public final void v(Graphics var1) {
       this.midlet.introManager.a(var1, (byte)0);
       var1.setClip(0, 0, 176, 220);
-      this.sleep(var1);
+      this.e(var1);
       this.midlet.introManager.a(var1, ratchetandclank.strings[46]);
       ratchetandclank.currentFont = ratchetandclank.smallFont;
       this.dc[0] = 100;
@@ -1846,7 +1846,7 @@ public final class Game {
                      this.j(var1);
                      return;
                   case 4:
-                     this.abs(var1);
+                     this.d(var1);
                      return;
                   case 5:
                      this.f(var1);
@@ -1886,10 +1886,10 @@ public final class Game {
                   case 20:
                   default:
                      if (this.cS) {
-                        this.player.E = 1;
+                        this.player.invulnTimer = 1;
                      }
 
-                     this.levelMap.a(var1);
+                     this.levelMap.render(var1);
                      this.G(var1);
                      this.z(var1);
                      this.B(var1);
@@ -1924,7 +1924,7 @@ public final class Game {
                            this.F(var1);
 
                            for (int var2 = 9; var2 >= 0; var2--) {
-                              this.playerProjectiles[var2].a(var1);
+                              this.playerProjectiles[var2].render(var1);
                            }
                         }
 
@@ -1943,7 +1943,7 @@ public final class Game {
                         var1.fillRect(0, 220 - hudHeight, 176, hudHeight);
                         ratchetandclank.currentFont = ratchetandclank.smallFont;
                         var1.setColor(1882828);
-                        ratchetandclank.currentFont.a(var1, ratchetandclank.strings[311] + " " + this.db, 88, 220 - hudHeight + 3, 17);
+                        ratchetandclank.currentFont.drawText(var1, ratchetandclank.strings[311] + " " + this.db, 88, 220 - hudHeight + 3, 17);
                      }
 
                      if (this.e) {
@@ -1959,7 +1959,7 @@ public final class Game {
                      if (this.n == 2 && this.dY > 0) {
                         var1.setColor(16777215);
                         ratchetandclank.currentFont = ratchetandclank.smallFont;
-                        ratchetandclank.currentFont.a(var1, "" + 1000 / this.dY + "." + 100000 / this.dY % 100, 0, hudHeight, 20);
+                        ratchetandclank.currentFont.drawText(var1, "" + 1000 / this.dY + "." + 100000 / this.dY % 100, 0, hudHeight, 20);
                      }
 
                      if (this.dX != -1) {
@@ -1993,29 +1993,29 @@ public final class Game {
    public final void b(byte var1) {
       switch (var1) {
          case 0:
-            this.player.n();
+            this.player.updateAnimation();
             this.d = true;
-            this.player.ab += 1536;
-            if (this.player.ab >> 8 > 9 * tileWidth) {
+            this.player.posX += 1536;
+            if (this.player.posX >> 8 > 9 * tileWidth) {
                this.h++;
-               this.player.ac = -3584;
-               this.player.ad = 512;
+               this.player.velY = -3584;
+               this.player.velX = 512;
                return;
             }
             break;
          case 1:
-            this.player.n();
-            this.player.a((byte)2);
+            this.player.updateAnimation();
+            this.player.setAnimState((byte)2);
             this.d = true;
-            this.player.ac = (short)(this.player.ac + 256);
-            this.player.ag = this.player.ag + this.player.ac;
-            this.player.ab = this.player.ab + this.player.ad;
-            this.player.v();
-            short var3 = this.player.a(false);
-            if (this.player.c() >= var3 && this.player.ac > 0) {
-               this.player.a((byte)4);
-               this.player.ag = 0;
-               this.player.ac = -3584;
+            this.player.velY = (short)(this.player.velY + 256);
+            this.player.posInRow = this.player.posInRow + this.player.velY;
+            this.player.posX = this.player.posX + this.player.velX;
+            this.player.wrapRow();
+            short var3 = this.player.groundYAhead(false);
+            if (this.player.y() >= var3 && this.player.velY > 0) {
+               this.player.setAnimState((byte)4);
+               this.player.posInRow = 0;
+               this.player.velY = -3584;
                this.h++;
                return;
             }
@@ -2023,35 +2023,35 @@ public final class Game {
          case 2:
             if (this.i >= 4) {
                this.h++;
-               this.player.a((byte)1);
+               this.player.setAnimState((byte)1);
                return;
             }
 
-            this.player.n();
-            this.player.a((byte)2);
+            this.player.updateAnimation();
+            this.player.setAnimState((byte)2);
             this.d = true;
-            this.player.ac = (short)(this.player.ac + 256);
-            this.player.ag = this.player.ag + this.player.ac;
-            this.player.v();
-            short var2 = this.player.a(false);
-            if (this.player.c() >= var2 && this.player.ac > 0) {
-               this.player.a((byte)4);
-               this.player.ag = 0;
-               this.player.ac = -3584;
-               this.player.am = 0;
+            this.player.velY = (short)(this.player.velY + 256);
+            this.player.posInRow = this.player.posInRow + this.player.velY;
+            this.player.wrapRow();
+            short var2 = this.player.groundYAhead(false);
+            if (this.player.y() >= var2 && this.player.velY > 0) {
+               this.player.setAnimState((byte)4);
+               this.player.posInRow = 0;
+               this.player.velY = -3584;
+               this.player.animRestart = 0;
                this.i++;
                return;
             }
             break;
          case 3:
-            this.player.n();
+            this.player.updateAnimation();
             this.d = true;
-            this.player.ab += 1536;
-            if (this.player.ab >> 8 > 11 * tileWidth + (tileWidth >> 1)) {
+            this.player.posX += 1536;
+            if (this.player.posX >> 8 > 11 * tileWidth + (tileWidth >> 1)) {
                this.h++;
-               this.player.a((byte)0);
-               this.player.am = 0;
-               this.player.n();
+               this.player.setAnimState((byte)0);
+               this.player.animRestart = 0;
+               this.player.updateAnimation();
             }
       }
    }
@@ -2060,45 +2060,45 @@ public final class Game {
       switch (var1) {
          case 0:
             this.U();
-            this.player.n();
-            if (this.player.s != -1) {
-               short var8 = this.player.a(false);
+            this.player.updateAnimation();
+            if (this.player.jumpPhase != -1) {
+               short var8 = this.player.groundYAhead(false);
                this.d = true;
-               this.player.ab = this.player.ab + this.player.ad;
-               this.player.ac = (short)(this.player.ac + 256);
-               this.player.ag = this.player.ag + this.player.ac;
-               this.player.v();
-               if (this.player.c() >= var8) {
-                  this.player.a((byte)4);
-                  this.player.ag = 0;
-                  this.player.s = -1;
+               this.player.posX = this.player.posX + this.player.velX;
+               this.player.velY = (short)(this.player.velY + 256);
+               this.player.posInRow = this.player.posInRow + this.player.velY;
+               this.player.wrapRow();
+               if (this.player.y() >= var8) {
+                  this.player.setAnimState((byte)4);
+                  this.player.posInRow = 0;
+                  this.player.jumpPhase = -1;
                }
             } else {
-               if (this.player.aa <= 8 && this.player.ab >> 8 < 13 * tileWidth) {
-                  if (this.player.ab >> 8 > 11 * tileWidth + (tileWidth >> 1)) {
-                     this.player.a((byte)0);
-                     this.player.am = 0;
+               if (this.player.row <= 8 && this.player.posX >> 8 < 13 * tileWidth) {
+                  if (this.player.posX >> 8 > 11 * tileWidth + (tileWidth >> 1)) {
+                     this.player.setAnimState((byte)0);
+                     this.player.animRestart = 0;
                      this.s = 4;
                      return;
                   }
 
-                  this.player.a((byte)1);
-                  this.player.am = 0;
+                  this.player.setAnimState((byte)1);
+                  this.player.animRestart = 0;
                   this.s = 3;
                   return;
                }
 
-               if (this.player.ab >> 8 < 10 * tileWidth + (tileWidth >> 1)) {
+               if (this.player.posX >> 8 < 10 * tileWidth + (tileWidth >> 1)) {
                   this.s = 2;
-                  this.player.ac = -3584;
+                  this.player.velY = -3584;
                   return;
                }
 
-               this.player.a((byte)1);
-               this.player.am = 0;
-               this.player.ao = false;
-               this.player.ad = 0;
-               this.player.ac = 0;
+               this.player.setAnimState((byte)1);
+               this.player.animRestart = 0;
+               this.player.facingRight = false;
+               this.player.velX = 0;
+               this.player.velY = 0;
                this.t = false;
                this.s++;
             }
@@ -2106,66 +2106,66 @@ public final class Game {
             this.U();
             return;
          case 1:
-            short var6 = this.player.a(false);
-            this.player.n();
+            short var6 = this.player.groundYAhead(false);
+            this.player.updateAnimation();
             this.d = true;
             if (this.t) {
-               var6 = this.player.a(false);
+               var6 = this.player.groundYAhead(false);
                this.d = true;
-               this.player.ab = this.player.ab + this.player.ad;
-               this.player.ac = (short)(this.player.ac + 256);
-               this.player.ag = this.player.ag + this.player.ac;
-               this.player.v();
-               if (this.player.c() >= var6) {
-                  this.player.a((byte)1);
-                  this.player.ag = 0;
+               this.player.posX = this.player.posX + this.player.velX;
+               this.player.velY = (short)(this.player.velY + 256);
+               this.player.posInRow = this.player.posInRow + this.player.velY;
+               this.player.wrapRow();
+               if (this.player.y() >= var6) {
+                  this.player.setAnimState((byte)1);
+                  this.player.posInRow = 0;
                   this.t = false;
                }
             } else {
-               if (this.player.c() < var6) {
-                  this.player.a((byte)3);
+               if (this.player.y() < var6) {
+                  this.player.setAnimState((byte)3);
                   this.t = true;
                }
 
-               this.player.ab -= 1536;
-               if (this.player.ab >> 8 < 10 * tileWidth + (tileWidth >> 1)) {
-                  this.player.a((byte)0);
+               this.player.posX -= 1536;
+               if (this.player.posX >> 8 < 10 * tileWidth + (tileWidth >> 1)) {
+                  this.player.setAnimState((byte)0);
                   this.s++;
-                  this.player.ac = -3584;
+                  this.player.velY = -3584;
                }
             }
 
             this.U();
             return;
          case 2:
-            this.player.n();
-            this.player.a((byte)2);
+            this.player.updateAnimation();
+            this.player.setAnimState((byte)2);
             this.d = true;
-            this.player.ac = (short)(this.player.ac + 256);
-            this.player.ag = this.player.ag + this.player.ac;
-            this.player.v();
-            short var5 = this.player.a(false);
-            if (this.player.c() >= var5 && this.player.ac > 0) {
-               this.player.a((byte)4);
-               this.player.ag = 0;
-               this.player.ac = -3584;
-               this.player.am = 0;
-               if (this.player.aa <= 8) {
+            this.player.velY = (short)(this.player.velY + 256);
+            this.player.posInRow = this.player.posInRow + this.player.velY;
+            this.player.wrapRow();
+            short var5 = this.player.groundYAhead(false);
+            if (this.player.y() >= var5 && this.player.velY > 0) {
+               this.player.setAnimState((byte)4);
+               this.player.posInRow = 0;
+               this.player.velY = -3584;
+               this.player.animRestart = 0;
+               if (this.player.row <= 8) {
                   this.s++;
-                  this.player.ao = true;
-                  this.player.a((byte)1);
+                  this.player.facingRight = true;
+                  this.player.setAnimState((byte)1);
                }
             }
 
             this.U();
             return;
          case 3:
-            this.player.n();
+            this.player.updateAnimation();
             this.d = true;
-            this.player.ab += 1536;
-            if (this.player.ab >> 8 > 11 * tileWidth + (tileWidth >> 1)) {
-               this.player.a((byte)0);
-               this.player.am = 0;
+            this.player.posX += 1536;
+            if (this.player.posX >> 8 > 11 * tileWidth + (tileWidth >> 1)) {
+               this.player.setAnimState((byte)0);
+               this.player.animRestart = 0;
                this.s++;
             }
 
@@ -2179,52 +2179,52 @@ public final class Game {
             }
 
             this.bJ[4] = 0;
-            d.d[d.i[this.X]][14][8] = -126;
-            d.d[d.i[this.X]][14][9] = -125;
-            this.levelMap.f[14][9] = 22;
-            this.levelMap.f[13][9] = 22;
-            this.levelMap.f[12][9] = 20;
-            this.levelMap.f[15][9] = 21;
-            d.e[12] = d.e[12] | 512;
-            d.e[13] = d.e[13] | 512;
-            d.e[14] = d.e[14] | 512;
-            d.e[15] = d.e[15] | 512;
+            LevelMap.subGrids[LevelMap.subGridIndexMap[this.X]][14][8] = -126;
+            LevelMap.subGrids[LevelMap.subGridIndexMap[this.X]][14][9] = -125;
+            this.levelMap.tiles[14][9] = 22;
+            this.levelMap.tiles[13][9] = 22;
+            this.levelMap.tiles[12][9] = 20;
+            this.levelMap.tiles[15][9] = 21;
+            LevelMap.columnSolidMasks[12] = LevelMap.columnSolidMasks[12] | 512;
+            LevelMap.columnSolidMasks[13] = LevelMap.columnSolidMasks[13] | 512;
+            LevelMap.columnSolidMasks[14] = LevelMap.columnSolidMasks[14] | 512;
+            LevelMap.columnSolidMasks[15] = LevelMap.columnSolidMasks[15] | 512;
             this.s++;
             return;
          case 5:
             this.cC = true;
             this.cI = cz[32];
             this.r(cA[32]);
-            this.player.ac = -3172;
-            this.player.ad = 512;
+            this.player.velY = -3172;
+            this.player.velX = 512;
             this.s++;
             return;
          case 6:
             if (!this.cD) {
-               this.player.n();
-               this.player.a((byte)2);
+               this.player.updateAnimation();
+               this.player.setAnimState((byte)2);
                this.d = true;
-               this.player.ac = (short)(this.player.ac + 256);
-               this.player.ag = this.player.ag + this.player.ac;
-               this.player.ab = this.player.ab + this.player.ad;
-               this.player.v();
-               short var2 = this.player.a(false);
-               if (this.player.c() >= var2 && this.player.ac > 0) {
-                  this.player.a((byte)1);
-                  this.player.am = 0;
-                  this.player.ag = 0;
-                  this.player.ac = -3584;
+               this.player.velY = (short)(this.player.velY + 256);
+               this.player.posInRow = this.player.posInRow + this.player.velY;
+               this.player.posX = this.player.posX + this.player.velX;
+               this.player.wrapRow();
+               short var2 = this.player.groundYAhead(false);
+               if (this.player.y() >= var2 && this.player.velY > 0) {
+                  this.player.setAnimState((byte)1);
+                  this.player.animRestart = 0;
+                  this.player.posInRow = 0;
+                  this.player.velY = -3584;
                   this.s++;
                   return;
                }
             }
             break;
          case 7:
-            this.player.n();
+            this.player.updateAnimation();
             this.d = true;
-            this.player.ab += 1536;
-            if (this.player.ab >> 8 > 14 * tileWidth + (tileWidth >> 1)) {
-               this.player.a((byte)0);
+            this.player.posX += 1536;
+            if (this.player.posX >> 8 > 14 * tileWidth + (tileWidth >> 1)) {
+               this.player.setAnimState((byte)0);
                this.s++;
                return;
             }
@@ -2241,16 +2241,16 @@ public final class Game {
 
             dA = dA + dz;
             this.b = 2;
-            this.player.ao = true;
-            this.player.L = 1;
-            this.player.a((byte)0);
-            this.player.am = 0;
-            this.player.aa = 1;
-            this.player.ag = 1792;
-            this.player.ab = 22528;
-            this.player.ac = 0;
-            this.player.ad = 0;
-            this.player.E = 0;
+            this.player.facingRight = true;
+            this.player.currentWeapon = 1;
+            this.player.setAnimState((byte)0);
+            this.player.animRestart = 0;
+            this.player.row = 1;
+            this.player.posInRow = 1792;
+            this.player.posX = 22528;
+            this.player.velY = 0;
+            this.player.velX = 0;
+            this.player.invulnTimer = 0;
             this.s++;
       }
    }
@@ -2277,21 +2277,21 @@ public final class Game {
          case 2:
             if (!this.cD) {
                this.a(3, 2, (byte)0, -1);
-               this.enemies[9].ao = false;
+               this.enemies[9].facingRight = false;
                this.k++;
                return;
             }
             break;
          case 3:
-            this.enemies[9].i();
+            this.enemies[9].updateAnimation();
             this.d = true;
-            int var4 = this.enemies[9].a(false);
-            this.enemies[9].ac = (short)(this.enemies[9].ac + 256);
-            this.enemies[9].ag = this.enemies[9].ag + this.enemies[9].ac;
-            this.enemies[9].v();
-            if (this.enemies[9].b() + 2 * tileHeight >= var4 && this.enemies[9].ac > 0) {
-               this.enemies[9].a((byte)0);
-               this.enemies[9].am = 0;
+            int var4 = this.enemies[9].groundYAhead(false);
+            this.enemies[9].velY = (short)(this.enemies[9].velY + 256);
+            this.enemies[9].posInRow = this.enemies[9].posInRow + this.enemies[9].velY;
+            this.enemies[9].wrapRow();
+            if (this.enemies[9].y() + 2 * tileHeight >= var4 && this.enemies[9].velY > 0) {
+               this.enemies[9].setAnimState((byte)0);
+               this.enemies[9].animRestart = 0;
                this.b = 0;
                this.cC = true;
                this.cI = cz[21];
@@ -2303,14 +2303,14 @@ public final class Game {
             }
             break;
          case 4:
-            this.player.n();
+            this.player.updateAnimation();
             this.d = true;
-            this.player.ab += 1536;
-            if (this.player.ab >> 8 > 18 * tileWidth - (tileWidth >> 3)) {
-               this.player.a((byte)0);
-               this.player.ad = 1280;
-               this.player.ag = 0;
-               this.player.ac = -3584;
+            this.player.posX += 1536;
+            if (this.player.posX >> 8 > 18 * tileWidth - (tileWidth >> 3)) {
+               this.player.setAnimState((byte)0);
+               this.player.velX = 1280;
+               this.player.posInRow = 0;
+               this.player.velY = -3584;
                this.k++;
                return;
             }
@@ -2323,59 +2323,59 @@ public final class Game {
             return;
          case 6:
             if (this.cD) {
-               this.player.a((byte)0);
+               this.player.setAnimState((byte)0);
                return;
             }
 
-            this.player.n();
-            this.player.a((byte)2);
+            this.player.updateAnimation();
+            this.player.setAnimState((byte)2);
             this.d = true;
-            this.player.ac = (short)(this.player.ac + 384);
-            this.player.ag = this.player.ag + this.player.ac;
-            this.player.ab = this.player.ab + this.player.ad;
-            this.player.v();
-            if (this.player.c() >= 5 * tileHeight + (tileHeight >> 1) && this.player.ac > 0) {
-               this.player.a((byte)6);
+            this.player.velY = (short)(this.player.velY + 384);
+            this.player.posInRow = this.player.posInRow + this.player.velY;
+            this.player.posX = this.player.posX + this.player.velX;
+            this.player.wrapRow();
+            if (this.player.y() >= 5 * tileHeight + (tileHeight >> 1) && this.player.velY > 0) {
+               this.player.setAnimState((byte)6);
                int var3 = (this.abs(this.be[0] - this.bc[0]) << 8) / 2304;
-               this.player.V = (this.bg[0] << 8) / var3;
-               this.player.W = this.bh[0] / var3;
-               this.player.X = this.bf[0];
+               this.player.zipVelX = (this.bg[0] << 8) / var3;
+               this.player.zipVelY = this.bh[0] / var3;
+               this.player.zipEndY = this.bf[0];
                this.k++;
                return;
             }
             break;
          case 7:
-            this.player.i();
-            if (this.player.ab >= tileWidth * 25 << 8) {
+            this.player.zipRide();
+            if (this.player.posX >= tileWidth * 25 << 8) {
                this.k++;
-               this.player.ac = 0;
-               this.player.ad = 0;
-               this.player.a((byte)3);
+               this.player.velY = 0;
+               this.player.velX = 0;
+               this.player.setAnimState((byte)3);
                return;
             }
             break;
          case 8:
-            this.player.n();
+            this.player.updateAnimation();
             this.d = true;
-            short var2 = this.player.a(false);
-            this.player.ac = (short)(this.player.ac + 256);
-            if (this.player.c() + this.player.ac > var2 << 8) {
-               this.player.ac = (short)((var2 << 8) - this.player.c());
+            short var2 = this.player.groundYAhead(false);
+            this.player.velY = (short)(this.player.velY + 256);
+            if (this.player.y() + this.player.velY > var2 << 8) {
+               this.player.velY = (short)((var2 << 8) - this.player.y());
             }
 
-            this.player.ag = this.player.ag + this.player.ac;
-            this.player.v();
-            if (this.player.c() >= var2 && this.player.ac > 0) {
-               this.player.a((byte)4);
-               this.player.ag = 0;
-               this.player.ac = 0;
-               this.player.ad = 0;
+            this.player.posInRow = this.player.posInRow + this.player.velY;
+            this.player.wrapRow();
+            if (this.player.y() >= var2 && this.player.velY > 0) {
+               this.player.setAnimState((byte)4);
+               this.player.posInRow = 0;
+               this.player.velY = 0;
+               this.player.velX = 0;
                this.k++;
                return;
             }
             break;
          case 9:
-            this.player.a((byte)0);
+            this.player.setAnimState((byte)0);
             this.e = true;
             this.a(3, 2, (byte)0, -1);
             this.ct = System.currentTimeMillis();
@@ -2454,7 +2454,7 @@ public final class Game {
    public final void n() {
       if (!this.dV) {
          this.dV = true;
-         this.midlet.d();
+         this.midlet.stopSoundSoft();
          this.d = true;
          this.dW = 0L;
          this.cv = 0;
@@ -2498,7 +2498,7 @@ public final class Game {
    }
 
    public final void tick() {
-      if (this.player.ac == 0) {
+      if (this.player.velY == 0) {
          this.ea = 0;
       }
 
@@ -2508,7 +2508,7 @@ public final class Game {
          this.d = true;
          System.currentTimeMillis();
       } else if (this.dU != -1) {
-         this.midlet.e(this.dU);
+         this.midlet.readSaveSlot(this.dU);
          this.ac = (byte)this.dU;
          this.dU = -1;
          this.d = true;
@@ -2538,13 +2538,13 @@ public final class Game {
                this.updateCamera();
 
                for (int var1 = 9; var1 >= 0; var1--) {
-                  this.playerProjectiles[var1].b(false);
+                  this.playerProjectiles[var1].update(false);
                }
             }
 
             if (this.b == 16) {
                for (int var2 = 9; var2 >= 0; var2--) {
-                  this.playerProjectiles[var2].b(false);
+                  this.playerProjectiles[var2].update(false);
                }
 
                this.b(this.h);
@@ -2570,7 +2570,7 @@ public final class Game {
             }
 
             if (this.b == 11 || this.b == 12) {
-               this.player.n();
+               this.player.updateAnimation();
             }
 
             if (this.b == 3 || this.b == 1) {
@@ -2586,12 +2586,12 @@ public final class Game {
                this.c();
                this.K();
                this.b();
-               this.player.l();
-               this.player.n();
-               if (this.player.E <= 0) {
+               this.player.tick();
+               this.player.updateAnimation();
+               if (this.player.invulnTimer <= 0) {
                   this.R();
                } else {
-                  this.player.E--;
+                  this.player.invulnTimer--;
                }
 
                this.updateCamera();
@@ -2599,15 +2599,15 @@ public final class Game {
                this.a();
 
                for (int var3 = 9; var3 >= 0; var3--) {
-                  this.playerProjectiles[var3].b(false);
-                  if (this.playerProjectiles[var3].f != -1) {
+                  this.playerProjectiles[var3].update(false);
+                  if (this.playerProjectiles[var3].type != -1) {
                      this.m(var3);
                   }
                }
 
                for (int var4 = 9; var4 >= 0; var4--) {
-                  this.enemyProjectiles[var4].b(true);
-                  if (this.enemyProjectiles[var4].f != -1) {
+                  this.enemyProjectiles[var4].update(true);
+                  if (this.enemyProjectiles[var4].type != -1) {
                      this.l(var4);
                   }
                }
@@ -2615,50 +2615,50 @@ public final class Game {
                this.db = 0;
 
                for (int var5 = enemyPoolSize - 1; var5 >= 0; var5--) {
-                  if (this.enemies[var5].Z != -1) {
-                     if (this.Z == 12 && (this.enemies[var5].Z == 1 || this.enemies[var5].Z == 4)) {
-                        if (this.enemies[var5].E > 140) {
-                           this.enemies[var5].Z = -1;
+                  if (this.enemies[var5].kind != -1) {
+                     if (this.Z == 12 && (this.enemies[var5].kind == 1 || this.enemies[var5].kind == 4)) {
+                        if (this.enemies[var5].stateTimer > 140) {
+                           this.enemies[var5].kind = -1;
                            continue;
                         }
 
-                        this.enemies[var5].E++;
-                        if (this.enemies[var5].E == 1) {
-                           this.enemies[var5].a((byte)6);
-                           this.enemies[var5].am = 1;
-                        } else if (this.enemies[var5].E == 137) {
-                           this.enemies[var5].a((byte)7);
-                           this.enemies[var5].am = 1;
+                        this.enemies[var5].stateTimer++;
+                        if (this.enemies[var5].stateTimer == 1) {
+                           this.enemies[var5].setAnimState((byte)6);
+                           this.enemies[var5].animRestart = 1;
+                        } else if (this.enemies[var5].stateTimer == 137) {
+                           this.enemies[var5].setAnimState((byte)7);
+                           this.enemies[var5].animRestart = 1;
                         }
                      }
 
-                     if (this.enemies[var5].al != 5 && this.player.al != 10) {
+                     if (this.enemies[var5].animState != 5 && this.player.animState != 10) {
                         this.q(var5);
                      }
 
-                     this.enemies[var5].h();
-                     this.enemies[var5].i();
-                     if (this.Z == 11 && this.enemies[var5].Z != 4) {
+                     this.enemies[var5].tick();
+                     this.enemies[var5].updateAnimation();
+                     if (this.Z == 11 && this.enemies[var5].kind != 4) {
                         this.db++;
                      }
                   }
                }
 
-               if (this.Z == 0 && this.enemies[9].Z == -1 && this.player.c() >= this.player.a(false)) {
+               if (this.Z == 0 && this.enemies[9].kind == -1 && this.player.y() >= this.player.groundYAhead(false)) {
                   this.b = 17;
                   this.e = false;
                   this.bC[0] = 0;
-                  this.player.a((byte)1);
-                  this.player.am = 0;
-                  this.player.ao = true;
+                  this.player.setAnimState((byte)1);
+                  this.player.animRestart = 0;
+                  this.player.facingRight = true;
                }
 
                if (this.Z == 12) {
-                  if (!this.g && this.player.ab >> 8 >= 6 * tileWidth && this.player.ab >> 8 <= 9 * tileWidth && this.player.c() >= this.player.a(false)) {
+                  if (!this.g && this.player.posX >> 8 >= 6 * tileWidth && this.player.posX >> 8 <= 9 * tileWidth && this.player.y() >= this.player.groundYAhead(false)) {
                      this.b = 16;
                      this.e = false;
-                     this.player.a((byte)1);
-                     this.player.am = 0;
+                     this.player.setAnimState((byte)1);
+                     this.player.animRestart = 0;
                   }
 
                   if (this.g) {
@@ -2676,7 +2676,7 @@ public final class Game {
 
          if (this.dZ) {
             this.dZ = false;
-            this.midlet.a();
+            this.midlet.returnToIntro();
          }
       }
    }
@@ -2684,17 +2684,17 @@ public final class Game {
    public final void updateCamera() {
       int var1 = 0;
       int var2 = 0;
-      short var4 = this.player.b();
-      short var5 = this.player.c();
+      short var4 = this.player.x();
+      short var5 = this.player.y();
       if (!z) {
-         if (this.player.ao) {
+         if (this.player.facingRight) {
             var1 = -(var4 - tileWidth);
          } else {
             var1 = -(var4 + tileWidth - 176);
          }
       } else {
          var1 = -(E - 88);
-         if (var4 > E + (tileWidth >> 1) || var4 < E - (tileWidth >> 1) || this.player.c() == this.player.a(false)) {
+         if (var4 > E + (tileWidth >> 1) || var4 < E - (tileWidth >> 1) || this.player.y() == this.player.groundYAhead(false)) {
             z = false;
          }
       }
@@ -2764,7 +2764,7 @@ public final class Game {
    }
 
    public final void f(int var1) {
-      this.player.u = -2;
+      this.player.swingPhase = -2;
       this.cS = false;
       this.cD = false;
       this.bZ = true;
@@ -2776,35 +2776,35 @@ public final class Game {
       this.u();
       if (var1 == 0) {
          this.Z = (byte)var1;
-         this.levelMap.b(var1);
-         this.X = d.a;
+         this.levelMap.loadLevelFile(var1);
+         this.X = LevelMap.currentSubGrid;
          this.di = 1;
          this.Y = this.X;
-         this.levelMap.a(this.X, true);
+         this.levelMap.enterRoom(this.X, true);
          this.ad = 1;
          this.ae = 5;
-         this.player.ab = this.ad * tileWidth + (J >> 1) << 8;
-         this.player.aa = this.player.af = this.ae;
-         this.player.aj = 1;
-         this.player.ak = 0;
-         this.player.al = 0;
-         this.player.am = 0;
-         this.player.ag = 0;
-         this.player.Z = 0;
-         this.player.ah = 1;
-         this.player.ai = 20;
+         this.player.posX = this.ad * tileWidth + (J >> 1) << 8;
+         this.player.row = this.player.af = this.ae;
+         this.player.animFrame = 1;
+         this.player.animCounter = 0;
+         this.player.animState = 0;
+         this.player.animRestart = 0;
+         this.player.posInRow = 0;
+         this.player.kind = 0;
+         this.player.activeFlag = 1;
+         this.player.health = 20;
          this.cr = 0;
          this.ct = System.currentTimeMillis();
          this.b(this.X, 6364);
-         this.player.E = 0;
-         this.player.ao = true;
+         this.player.invulnTimer = 0;
+         this.player.facingRight = true;
          this.d = true;
          this.aX = 0;
-         this.player.a((byte)0);
-         this.player.am = 0;
+         this.player.setAnimState((byte)0);
+         this.player.animRestart = 0;
          this.ce = 1;
          this.cf = 18;
-         this.player.M[1] = 0;
+         this.player.ammo[1] = 0;
          x = -22;
          y = -32;
       }
@@ -2823,13 +2823,13 @@ public final class Game {
       this.cJ = -1;
       this.cK = -1;
       this.cL = 1572865;
-      this.player.O = 3;
-      this.player.L = 1;
+      this.player.ownedWeapons = 3;
+      this.player.currentWeapon = 1;
 
       for (int var1 = 7; var1 >= 0; var1--) {
          this.player.N[var1] = 0;
-         this.player.P[var1] = 0;
-         this.player.M[var1] = b.e[var1];
+         this.player.weaponLevel[var1] = 0;
+         this.player.ammo[var1] = Player.INITIAL_AMMO[var1];
       }
 
       for (int var2 = 0; var2 < 10; var2++) {
@@ -2861,17 +2861,17 @@ public final class Game {
          this.cO = this.cL;
          this.dl = this.di;
          this.aY = this.aX;
-         this.player.R = this.player.L;
-         this.da = this.player.O;
+         this.player.R = this.player.currentWeapon;
+         this.da = this.player.ownedWeapons;
          this.cP = var2;
 
          for (int var3 = 0; var3 < 8; var3++) {
             this.player.S[var3] = this.player.N[var3];
-            this.player.U[var3] = this.player.P[var3];
-            this.player.T[var3] = this.player.M[var3];
+            this.player.U[var3] = this.player.weaponLevel[var3];
+            this.player.T[var3] = this.player.ammo[var3];
          }
 
-         this.player.u = -2;
+         this.player.swingPhase = -2;
          this.ab = 1;
          this.cS = false;
          this.cD = false;
@@ -2887,28 +2887,28 @@ public final class Game {
          this.dC = 0;
          this.ct = System.currentTimeMillis();
          this.Z = (byte)var1;
-         this.levelMap.b(var1);
-         this.player.ao = true;
+         this.levelMap.loadLevelFile(var1);
+         this.player.facingRight = true;
          this.X = var2;
          this.Y = this.X;
-         this.player.E = 10;
+         this.player.invulnTimer = 10;
          this.d = true;
          this.b(this.X, 6541);
-         this.levelMap.a(this.X, true);
+         this.levelMap.enterRoom(this.X, true);
          if (this.Z == 12) {
             this.N();
          }
 
-         this.player.ab = this.ad * tileWidth + (J >> 1) << 8;
-         this.player.aa = this.player.af = this.ae;
-         this.player.aj = 1;
-         this.player.ak = 0;
-         this.player.al = 0;
-         this.player.am = 0;
-         this.player.ag = 0;
-         this.player.Z = 0;
-         this.player.ah = 1;
-         this.player.ai = 20;
+         this.player.posX = this.ad * tileWidth + (J >> 1) << 8;
+         this.player.row = this.player.af = this.ae;
+         this.player.animFrame = 1;
+         this.player.animCounter = 0;
+         this.player.animState = 0;
+         this.player.animRestart = 0;
+         this.player.posInRow = 0;
+         this.player.kind = 0;
+         this.player.activeFlag = 1;
+         this.player.health = 20;
          this.ct = System.currentTimeMillis();
          this.e = true;
          this.cu = 0;
@@ -2923,7 +2923,7 @@ public final class Game {
 
       this.m = false;
       if (var1 == 1) {
-         this.midlet.d(this.ac);
+         this.midlet.writeSaveSlot(this.ac);
       }
    }
 
@@ -3057,7 +3057,7 @@ public final class Game {
       if (this.v() >= bR) {
          this.cC = false;
          this.r(72);
-         this.player.O = (byte)(this.player.O | 128);
+         this.player.ownedWeapons = (byte)(this.player.ownedWeapons | 128);
          this.da = (byte)(this.da | 128);
       } else if (this.v() == 1) {
          this.cC = false;
@@ -3069,7 +3069,7 @@ public final class Game {
    }
 
    public final void w() {
-      this.player.u = -2;
+      this.player.swingPhase = -2;
 
       for (byte var1 = 0; var1 < 6; var1++) {
          this.bt[var1] = true;
@@ -3077,17 +3077,17 @@ public final class Game {
 
       this.X = this.ah;
       this.b(this.X, 6911);
-      this.levelMap.a(this.ah, false);
-      this.player.E = 10;
-      this.player.ab = this.ad * tileWidth + (J >> 1) << 8;
-      this.player.aa = this.ae;
+      this.levelMap.enterRoom(this.ah, false);
+      this.player.invulnTimer = 10;
+      this.player.posX = this.ad * tileWidth + (J >> 1) << 8;
+      this.player.row = this.ae;
       x = this.af;
       y = this.ag;
-      this.player.ag = 0;
-      this.player.ai = 20;
-      this.player.ad = this.player.ac = 0;
-      this.player.a((byte)0);
-      this.player.am = 0;
+      this.player.posInRow = 0;
+      this.player.health = 20;
+      this.player.velX = this.player.velY = 0;
+      this.player.setAnimState((byte)0);
+      this.player.animRestart = 0;
       this.e = true;
       if (this.Z == 12) {
          this.bI[0] = this.bI[1] = this.bI[2] = this.bI[3] = 0;
@@ -3102,7 +3102,7 @@ public final class Game {
       if (var1 == -1) {
          this.ec = this.cu = 0;
          this.W();
-         this.midlet.d(this.ac);
+         this.midlet.writeSaveSlot(this.ac);
          this.y();
          this.b = 3;
          if (this.cV) {
@@ -3111,14 +3111,14 @@ public final class Game {
             this.cV = false;
             this.X();
             this.b = 1;
-            this.player.O = this.da;
+            this.player.ownedWeapons = this.da;
          }
       }
    }
 
    public final void x() {
-      if (this.aQ != d.b) {
-         this.aQ = d.b;
+      if (this.aQ != LevelMap.startSubGrid) {
+         this.aQ = LevelMap.startSubGrid;
 
          try {
             aF = null;
@@ -3158,7 +3158,7 @@ public final class Game {
          this.cu = 0;
          this.Z = 11;
          this.aQ = 3;
-         this.levelMap.b(11);
+         this.levelMap.loadLevelFile(11);
          this.b(this.X, 7229);
 
          for (int var2 = 0; var2 < 10; var2++) {
@@ -3173,27 +3173,27 @@ public final class Game {
             this.bv[var4] = -1;
          }
 
-         this.levelMap.a(var1, true);
+         this.levelMap.enterRoom(var1, true);
          this.aQ = 1;
-         this.player.ab = this.ad * tileWidth + (J >> 1) << 8;
-         this.player.aa = this.player.af = this.ae;
-         this.player.aj = 1;
-         this.player.ak = 0;
-         this.player.al = 0;
-         this.player.am = 0;
-         this.player.ag = 0;
-         this.player.Z = 0;
-         this.player.ah = 1;
-         this.player.ai = 20;
+         this.player.posX = this.ad * tileWidth + (J >> 1) << 8;
+         this.player.row = this.player.af = this.ae;
+         this.player.animFrame = 1;
+         this.player.animCounter = 0;
+         this.player.animState = 0;
+         this.player.animRestart = 0;
+         this.player.posInRow = 0;
+         this.player.kind = 0;
+         this.player.activeFlag = 1;
+         this.player.health = 20;
          this.ct = System.currentTimeMillis();
          this.e = true;
-         this.player.ao = true;
+         this.player.facingRight = true;
          this.d = true;
          x = this.af;
          y = this.ag;
 
          for (int var5 = 0; var5 < 8; var5++) {
-            this.player.M[var5] = b.d[var5 * 3 + this.player.P[var5]];
+            this.player.ammo[var5] = Player.AMMO_CAPACITY[var5 * 3 + this.player.weaponLevel[var5]];
          }
 
          this.b = 0;
@@ -3202,24 +3202,24 @@ public final class Game {
    }
 
    public final void A() {
-      if (this.cX && this.player.ai != 20) {
-         this.player.ai = 0;
+      if (this.cX && this.player.health != 20) {
+         this.player.health = 0;
       } else {
          if (this.cW && this.cY++ > 80) {
             if (!f) {
-               this.player.ai--;
+               this.player.health--;
             }
 
             this.cY = 0;
             this.e = true;
          }
 
-         if (this.cZ && this.player.O != 1 && this.player.M[this.player.L] <= 0) {
+         if (this.cZ && this.player.ownedWeapons != 1 && this.player.ammo[this.player.currentWeapon] <= 0) {
             this.y();
             this.b = 19;
          } else {
             for (int var1 = enemyPoolSize - 1; var1 >= 0; var1--) {
-               if (this.enemies[var1].ai > 0 && this.enemies[var1].Z != 4 && this.enemies[var1].Z != -1) {
+               if (this.enemies[var1].health > 0 && this.enemies[var1].kind != 4 && this.enemies[var1].kind != -1) {
                   return;
                }
             }
@@ -3239,7 +3239,7 @@ public final class Game {
 
          this.cu = 0;
          this.cV = false;
-         this.player.O = this.da;
+         this.player.ownedWeapons = this.da;
          if (this.b != 19) {
             this.y();
             this.b = 15;
@@ -3253,7 +3253,7 @@ public final class Game {
                return;
             }
 
-            this.player.O = (byte)(this.player.O | 64);
+            this.player.ownedWeapons = (byte)(this.player.ownedWeapons | 64);
          }
       }
    }
@@ -3262,22 +3262,22 @@ public final class Game {
       switch (var1) {
          case 1:
             this.ed = 6;
-            this.Y = d.h[this.X][0];
+            this.Y = LevelMap.subGridNeighbors[this.X][0];
             break;
          case 2:
             this.ed = 5;
-            this.Y = d.h[this.X][3];
+            this.Y = LevelMap.subGridNeighbors[this.X][3];
          case 3:
          case 4:
          default:
             break;
          case 5:
             this.ed = 2;
-            this.Y = d.h[this.X][2];
+            this.Y = LevelMap.subGridNeighbors[this.X][2];
             break;
          case 6:
             this.ed = 1;
-            this.Y = d.h[this.X][1];
+            this.Y = LevelMap.subGridNeighbors[this.X][1];
       }
 
       if (this.Y != -1) {
@@ -3289,25 +3289,25 @@ public final class Game {
    private void V() {
       this.m = true;
       this.b(this.X, 7455);
-      this.levelMap.a(this.X, false);
+      this.levelMap.enterRoom(this.X, false);
       switch (this.ed) {
          case 1:
-            this.player.aa = this.player.af = 1;
+            this.player.row = this.player.af = 1;
             y = 0;
             break;
          case 2:
-            this.player.ab = 1 * tileWidth + (J >> 1) << 8;
+            this.player.posX = 1 * tileWidth + (J >> 1) << 8;
             x = 0;
          case 3:
          case 4:
          default:
             break;
          case 5:
-            this.player.ab = 26 * tileWidth + (J >> 1) << 8;
+            this.player.posX = 26 * tileWidth + (J >> 1) << 8;
             x = v;
             break;
          case 6:
-            this.player.aa = this.player.af = 16;
+            this.player.row = this.player.af = 16;
             y = w;
       }
 
@@ -3315,30 +3315,30 @@ public final class Game {
    }
 
    public final void a(int var1, int var2, int var3) {
-      this.player.w = var1 * tileWidth + (tileWidth >> 1) + (this.player.ao ? -5 : 5) << 8;
-      this.player.x = var2 * tileHeight + (tileHeight >> 1) - 2 << 8;
+      this.player.swingTargetX = var1 * tileWidth + (tileWidth >> 1) + (this.player.facingRight ? -5 : 5) << 8;
+      this.player.swingTargetY = var2 * tileHeight + (tileHeight >> 1) - 2 << 8;
       int var4 = 4 * tileWidth / 44;
-      if (!this.player.ao) {
+      if (!this.player.facingRight) {
          var4 = -var4;
       }
 
       int var5 = 10 * tileHeight / 44;
-      this.player.y = (this.player.ab >> 8) + var4 << 8;
-      this.player.z = this.player.aa * tileHeight + (this.player.ag >> 8) + var5 << 8;
-      this.player.A = (this.player.w - this.player.y) / 6;
-      this.player.B = (this.player.x - this.player.z) / 6;
-      if (this.player.x < this.player.z) {
+      this.player.swingCurX = (this.player.posX >> 8) + var4 << 8;
+      this.player.swingCurY = this.player.row * tileHeight + (this.player.posInRow >> 8) + var5 << 8;
+      this.player.swingStepX = (this.player.swingTargetX - this.player.swingCurX) / 6;
+      this.player.swingStepY = (this.player.swingTargetY - this.player.swingCurY) / 6;
+      if (this.player.swingTargetY < this.player.swingCurY) {
          this.player.tileWidth = (byte)var3;
-         this.player.u = 0;
-         this.player.a((byte)5);
-         this.player.am = 2;
+         this.player.swingPhase = 0;
+         this.player.setAnimState((byte)5);
+         this.player.animRestart = 2;
       }
    }
 
    public final int b(int var1, int var2, int var3) {
       int var4 = 18 * tileHeight;
       int var5 = var2 / tileHeight;
-      if ((d.e[var1 / tileWidth] & 1 << var5 + 1) > 0) {
+      if ((LevelMap.columnSolidMasks[var1 / tileWidth] & 1 << var5 + 1) > 0) {
          var4 = (var5 + 1) * tileHeight;
       }
 
@@ -3348,16 +3348,16 @@ public final class Game {
    public final short B() {
       short var1 = (short)(18 * tileHeight);
       int var2 = 0;
-      if (this.player.t != 0) {
+      if (this.player.zipGrabRetryDelay != 0) {
          return var1;
       }
 
       for (int var3 = 3; var3 >= 0; var3--) {
          if (this.cq[var3] != -1
-            && this.cm[var3] + this.co[var3] <= (this.player.ab >> 8) + 8
-            && this.cm[var3] + this.co[var3] + tileWidth >= (this.player.ab >> 8) - 8
+            && this.cm[var3] + this.co[var3] <= (this.player.posX >> 8) + 8
+            && this.cm[var3] + this.co[var3] + tileWidth >= (this.player.posX >> 8) - 8
             && (var2 = this.cn[var3] + this.cp[var3]) < var1
-            && var2 > this.player.c()) {
+            && var2 > this.player.y()) {
             var1 = (short)var2;
             this.player.hudHeight = 0;
             if (this.cq[var3] == 0) {
@@ -3373,8 +3373,8 @@ public final class Game {
 
    public final short C() {
       short var1 = (short)(18 * tileHeight);
-      short var2 = this.player.c();
-      int var3 = this.player.ab >> 8;
+      short var2 = this.player.y();
+      int var3 = this.player.posX >> 8;
       boolean var4 = false;
       int var5 = aJ.getWidth();
 
@@ -3393,8 +3393,8 @@ public final class Game {
       byte var3 = tileWidth;
       byte var4 = tileHeight;
       boolean var5 = false;
-      int var6 = this.player.ab >> 8;
-      short var7 = this.player.c();
+      int var6 = this.player.posX >> 8;
+      short var7 = this.player.y();
       boolean var8 = false;
       int var9 = var4 - 1;
 
@@ -3411,21 +3411,21 @@ public final class Game {
    }
 
    public final boolean k(int var1) {
-      short var9 = this.player.b();
-      int var10 = this.player.c() + L;
+      short var9 = this.player.x();
+      int var10 = this.player.y() + L;
       boolean var11 = false;
       boolean var12 = false;
       boolean var13 = false;
       boolean var14 = false;
-      byte var2 = this.enemies[var1].Z;
-      if (this.enemies[var1].Z != -1 && var2 != 4) {
-         if (this.abs(this.enemies[var1].ab - this.player.ab) <= tileWidth << 8 && this.abs(this.enemies[var1].aa - this.player.aa) <= 3 && this.enemies[var1].al != 5) {
-            short var3 = this.enemies[var1].c();
-            short var4 = this.enemies[var1].b();
-            byte var5 = f.a[var2];
-            byte var6 = f.b[var2];
-            byte var7 = f.c[var2];
-            byte var8 = f.d[var2];
+      byte var2 = this.enemies[var1].kind;
+      if (this.enemies[var1].kind != -1 && var2 != 4) {
+         if (this.abs(this.enemies[var1].posX - this.player.posX) <= tileWidth << 8 && this.abs(this.enemies[var1].row - this.player.row) <= 3 && this.enemies[var1].animState != 5) {
+            short var3 = this.enemies[var1].x();
+            short var4 = this.enemies[var1].y();
+            byte var5 = Enemy.HITBOX_X_OFFSETS[var2];
+            byte var6 = Enemy.HITBOX_Y_OFFSETS[var2];
+            byte var7 = Enemy.HITBOX_WIDTHS[var2];
+            byte var8 = Enemy.HITBOX_HEIGHTS[var2];
             return this.a(var3 - var5, var4 + var6, var7, var8, var9 - 11, var10 + 7, 18, 37);
          } else {
             return false;
@@ -3438,14 +3438,14 @@ public final class Game {
    public final boolean E() {
       int var1 = aJ.getWidth();
       byte var2 = tileWidth;
-      int var3 = this.player.ab >> 8;
-      short var4 = this.player.c();
+      int var3 = this.player.posX >> 8;
+      short var4 = this.player.y();
       int var5 = 0;
 
       for (int var6 = 49; var6 >= 0; var6--) {
          if (this.bn[var6] >= 0
-            && ((var5 = this.bl[var6] + (var1 >> 1)) <= var3 || this.player.ao)
-            && (var5 >= var3 || !this.player.ao)
+            && ((var5 = this.bl[var6] + (var1 >> 1)) <= var3 || this.player.facingRight)
+            && (var5 >= var3 || !this.player.facingRight)
             && this.abs(var5 - var3) <= var2
             && this.bm[var6] == var4) {
             return true;
@@ -3457,14 +3457,14 @@ public final class Game {
 
    public final boolean F() {
       for (int var2 = enemyPoolSize - 1; var2 >= 0; var2--) {
-         byte var1 = this.enemies[var2].Z;
-         if (this.enemies[var2].Z != -1
+         byte var1 = this.enemies[var2].kind;
+         if (this.enemies[var2].kind != -1
             && var1 != 4
-            && (this.enemies[var2].ab <= this.player.ab || this.player.ao)
-            && (this.enemies[var2].ab >= this.player.ab || !this.player.ao)
-            && this.abs(this.enemies[var2].ab - this.player.ab) <= tileWidth << 8
-            && this.enemies[var2].al != 5
-            && this.player.aa == this.enemies[var2].aa) {
+            && (this.enemies[var2].posX <= this.player.posX || this.player.facingRight)
+            && (this.enemies[var2].posX >= this.player.posX || !this.player.facingRight)
+            && this.abs(this.enemies[var2].posX - this.player.posX) <= tileWidth << 8
+            && this.enemies[var2].animState != 5
+            && this.player.row == this.enemies[var2].row) {
             return true;
          }
       }
@@ -3473,26 +3473,26 @@ public final class Game {
    }
 
    public final int G() {
-      short var8 = this.player.b();
-      int var9 = this.player.c() + L;
+      short var8 = this.player.x();
+      int var9 = this.player.y() + L;
       boolean var10 = false;
       boolean var11 = false;
       boolean var12 = false;
       boolean var13 = false;
 
       for (int var14 = enemyPoolSize - 1; var14 >= 0; var14--) {
-         byte var1 = this.enemies[var14].Z;
-         if (this.enemies[var14].Z != -1
+         byte var1 = this.enemies[var14].kind;
+         if (this.enemies[var14].kind != -1
             && var1 != 4
-            && this.abs(this.enemies[var14].ab - this.player.ab) <= tileWidth << 8
-            && this.abs(this.enemies[var14].aa - this.player.aa) <= 3
-            && this.enemies[var14].al != 5) {
-            short var2 = this.enemies[var14].c();
-            short var3 = this.enemies[var14].b();
-            byte var4 = f.a[var1];
-            byte var5 = f.b[var1];
-            byte var6 = f.c[var1];
-            byte var7 = f.d[var1];
+            && this.abs(this.enemies[var14].posX - this.player.posX) <= tileWidth << 8
+            && this.abs(this.enemies[var14].row - this.player.row) <= 3
+            && this.enemies[var14].animState != 5) {
+            short var2 = this.enemies[var14].x();
+            short var3 = this.enemies[var14].y();
+            byte var4 = Enemy.HITBOX_X_OFFSETS[var1];
+            byte var5 = Enemy.HITBOX_Y_OFFSETS[var1];
+            byte var6 = Enemy.HITBOX_WIDTHS[var1];
+            byte var7 = Enemy.HITBOX_HEIGHTS[var1];
             if (this.a(var2 - var4, var3 + var5, var6, var7, var8 - 11, var9 + 7, 18, 37)) {
                return var14;
             }
@@ -3511,7 +3511,7 @@ public final class Game {
                this.cu = 0;
             }
 
-            this.midlet.c(3);
+            this.midlet.playSoundIfEnabled(3);
             if (this.cu != 0) {
                if (this.cu == 1) {
                   this.b = 5;
@@ -3545,7 +3545,7 @@ public final class Game {
          if (var1 == -7) {
             this.cu = 0;
             this.b = 4;
-            this.midlet.c(3);
+            this.midlet.playSoundIfEnabled(3);
             this.midlet.writeSoundAndLanguageSettings((byte)(this.midlet.soundEnabled ? 1 : 0));
          }
       } else if (this.cu == 0) {
@@ -3571,13 +3571,13 @@ public final class Game {
          }
       } else {
          this.ec = this.cu;
-         this.midlet.c(3);
+         this.midlet.playSoundIfEnabled(3);
          if (this.midlet.saveSlotFlags[this.cu] != 0) {
             this.b = 9;
          } else {
             this.f(0);
             this.ac = this.ec;
-            this.midlet.e();
+            this.midlet.refreshSaveSlotSummaries();
          }
 
          this.cu = 0;
@@ -3586,10 +3586,10 @@ public final class Game {
 
    public final void k(int var1, int var2) {
       if (var1 == -7) {
-         this.midlet.c(3);
+         this.midlet.playSoundIfEnabled(3);
          this.ec = this.cu = 0;
          this.W();
-         this.player.L = this.cU;
+         this.player.currentWeapon = this.cU;
          this.b = 3;
       } else {
          if (var1 != 52 && var2 != -3) {
@@ -3598,7 +3598,7 @@ public final class Game {
                   this.cu = 0;
                }
 
-               while (this.cu > 3 && (this.player.O & 1 << this.cu + 1) == 0 || this.cu == 5) {
+               while (this.cu > 3 && (this.player.ownedWeapons & 1 << this.cu + 1) == 0 || this.cu == 5) {
                   if (this.cu == 7) {
                      return;
                   }
@@ -3608,7 +3608,7 @@ public final class Game {
                   }
                }
             } else if (var1 == 53 || var2 == -5 || var1 == -6) {
-               this.midlet.c(3);
+               this.midlet.playSoundIfEnabled(3);
                if (this.cu != 2 || !this.h(3)) {
                   if (this.cu == 3 && this.h(8)) {
                      return;
@@ -3618,14 +3618,14 @@ public final class Game {
                      return;
                   }
 
-                  if (this.cu != 7 && (this.player.O & 1 << this.cu + 1) == 0) {
+                  if (this.cu != 7 && (this.player.ownedWeapons & 1 << this.cu + 1) == 0) {
                      this.b = 12;
                      this.ec = this.cu;
                      this.cu = 0;
                      return;
                   }
 
-                  if (this.cu != 7 && this.player.M[this.cu + 1] >= b.d[3 * (this.cu + 1) + this.player.P[this.cu + 1]]) {
+                  if (this.cu != 7 && this.player.ammo[this.cu + 1] >= Player.AMMO_CAPACITY[3 * (this.cu + 1) + this.player.weaponLevel[this.cu + 1]]) {
                      return;
                   }
 
@@ -3639,7 +3639,7 @@ public final class Game {
                this.cu = 7;
             }
 
-            while (this.cu > 3 && (this.player.O & 1 << this.cu + 1) == 0 || this.cu == 5) {
+            while (this.cu > 3 && (this.player.ownedWeapons & 1 << this.cu + 1) == 0 || this.cu == 5) {
                if (this.cu == 7) {
                   return;
                }
@@ -3659,13 +3659,13 @@ public final class Game {
          this.cu = this.a(this.cu, (byte)0, (byte)1);
       } else if (var1 != 53 && var2 != -5 && var1 != -6) {
          if (var1 == -7) {
-            this.midlet.c(3);
+            this.midlet.playSoundIfEnabled(3);
             this.cu = this.ec;
             this.b = 11;
             this.player.Q = this.Y();
          }
       } else {
-         this.midlet.c(3);
+         this.midlet.playSoundIfEnabled(3);
          if (this.cu == 1) {
             if (this.ec == 7) {
                if (this.aX < this.player.Q) {
@@ -3677,19 +3677,19 @@ public final class Game {
                this.aX = this.aX - this.player.Q;
 
                for (int var3 = 1; var3 < 8; var3++) {
-                  if ((this.player.O & 1 << var3) > 0) {
-                     this.player.M[var3] = b.d[var3 * 3 + this.player.P[var3]];
+                  if ((this.player.ownedWeapons & 1 << var3) > 0) {
+                     this.player.ammo[var3] = Player.AMMO_CAPACITY[var3 * 3 + this.player.weaponLevel[var3]];
                   }
                }
-            } else if ((this.player.O & 1 << this.ec + 1) == 0) {
-               if (this.aX < b.h[this.ec]) {
+            } else if ((this.player.ownedWeapons & 1 << this.ec + 1) == 0) {
+               if (this.aX < Player.h[this.ec]) {
                   this.cu = 0;
                   this.b = 13;
                   return;
                }
 
-               this.aX = this.aX - b.h[this.ec];
-               this.player.O = (byte)(this.player.O | 1 << this.ec + 1);
+               this.aX = this.aX - Player.h[this.ec];
+               this.player.ownedWeapons = (byte)(this.player.ownedWeapons | 1 << this.ec + 1);
             } else {
                if (this.aX < this.aZ[this.ec + 1]) {
                   this.cu = 0;
@@ -3698,9 +3698,9 @@ public final class Game {
                }
 
                this.aX = this.aX - this.aZ[this.ec + 1];
-               this.player.M[this.ec + 1] = (short)(this.player.M[this.ec + 1] + b.d[(this.ec + 1) * 3 + this.player.P[this.ec + 1]]);
-               if (this.player.M[this.ec + 1] > b.d[(this.ec + 1) * 3 + this.player.P[this.ec + 1]]) {
-                  this.player.M[this.ec + 1] = b.d[(this.ec + 1) * 3 + this.player.P[this.ec + 1]];
+               this.player.ammo[this.ec + 1] = (short)(this.player.ammo[this.ec + 1] + Player.AMMO_CAPACITY[(this.ec + 1) * 3 + this.player.weaponLevel[this.ec + 1]]);
+               if (this.player.ammo[this.ec + 1] > Player.AMMO_CAPACITY[(this.ec + 1) * 3 + this.player.weaponLevel[this.ec + 1]]) {
+                  this.player.ammo[this.ec + 1] = Player.AMMO_CAPACITY[(this.ec + 1) * 3 + this.player.weaponLevel[this.ec + 1]];
                }
             }
          }
@@ -3761,17 +3761,17 @@ public final class Game {
       } else if (var1 == 53 || var2 == -5 || var1 == -6) {
          if (this.cu == 19) {
             if (this.cL != 1572865) {
-               this.player.ao = true;
-               this.player.a((byte)0);
-               this.player.am = 0;
-               this.player.aa = 2;
-               this.player.ab = 22528;
-               this.player.ac = 0;
-               this.player.ad = 0;
-               this.player.E = 0;
-               this.player.ag = 0;
+               this.player.facingRight = true;
+               this.player.setAnimState((byte)0);
+               this.player.animRestart = 0;
+               this.player.row = 2;
+               this.player.posX = 22528;
+               this.player.velY = 0;
+               this.player.velX = 0;
+               this.player.invulnTimer = 0;
+               this.player.posInRow = 0;
                this.b = 11;
-               this.cU = this.player.L;
+               this.cU = this.player.currentWeapon;
                this.player.Q = this.Y();
                this.cu = 0;
                return;
@@ -3783,7 +3783,7 @@ public final class Game {
             this.b = 1;
 
             for (int var5 = 0; var5 < 8; var5++) {
-               this.player.T[var5] = this.player.M[var5];
+               this.player.T[var5] = this.player.ammo[var5];
             }
          } else {
             if (this.cu == 0 && this.h(0)) {
@@ -3860,7 +3860,7 @@ public final class Game {
             this.b = 1;
          }
 
-         this.midlet.c(3);
+         this.midlet.playSoundIfEnabled(3);
       }
    }
 
@@ -3868,7 +3868,7 @@ public final class Game {
       this.cu = 0;
       this.b = 11;
       this.player.Q = this.Y();
-      this.midlet.c(3);
+      this.midlet.playSoundIfEnabled(3);
    }
 
    public final void q(int var1, int var2) {
@@ -3897,7 +3897,7 @@ public final class Game {
          } else if (this.b == 15) {
             this.c = this.b;
             this.b = 10;
-            this.midlet.d(this.ac);
+            this.midlet.writeSaveSlot(this.ac);
          }
 
          this.e = true;
@@ -3912,7 +3912,7 @@ public final class Game {
             this.b = 1;
             this.e = true;
             this.d = true;
-            this.player.O = this.da;
+            this.player.ownedWeapons = this.da;
             this.cV = false;
          }
       } else {
@@ -3930,18 +3930,18 @@ public final class Game {
                   this.ec = this.cu = 0;
                   this.W();
                   this.b = 3;
-                  if ((this.player.O & 1 << this.player.L) == 0 || this.player.L == 0) {
-                     this.player.L = 1;
+                  if ((this.player.ownedWeapons & 1 << this.player.currentWeapon) == 0 || this.player.currentWeapon == 0) {
+                     this.player.currentWeapon = 1;
                   }
 
                   for (int var3 = 0; var3 < 8; var3++) {
-                     this.player.M[var3] = this.player.T[var3];
+                     this.player.ammo[var3] = this.player.T[var3];
                   }
 
-                  this.midlet.c(3);
+                  this.midlet.playSoundIfEnabled(3);
                }
             } else {
-               this.da = this.player.O;
+               this.da = this.player.ownedWeapons;
                this.cV = true;
                this.cW = false;
                this.cX = false;
@@ -3956,8 +3956,8 @@ public final class Game {
                      break;
                   case 2:
                      this.cZ = true;
-                     this.player.O = 2;
-                     this.player.L = 1;
+                     this.player.ownedWeapons = 2;
+                     this.player.currentWeapon = 1;
                      this.o = 12;
                      break;
                   case 3:
@@ -3965,14 +3965,14 @@ public final class Game {
                      break;
                   case 4:
                      this.cZ = true;
-                     this.player.O = 1;
-                     this.player.L = 0;
+                     this.player.ownedWeapons = 1;
+                     this.player.currentWeapon = 0;
                      this.o = 8;
                      break;
                   case 5:
                      this.cZ = true;
-                     this.player.O = 2;
-                     this.player.L = 1;
+                     this.player.ownedWeapons = 2;
+                     this.player.currentWeapon = 1;
                      this.o = 12;
                      break;
                   case 6:
@@ -3996,8 +3996,8 @@ public final class Game {
                      break;
                   case 11:
                      this.cZ = true;
-                     this.player.O = 64;
-                     this.player.L = 6;
+                     this.player.ownedWeapons = 64;
+                     this.player.currentWeapon = 6;
                      this.o = 11;
                }
 
@@ -4032,7 +4032,7 @@ public final class Game {
          this.cu = this.a(this.cu, (byte)0, (byte)1);
       } else if (var2 != -2 && var1 != 56) {
          if (var1 == 53 || var2 == -5 || var1 == -6) {
-            this.midlet.c(3);
+            this.midlet.playSoundIfEnabled(3);
             if (this.cu == 0) {
                this.dZ = true;
                if (dA > 0) {
@@ -4051,8 +4051,8 @@ public final class Game {
       int var3 = 0;
       if (var1 != 54 && var1 != 50 && var2 != -4 && var2 != -1) {
          if (var1 == 52 || var1 == 56 || var2 == -3 || var2 == -2) {
-            for (this.player.L = S[this.player.L]; (this.player.O & 1 << this.player.L) == 0 && var3 < 8; var3++) {
-               this.player.L = S[this.player.L];
+            for (this.player.currentWeapon = S[this.player.currentWeapon]; (this.player.ownedWeapons & 1 << this.player.currentWeapon) == 0 && var3 < 8; var3++) {
+               this.player.currentWeapon = S[this.player.currentWeapon];
             }
          } else if (var2 == -5 || var1 == 53) {
             this.ec = this.cu = 0;
@@ -4062,8 +4062,8 @@ public final class Game {
             this.updateCamera();
          }
       } else {
-         for (this.player.L = R[this.player.L]; (this.player.O & 1 << this.player.L) == 0 && var3 < 8; var3++) {
-            this.player.L = R[this.player.L];
+         for (this.player.currentWeapon = R[this.player.currentWeapon]; (this.player.ownedWeapons & 1 << this.player.currentWeapon) == 0 && var3 < 8; var3++) {
+            this.player.currentWeapon = R[this.player.currentWeapon];
          }
       }
    }
@@ -4075,14 +4075,14 @@ public final class Game {
          this.cu = this.b(this.cu, (byte)1, (byte)0);
       } else if (var1 != 53 && var2 != -5 && var1 != -6) {
          if (var1 == -7) {
-            this.midlet.c(3);
+            this.midlet.playSoundIfEnabled(3);
             this.cu = 0;
             this.b = 6;
          }
       } else {
-         this.midlet.c(3);
+         this.midlet.playSoundIfEnabled(3);
          if (this.cu == 0) {
-            this.midlet.e();
+            this.midlet.refreshSaveSlotSummaries();
             this.b = 6;
          } else if (this.cu == 1) {
             this.ac = this.ec;
@@ -4098,12 +4098,12 @@ public final class Game {
          this.cu = this.a(this.cu, (byte)0, (byte)1);
       } else if (var2 != -2 && var1 != 56) {
          if (var1 == 53 || var2 == -5 || var1 == -6) {
-            this.midlet.c(3);
+            this.midlet.playSoundIfEnabled(3);
             if (this.cu == 0) {
                this.c = this.b;
                this.b = 10;
                dA = dA + dz;
-               this.midlet.d(this.ac);
+               this.midlet.writeSaveSlot(this.ac);
                return;
             }
 
@@ -4118,13 +4118,13 @@ public final class Game {
                this.cL = this.cO;
                this.di = this.dl;
                this.aX = this.aY;
-               this.player.L = this.player.R;
-               this.player.O = this.da;
+               this.player.currentWeapon = this.player.R;
+               this.player.ownedWeapons = this.da;
 
                for (int var3 = 0; var3 < 8; var3++) {
                   this.player.N[var3] = this.player.S[var3];
-                  this.player.P[var3] = this.player.U[var3];
-                  this.player.M[var3] = this.player.T[var3];
+                  this.player.weaponLevel[var3] = this.player.U[var3];
+                  this.player.ammo[var3] = this.player.T[var3];
                }
 
                if (this.Z == 1) {
@@ -4146,7 +4146,7 @@ public final class Game {
       } else if (var2 != -2 && var1 != 56) {
          if (var1 != 53 && var2 != -5 && var1 != -6) {
             if (var1 == -7) {
-               this.midlet.c(3);
+               this.midlet.playSoundIfEnabled(3);
                this.cu = 0;
                this.b = 4;
             }
@@ -4154,17 +4154,17 @@ public final class Game {
             if (this.cu == 0) {
                this.b = 4;
                this.cu = 0;
-               this.midlet.c(3);
+               this.midlet.playSoundIfEnabled(3);
                return;
             }
 
             if (this.cu == 1) {
                this.cV = true;
-               this.player.O = this.da;
-               this.player.L = 1;
+               this.player.ownedWeapons = this.da;
+               this.player.currentWeapon = 1;
                this.cV = false;
                if (this.Z != 0) {
-                  this.midlet.d(this.ac);
+                  this.midlet.writeSaveSlot(this.ac);
                }
 
                this.dZ = true;
@@ -4184,26 +4184,26 @@ public final class Game {
             if (var1 == -7) {
                this.cu = 0;
                this.b = 4;
-               this.midlet.c(3);
+               this.midlet.playSoundIfEnabled(3);
             }
          } else {
             if (this.cu == 0) {
                this.b = 4;
                this.cu = 0;
-               this.midlet.c(3);
+               this.midlet.playSoundIfEnabled(3);
                return;
             }
 
             if (this.cu == 1) {
                this.cV = true;
-               this.player.O = this.da;
-               this.player.L = 1;
+               this.player.ownedWeapons = this.da;
+               this.player.currentWeapon = 1;
                this.cV = false;
                if (this.Z != 0) {
-                  this.midlet.d(this.ac);
+                  this.midlet.writeSaveSlot(this.ac);
                }
 
-               this.midlet.c();
+               this.midlet.stopSoundHardOnLevelStart();
                this.midlet.notifyDestroyed();
                return;
             }
@@ -4231,76 +4231,76 @@ public final class Game {
             this.c = this.b;
             this.b = 4;
             this.y();
-         } else if (this.player.al == 10) {
+         } else if (this.player.animState == 10) {
             this.cv = this.cw = 0;
             this.cx &= -129;
             this.cy = 0L;
          } else {
             if (var2 == -1) {
-               if (this.player.al == 11) {
+               if (this.player.animState == 11) {
                   return;
                }
 
                byte var7 = 0;
-               if (this.player.u == -1 && this.player.al != 12) {
-                  this.player.o();
-               } else if (this.player.s >= 0) {
-                  if (this.player.g() && !this.player.ao && this.ea != -1) {
+               if (this.player.swingPhase == -1 && this.player.animState != 12) {
+                  this.player.hyperShotSearch();
+               } else if (this.player.jumpPhase >= 0) {
+                  if (this.player.wallOnLeft() && !this.player.facingRight && this.ea != -1) {
                      if (!z) {
                         z = true;
-                        E = this.player.b() - 8 + (tileWidth >> 1);
+                        E = this.player.x() - 8 + (tileWidth >> 1);
                      }
 
                      var7 = -1;
                      this.ea = -1;
-                     this.player.ad = 2500;
-                     this.player.s = 0;
-                     this.player.ao = true;
-                     this.player.a((byte)4);
+                     this.player.velX = 2500;
+                     this.player.jumpPhase = 0;
+                     this.player.facingRight = true;
+                     this.player.setAnimState((byte)4);
                      this.cw = this.cv = 0;
-                  } else if (this.player.h() && this.player.ao && this.ea != 1) {
+                  } else if (this.player.wallOnRight() && this.player.facingRight && this.ea != 1) {
                      if (!z) {
                         z = true;
-                        E = this.player.b() + 8 - (tileWidth >> 1);
+                        E = this.player.x() + 8 - (tileWidth >> 1);
                      }
 
                      var7 = 1;
                      this.ea = 1;
-                     this.player.ad = -2500;
-                     this.player.s = 0;
-                     this.player.ao = false;
-                     this.player.a((byte)4);
+                     this.player.velX = -2500;
+                     this.player.jumpPhase = 0;
+                     this.player.facingRight = false;
+                     this.player.setAnimState((byte)4);
                      this.cw = this.cv = 0;
                   }
                }
 
-               if (this.player.s < 1 || var7 != 0) {
+               if (this.player.jumpPhase < 1 || var7 != 0) {
                   this.cv = var2;
                   return;
                }
             } else if (var2 == -2) {
-               if (this.player.al == 5) {
+               if (this.player.animState == 5) {
                   return;
                }
 
-               if (this.player.s == 2) {
-                  this.player.a((byte)3);
-                  this.player.ad = 0;
-                  this.player.ac = 0;
-                  this.player.s = 1;
-                  if ((this.player.O & 1) > 0) {
+               if (this.player.jumpPhase == 2) {
+                  this.player.setAnimState((byte)3);
+                  this.player.velX = 0;
+                  this.player.velY = 0;
+                  this.player.jumpPhase = 1;
+                  if ((this.player.ownedWeapons & 1) > 0) {
                      this.cw = 0;
-                     this.player.a((byte)14);
-                     this.player.am = 1;
-                     this.player.D = 1;
+                     this.player.setAnimState((byte)14);
+                     this.player.animRestart = 1;
+                     this.player.swingTargetType = 1;
                      return;
                   }
                } else {
-                  if ((this.player.O & 1) > 0 && this.player.s != -1 && this.player.al != 11 && this.player.al != 14) {
+                  if ((this.player.ownedWeapons & 1) > 0 && this.player.jumpPhase != -1 && this.player.animState != 11 && this.player.animState != 14) {
                      this.cw = 0;
-                     this.player.a((byte)14);
-                     this.player.am = 1;
-                     this.player.D = 1;
+                     this.player.setAnimState((byte)14);
+                     this.player.animRestart = 1;
+                     this.player.swingTargetType = 1;
                      return;
                   }
 
@@ -4309,64 +4309,64 @@ public final class Game {
                      return;
                   }
 
-                  if (this.player.tileHeight) {
-                     this.player.tileHeight = false;
-                     this.player.aa++;
-                     this.player.k();
-                     this.player.t = 10;
-                     if ((this.player.O & 1) > 0 && this.player.al != 14) {
+                  if (this.player.ledgeAhead) {
+                     this.player.ledgeAhead = false;
+                     this.player.row++;
+                     this.player.startFall();
+                     this.player.zipGrabRetryDelay = 10;
+                     if ((this.player.ownedWeapons & 1) > 0 && this.player.animState != 14) {
                         this.cw = 0;
-                        this.player.a((byte)14);
-                        this.player.am = 1;
-                        this.player.D = 1;
+                        this.player.setAnimState((byte)14);
+                        this.player.animRestart = 1;
+                        this.player.swingTargetType = 1;
                         return;
                      }
-                  } else if (this.player.f() && this.player.ac == 0 && this.player.al != 14 && this.player.al != 11) {
-                     this.player.k();
-                     this.player.aa++;
-                     this.player.ag = tileHeight - 2;
-                     if ((this.player.O & 1) > 0) {
+                  } else if (this.player.onLadderTop() && this.player.velY == 0 && this.player.animState != 14 && this.player.animState != 11) {
+                     this.player.startFall();
+                     this.player.row++;
+                     this.player.posInRow = tileHeight - 2;
+                     if ((this.player.ownedWeapons & 1) > 0) {
                         this.cw = 0;
-                        this.player.a((byte)14);
-                        this.player.am = 1;
-                        this.player.D = 1;
+                        this.player.setAnimState((byte)14);
+                        this.player.animRestart = 1;
+                        this.player.swingTargetType = 1;
                         return;
                      }
                   }
                }
             } else if (var2 == -3) {
                this.cw = this.cv = var2;
-               if (z && this.player.b() < E + (tileWidth >> 1) && this.player.ad > 0) {
+               if (z && this.player.x() < E + (tileWidth >> 1) && this.player.velX > 0) {
                   this.cw = this.cv = 0;
                   return;
                }
             } else if (var2 == -4) {
                this.cw = this.cv = var2;
-               if (z && this.player.b() > E - (tileWidth >> 1) && this.player.ad < 0) {
+               if (z && this.player.x() > E - (tileWidth >> 1) && this.player.velX < 0) {
                   this.cw = this.cv = 0;
                   return;
                }
             } else if (var1 == 53 || var2 == -5) {
-               byte var3 = this.player.u();
-               byte var4 = (byte)((this.player.c() + K) / tileHeight);
+               byte var3 = this.player.column();
+               byte var4 = (byte)((this.player.y() + K) / tileHeight);
                short var5;
-               int var6 = var5 = this.levelMap.a(var3, var4 - 1);
+               int var6 = var5 = this.levelMap.getTile(var3, var4 - 1);
                var6 -= 36;
                var6 = 1 << var6;
-               if ((this.player.O & 1) > 0
-                  && this.player.s == -1
-                  && this.player.al != 11
-                  && this.player.al != 14
-                  && this.player.al != 8
-                  && (this.F() || this.E() || this.player.M[this.player.L] <= 0 || (this.bw & var6) != 0 && var5 >= 36 && var5 <= 42)) {
+               if ((this.player.ownedWeapons & 1) > 0
+                  && this.player.jumpPhase == -1
+                  && this.player.animState != 11
+                  && this.player.animState != 14
+                  && this.player.animState != 8
+                  && (this.F() || this.E() || this.player.ammo[this.player.currentWeapon] <= 0 || (this.bw & var6) != 0 && var5 >= 36 && var5 <= 42)) {
                   this.cw = 0;
-                  this.player.D = 0;
-                  this.player.q();
+                  this.player.swingTargetType = 0;
+                  this.player.meleeHit();
                   return;
                }
 
-               if (this.player.M[this.player.L] > 0 && this.cx == 0) {
-                  this.player.p();
+               if (this.player.ammo[this.player.currentWeapon] > 0 && this.cx == 0) {
+                  this.player.fire();
                   this.cx = 129;
                   dD++;
                   this.cy = System.currentTimeMillis();
@@ -4374,22 +4374,22 @@ public final class Game {
                }
             } else if (var1 == 42) {
                this.cw = 0;
-               if ((this.player.O & 1) > 0 && this.player.s == -1) {
-                  this.player.D = 0;
-                  this.player.q();
+               if ((this.player.ownedWeapons & 1) > 0 && this.player.jumpPhase == -1) {
+                  this.player.swingTargetType = 0;
+                  this.player.meleeHit();
                   return;
                }
             } else if (var1 == 35) {
                this.cu = 0;
                this.b = 22;
-               if (this.player.L != 0) {
-                  if (++this.player.L > 7) {
-                     this.player.L = 1;
+               if (this.player.currentWeapon != 0) {
+                  if (++this.player.currentWeapon > 7) {
+                     this.player.currentWeapon = 1;
                   }
 
-                  while ((this.player.O & 1 << this.player.L) == 0) {
-                     if (++this.player.L > 7) {
-                        this.player.L = 1;
+                  while ((this.player.ownedWeapons & 1 << this.player.currentWeapon) == 0) {
+                     if (++this.player.currentWeapon > 7) {
+                        this.player.currentWeapon = 1;
                      }
                   }
 
@@ -4423,20 +4423,20 @@ public final class Game {
                }
 
                if (var1 == 49) {
-                  if (!z && this.player.al != 11) {
-                     if (this.player.u < 0 && this.player.al != 5) {
-                        if (this.player.al != 12) {
-                           this.player.a((byte)0);
+                  if (!z && this.player.animState != 11) {
+                     if (this.player.swingPhase < 0 && this.player.animState != 5) {
+                        if (this.player.animState != 12) {
+                           this.player.setAnimState((byte)0);
                         }
 
-                        if (this.player.s < 0) {
-                           this.player.ac = 3584;
-                           this.player.s++;
-                        } else if (this.player.s < 1) {
-                           this.player.ac = 3072;
-                           this.player.s++;
-                           this.player.am = 1;
-                           this.player.a((byte)13);
+                        if (this.player.jumpPhase < 0) {
+                           this.player.velY = 3584;
+                           this.player.jumpPhase++;
+                        } else if (this.player.jumpPhase < 1) {
+                           this.player.velY = 3072;
+                           this.player.jumpPhase++;
+                           this.player.animRestart = 1;
+                           this.player.setAnimState((byte)13);
                         }
 
                         this.cv = -3;
@@ -4450,20 +4450,20 @@ public final class Game {
                }
 
                if (var1 == 51) {
-                  if (!z && this.player.al != 11) {
-                     if (this.player.u < 0 && this.player.al != 5) {
-                        if (this.player.al != 12) {
-                           this.player.a((byte)0);
+                  if (!z && this.player.animState != 11) {
+                     if (this.player.swingPhase < 0 && this.player.animState != 5) {
+                        if (this.player.animState != 12) {
+                           this.player.setAnimState((byte)0);
                         }
 
-                        if (this.player.s < 0) {
-                           this.player.ac = 3584;
-                           this.player.s++;
-                        } else if (this.player.s < 1) {
-                           this.player.ac = 3072;
-                           this.player.s++;
-                           this.player.am = 1;
-                           this.player.a((byte)13);
+                        if (this.player.jumpPhase < 0) {
+                           this.player.velY = 3584;
+                           this.player.jumpPhase++;
+                        } else if (this.player.jumpPhase < 1) {
+                           this.player.velY = 3072;
+                           this.player.jumpPhase++;
+                           this.player.animRestart = 1;
+                           this.player.setAnimState((byte)13);
                         }
 
                         this.cv = -4;
@@ -4503,12 +4503,12 @@ public final class Game {
                      return;
                   }
 
-                  if (this.player.O == -1) {
+                  if (this.player.ownedWeapons == -1) {
                      this.cL = -1;
                      return;
                   }
 
-                  this.player.O = -1;
+                  this.player.ownedWeapons = -1;
                }
             }
          }
@@ -4518,15 +4518,15 @@ public final class Game {
    public final void B(int var1, int var2) {
       if (var1 == 53 || var2 == -5) {
          this.cx &= -129;
-         if (this.player.al != 8) {
-            this.player.r();
+         if (this.player.animState != 8) {
+            this.player.resetAttackAnim();
          }
 
          this.cy = 0L;
       } else if ((this.cx & 128) != 0 && this.cy != 0L && System.currentTimeMillis() - this.cy > 5000L) {
          this.cx &= -129;
-         if (this.player.al != 8) {
-            this.player.r();
+         if (this.player.animState != 8) {
+            this.player.resetAttackAnim();
          }
 
          this.cy = 0L;
@@ -4544,12 +4544,12 @@ public final class Game {
    public final void l(int var1) {
       int var2 = aJ.getWidth();
       int var3 = aJ.getHeight() >> 3;
-      byte var4 = this.enemyProjectiles[var1].f;
-      if (this.enemyProjectiles[var1].f != -1 && var4 != 30 && (var4 < 15 || var4 > 17)) {
-         int var5 = (this.enemyProjectiles[var1].g >> 8) - this.enemyProjectiles[var1].p;
-         int var6 = (this.enemyProjectiles[var1].h >> 8) - this.enemyProjectiles[var1].q;
-         int var7 = this.enemyProjectiles[var1].p << 1;
-         int var8 = this.enemyProjectiles[var1].q << 1;
+      byte var4 = this.enemyProjectiles[var1].type;
+      if (this.enemyProjectiles[var1].type != -1 && var4 != 30 && (var4 < 15 || var4 > 17)) {
+         int var5 = (this.enemyProjectiles[var1].posX >> 8) - this.enemyProjectiles[var1].halfWidth;
+         int var6 = (this.enemyProjectiles[var1].posY >> 8) - this.enemyProjectiles[var1].halfHeight;
+         int var7 = this.enemyProjectiles[var1].halfWidth << 1;
+         int var8 = this.enemyProjectiles[var1].halfHeight << 1;
 
          for (int var9 = 49; var9 >= 0; var9--) {
             if (this.bn[var9] != -1
@@ -4558,7 +4558,7 @@ public final class Game {
                && this.bm[var9] + y <= 220
                && this.bm[var9] + var3 + y >= 0
                && this.a(this.bl[var9], this.bm[var9], var2, var3, var5, var6, var7, var8)) {
-               this.enemyProjectiles[var1].a(true);
+               this.enemyProjectiles[var1].detonate(true);
             }
          }
       }
@@ -4570,19 +4570,19 @@ public final class Game {
       if (var1 == -1) {
          for (int var10 = 49; var10 >= 0; var10--) {
             if (this.bn[var10] != -1
-               && this.abs(this.bl[var10] - (this.player.ab >> 8)) <= 3 * tileWidth >> 1
-               && this.abs(this.bm[var10] - this.player.c()) <= tileHeight * 2
+               && this.abs(this.bl[var10] - (this.player.posX >> 8)) <= 3 * tileWidth >> 1
+               && this.abs(this.bm[var10] - this.player.y()) <= tileHeight * 2
                && this.a(
                   this.bl[var10],
                   this.bm[var10] + this.bo[var10],
                   aJ.getWidth(),
                   aJ.getHeight() >> 2,
-                  (this.player.ab >> 8) + (this.player.ao ? b.o[this.player.D] : -b.o[this.player.D] - b.q[this.player.D]),
-                  this.player.c() + b.p[this.player.D],
-                  b.q[this.player.D],
-                  b.r[this.player.D]
+                  (this.player.posX >> 8) + (this.player.facingRight ? Player.SWING_X_OFFSET[this.player.swingTargetType] : -Player.SWING_X_OFFSET[this.player.swingTargetType] - Player.SWING_WIDTH[this.player.swingTargetType]),
+                  this.player.y() + Player.SWING_Y_OFFSET[this.player.swingTargetType],
+                  Player.SWING_WIDTH[this.player.swingTargetType],
+                  Player.SWING_HEIGHT[this.player.swingTargetType]
                )) {
-               this.midlet.c(4);
+               this.midlet.playSoundIfEnabled(4);
                this.n(var10);
                dE++;
                if (this.bn[var10] == 0) {
@@ -4597,12 +4597,12 @@ public final class Game {
             }
          }
       } else {
-         byte var4 = this.playerProjectiles[var1].f;
-         if (this.playerProjectiles[var1].f != -1 && var4 != 30 && (var4 < 15 || var4 > 17)) {
-            int var5 = (this.playerProjectiles[var1].g >> 8) - this.playerProjectiles[var1].p;
-            int var6 = (this.playerProjectiles[var1].h >> 8) - this.playerProjectiles[var1].q;
-            int var7 = this.playerProjectiles[var1].p << 1;
-            int var8 = this.playerProjectiles[var1].q << 1;
+         byte var4 = this.playerProjectiles[var1].type;
+         if (this.playerProjectiles[var1].type != -1 && var4 != 30 && (var4 < 15 || var4 > 17)) {
+            int var5 = (this.playerProjectiles[var1].posX >> 8) - this.playerProjectiles[var1].halfWidth;
+            int var6 = (this.playerProjectiles[var1].posY >> 8) - this.playerProjectiles[var1].halfHeight;
+            int var7 = this.playerProjectiles[var1].halfWidth << 1;
+            int var8 = this.playerProjectiles[var1].halfHeight << 1;
 
             for (int var9 = 49; var9 >= 0; var9--) {
                if (this.bn[var9] != -1
@@ -4622,7 +4622,7 @@ public final class Game {
 
                   this.e(this.bl[var9] + (var2 >> 1) << 8, this.bm[var9] + (var3 >> 1) + this.bo[var9] << 8, 30);
                   this.bn[var9] = -1;
-                  this.playerProjectiles[var1].a(false);
+                  this.playerProjectiles[var1].detonate(false);
                }
             }
          }
@@ -4651,7 +4651,7 @@ public final class Game {
          boolean var2 = false;
          int var3 = this.bP * tileWidth;
          int var4 = this.bQ * tileHeight;
-         if (this.a(this.player.b() - 11, this.player.c() + L + 7, 18, 37, var3, var4, 19, 19)) {
+         if (this.a(this.player.x() - 11, this.player.y() + L + 7, 18, 37, var3, var4, 19, 19)) {
             this.bP = this.bQ = -1;
             this.g(this.Z, this.X);
             dr++;
@@ -4674,20 +4674,20 @@ public final class Game {
       boolean var9 = false;
       int var10 = aE.getHeight() / 12;
       int var11 = aE.getWidth();
-      if (this.player.ai < 0) {
-         this.player.ai = 0;
+      if (this.player.health < 0) {
+         this.player.health = 0;
       }
 
-      int var12 = 20 - this.player.ai;
+      int var12 = 20 - this.player.health;
       int var16 = var10 >> 1;
       var1.drawImage(an, 0, 0, 0);
       var1.setColor(255, 255, 255);
-      byte var13 = this.player.L;
-      if (this.player.L != 6 && var13 != 0) {
-         ratchetandclank.currentFont.a(var1, String.valueOf(this.player.M[var13]), 3 + var11 + 6, 4, 0);
+      byte var13 = this.player.currentWeapon;
+      if (this.player.currentWeapon != 6 && var13 != 0) {
+         ratchetandclank.currentFont.drawText(var1, String.valueOf(this.player.ammo[var13]), 3 + var11 + 6, 4, 0);
       }
 
-      ratchetandclank.currentFont.a(var1, Integer.toString(this.aX), var8, 4, 24);
+      ratchetandclank.currentFont.drawText(var1, Integer.toString(this.aX), var8, 4, 24);
       var1.setColor(37, 84, 106);
 
       for (byte var17 = 0; var17 < var12; var17++) {
@@ -4696,9 +4696,9 @@ public final class Game {
          var1.fillRect(51 + var14, 4 + var15, var16, var16);
       }
 
-      if (this.player.L != 0) {
+      if (this.player.currentWeapon != 0) {
          this.a(var1, 3, 4, var11, var10);
-         var1.drawImage(aE, 3, 4 - (this.player.L - 1) * var10, 0);
+         var1.drawImage(aE, 3, 4 - (this.player.currentWeapon - 1) * var10, 0);
       }
    }
 
@@ -4762,12 +4762,12 @@ public final class Game {
       int var3 = aJ.getWidth();
       int var4 = aJ.getHeight() >> 3;
       byte var5 = 8;
-      short var6 = this.player.c();
+      short var6 = this.player.y();
       byte var7 = 16;
       byte var8 = K;
 
       for (int var1 = 49; var1 >= 0; var1--) {
-         int var9 = this.player.ab >> 8;
+         int var9 = this.player.posX >> 8;
          if (this.bs[var1] && this.bn[var1] != -1) {
             if (this.br[var1] == -1 || !this.bs[this.br[var1]]) {
                if (this.a(this.bl[var1], this.bm[var1] + this.bo[var1], var3, var4, var9 - var5, var6, var7, var8)) {
@@ -4788,9 +4788,9 @@ public final class Game {
                var7 = 24;
 
                for (int var2 = enemyPoolSize - 1; var2 >= 0; var2--) {
-                  if (this.enemies[var2].Z >= 0) {
-                     var9 = this.enemies[var2].ab >> 8;
-                     var6 = this.enemies[var2].b();
+                  if (this.enemies[var2].kind >= 0) {
+                     var9 = this.enemies[var2].posX >> 8;
+                     var6 = this.enemies[var2].y();
                      if (var9 + 12 >= this.bl[var1]
                         && var9 - 12 <= this.bl[var1] + var3
                         && this.a(this.bl[var1], this.bm[var1] + this.bo[var1], var3, var4, var9 - 12, var6, 24, var8)) {
@@ -4923,7 +4923,7 @@ public final class Game {
          int var2 = aw.getWidth();
          int var3 = this.ca * tileWidth;
          int var4 = this.cb * tileHeight;
-         if (this.a(this.player.b() - 11, this.player.c() + L + 7, 18, 37, var3, var4, var1, var2)) {
+         if (this.a(this.player.x() - 11, this.player.y() + L + 7, 18, 37, var3, var4, var1, var2)) {
             this.ca = this.cb = -1;
             this.cC = true;
             this.cI = cz[11];
@@ -4937,19 +4937,19 @@ public final class Game {
 
    public final void E(Graphics var1) {
       for (int var2 = enemyPoolSize - 1; var2 >= 0; var2--) {
-         if (this.enemies[var2].Z != -1) {
-            this.enemies[var2].a(var1, var2, this.enemies[var2].ah, x, y);
+         if (this.enemies[var2].kind != -1) {
+            this.enemies[var2].render(var1, var2, this.enemies[var2].activeFlag, x, y);
          }
       }
 
-      this.player.a(var1, this.player.ah, x, y);
+      this.player.render(var1, this.player.activeFlag, x, y);
 
       for (int var3 = 9; var3 >= 0; var3--) {
-         this.enemyProjectiles[var3].a(var1);
+         this.enemyProjectiles[var3].render(var1);
       }
 
       for (int var4 = 9; var4 >= 0; var4--) {
-         this.playerProjectiles[var4].a(var1);
+         this.playerProjectiles[var4].render(var1);
       }
    }
 
@@ -4957,34 +4957,34 @@ public final class Game {
       this.eb = true;
 
       for (int var1 = 9; var1 >= 0; var1--) {
-         if (this.enemyProjectiles[var1].f == -1) {
+         if (this.enemyProjectiles[var1].type == -1) {
             boolean var2 = false;
-            this.enemyProjectiles[var1].g = tileWidth * 14 << 8;
-            this.enemyProjectiles[var1].h = tileHeight * 9 << 8;
-            this.enemyProjectiles[var1].f = 31;
-            this.enemyProjectiles[var1].o = 0;
-            this.enemyProjectiles[var1].r = 25;
-            this.enemyProjectiles[var1].p = j.b[31];
-            this.enemyProjectiles[var1].q = j.c[31];
+            this.enemyProjectiles[var1].posX = tileWidth * 14 << 8;
+            this.enemyProjectiles[var1].posY = tileHeight * 9 << 8;
+            this.enemyProjectiles[var1].type = 31;
+            this.enemyProjectiles[var1].age = 0;
+            this.enemyProjectiles[var1].sourceAnim = 25;
+            this.enemyProjectiles[var1].halfWidth = Projectile.HALF_WIDTHS[31];
+            this.enemyProjectiles[var1].halfHeight = Projectile.HALF_HEIGHTS[31];
             if (this.bK == 0 || this.bK == 1 || this.bK == 7) {
-               this.enemyProjectiles[var1].m = j.d[31] << 8;
+               this.enemyProjectiles[var1].vx = Projectile.SPEEDS[31] << 8;
             } else if (this.bK != 2 && this.bK != 6) {
-               this.enemyProjectiles[var1].m = -(j.d[31] << 8);
+               this.enemyProjectiles[var1].vx = -(Projectile.SPEEDS[31] << 8);
             } else {
-               this.enemyProjectiles[var1].m = 0;
+               this.enemyProjectiles[var1].vx = 0;
             }
 
             if (this.bK != 2 && this.bK != 1 && this.bK != 3) {
                if (this.bK != 0 && this.bK != 4) {
-                  this.enemyProjectiles[var1].n = j.d[31] << 8;
+                  this.enemyProjectiles[var1].vy = Projectile.SPEEDS[31] << 8;
                   return;
                }
 
-               this.enemyProjectiles[var1].n = 0;
+               this.enemyProjectiles[var1].vy = 0;
                return;
             }
 
-            this.enemyProjectiles[var1].n = -(j.d[31] << 8);
+            this.enemyProjectiles[var1].vy = -(Projectile.SPEEDS[31] << 8);
             return;
          }
       }
@@ -4994,15 +4994,15 @@ public final class Game {
       this.eb = false;
       int var3 = (var1 >> 8) / tileWidth;
       int var4 = (var2 >> 8) / tileHeight;
-      if (!this.levelMap.b(var3, var4)) {
-         if (this.levelMap.b(var3, var4 - 1)) {
+      if (!this.levelMap.isWalkable(var3, var4)) {
+         if (this.levelMap.isWalkable(var3, var4 - 1)) {
             var4--;
-         } else if (this.levelMap.b(var3, var4 + 1)) {
+         } else if (this.levelMap.isWalkable(var3, var4 + 1)) {
             var4++;
-         } else if (this.levelMap.b(var3 + 1, var4)) {
+         } else if (this.levelMap.isWalkable(var3 + 1, var4)) {
             var3++;
          } else {
-            if (!this.levelMap.b(var3 - 1, var4)) {
+            if (!this.levelMap.isWalkable(var3 - 1, var4)) {
                return;
             }
 
@@ -5015,32 +5015,32 @@ public final class Game {
 
    public final void M() {
       if (this.bJ[4] <= 0) {
-         this.midlet.k();
+         this.midlet.markGameWon();
          this.Z = 100;
          this.cu = 0;
          this.b = 24;
          this.bJ[4] = 1;
-         this.player.ac = 256;
-         this.player.ao = true;
+         this.player.velY = 256;
+         this.player.facingRight = true;
 
          for (int var11 = 0; var11 < enemyPoolSize; var11++) {
-            this.enemies[var11].Z = -1;
+            this.enemies[var11].kind = -1;
          }
 
          for (int var12 = 9; var12 >= 0; var12--) {
-            this.enemyProjectiles[var12].f = -1;
+            this.enemyProjectiles[var12].type = -1;
          }
 
          for (int var13 = 9; var13 >= 0; var13--) {
-            this.enemyProjectiles[var13].f = -1;
+            this.enemyProjectiles[var13].type = -1;
          }
 
          for (int var14 = 11; var14 >= 0; var14--) {
             this.ck[var14] = -1;
          }
       } else {
-         short var1 = this.player.b();
-         int var2 = this.player.c() + L + (K >> 1);
+         short var1 = this.player.x();
+         int var2 = this.player.y() + L + (K >> 1);
          int var3 = tileWidth * 14;
          int var4 = tileHeight * 9;
          int var5 = var1 - var3;
@@ -5126,41 +5126,41 @@ public final class Game {
          this.dZ = true;
       } else {
          this.o = -1;
-         this.player.u = -2;
+         this.player.swingPhase = -2;
          this.dC = 0;
          this.cS = false;
          this.Z = 1;
          this.bZ = false;
          this.aQ = 3;
-         this.levelMap.b(this.Z);
-         this.X = d.a;
+         this.levelMap.loadLevelFile(this.Z);
+         this.X = LevelMap.currentSubGrid;
          this.di = 1;
          this.Y = this.X;
-         this.levelMap.a(this.X, true);
-         this.player.ab = this.ad * tileWidth + (J >> 1) << 8;
-         this.player.aa = this.player.af = this.ae;
-         this.player.aj = 1;
-         this.player.ak = 0;
-         this.player.al = 0;
-         this.player.am = 0;
-         this.player.ag = 0;
-         this.player.s = -1;
-         this.player.Z = 0;
-         this.player.ah = 1;
-         this.player.ai = 20;
+         this.levelMap.enterRoom(this.X, true);
+         this.player.posX = this.ad * tileWidth + (J >> 1) << 8;
+         this.player.row = this.player.af = this.ae;
+         this.player.animFrame = 1;
+         this.player.animCounter = 0;
+         this.player.animState = 0;
+         this.player.animRestart = 0;
+         this.player.posInRow = 0;
+         this.player.jumpPhase = -1;
+         this.player.kind = 0;
+         this.player.activeFlag = 1;
+         this.player.health = 20;
          x = this.af;
          y = this.ag;
          this.ct = System.currentTimeMillis();
          this.b(this.X, 11337);
-         this.player.E = 0;
-         this.player.ao = true;
+         this.player.invulnTimer = 0;
+         this.player.facingRight = true;
          this.d = true;
          this.e = true;
-         this.player.a((byte)0);
-         this.player.am = 0;
+         this.player.setAnimState((byte)0);
+         this.player.animRestart = 0;
          this.ce = 1;
          this.cf = 18;
-         this.player.O = (byte)(this.player.O & -33);
+         this.player.ownedWeapons = (byte)(this.player.ownedWeapons & -33);
          this.aa = true;
          this.bw = -1;
          this.bx = -1;
@@ -5169,7 +5169,7 @@ public final class Game {
          this.cK = -1;
          this.cK &= -221;
          this.cL = 1572865;
-         this.player.L = 1;
+         this.player.currentWeapon = 1;
          this.b = 0;
          this.cv = this.cw = 0;
          this.updateCamera();
@@ -5196,14 +5196,14 @@ public final class Game {
 
          if (var2 + var4 + x >= 0 && var2 + x <= 176 && var3 + var5 + y >= 0 && var3 + y <= 220) {
             for (int var6 = 9; var6 >= 0; var6--) {
-               byte var7 = this.playerProjectiles[var6].f;
-               if (this.playerProjectiles[var6].f >= 0 && var7 != 30 && var7 != 15 && var7 != 16 && var7 != 17) {
-                  int var10 = this.playerProjectiles[var6].p;
-                  int var11 = this.playerProjectiles[var6].q;
-                  int var8 = (this.playerProjectiles[var6].g >> 8) - var10;
-                  int var9 = (this.playerProjectiles[var6].h >> 8) - var11;
+               byte var7 = this.playerProjectiles[var6].type;
+               if (this.playerProjectiles[var6].type >= 0 && var7 != 30 && var7 != 15 && var7 != 16 && var7 != 17) {
+                  int var10 = this.playerProjectiles[var6].halfWidth;
+                  int var11 = this.playerProjectiles[var6].halfHeight;
+                  int var8 = (this.playerProjectiles[var6].posX >> 8) - var10;
+                  int var9 = (this.playerProjectiles[var6].posY >> 8) - var11;
                   if (this.a(var2, var3, var4, var5, var8, var9, var10 * 2, var11 * 2)) {
-                     this.bJ[var1] = this.bJ[var1] - j.a[var7];
+                     this.bJ[var1] = this.bJ[var1] - Projectile.DAMAGE_BY_TYPE[var7];
                      if (var1 == 4) {
                         this.bI[0] = this.bI[1] = this.bI[2] = this.bI[3] = 5;
                         this.bH[0] = this.bH[1] = this.bH[2] = this.bH[3] = 3;
@@ -5212,7 +5212,7 @@ public final class Game {
                         this.bH[var1] = 1;
                      }
 
-                     this.playerProjectiles[var6].a(false);
+                     this.playerProjectiles[var6].detonate(false);
                      return;
                   }
                }
@@ -5288,7 +5288,7 @@ public final class Game {
 
          if (var4 < 176 && var5 < 220 && var4 + var6 > 0 && var5 + var7 > 0) {
             this.b(var1, var4, var5, var6, var7);
-            e.b.drawImage(aP, var2, var3, 20, var8);
+            CanvasShell.directGraphics.drawImage(aP, var2, var3, 20, var8);
          }
 
          var6 = aN.getWidth();
@@ -5325,7 +5325,7 @@ public final class Game {
 
             if (var4 + var6 >= 0 && var4 <= 176 && var5 + var7 >= 0 && var5 <= 220) {
                this.b(var1, var4, var5, var6, var7);
-               e.b.drawImage(aN, var2, var3, 20, var8);
+               CanvasShell.directGraphics.drawImage(aN, var2, var3, 20, var8);
             }
          }
       }
@@ -5336,7 +5336,7 @@ public final class Game {
       int var4 = av.getHeight() / 5;
       int var5 = tileWidth * 14 + x;
       int var6 = tileHeight * 7 + y;
-      this.player.n();
+      this.player.updateAnimation();
       if (var5 - 3 < 176 && var6 < 220 && var5 - 3 + var3 >= 0 && var6 + var4 >= 0) {
          var1.setClip(var5 - (tileWidth >> 1), var6, var3, var4);
          var1.drawImage(av, var5 - 3, var6 - var4 * var2, 17);
@@ -5351,39 +5351,39 @@ public final class Game {
 
    public final void p(int var1) {
       if (var1 == bb) {
-         this.aS = this.player.Z;
-         this.aT = this.player.al;
-         this.aU = this.player.aj;
-         if (this.player.ao) {
+         this.aS = this.player.kind;
+         this.aT = this.player.animState;
+         this.aU = this.player.animFrame;
+         if (this.player.facingRight) {
             this.aW = 0;
          } else {
             this.aW = 5;
          }
       } else if (var1 >= 0) {
-         this.aS = this.enemies[var1].Z;
-         this.aT = this.enemies[var1].al;
-         this.aU = this.enemies[var1].aj;
+         this.aS = this.enemies[var1].kind;
+         this.aT = this.enemies[var1].animState;
+         this.aU = this.enemies[var1].animFrame;
          if (this.enemies[var1].ap != 0) {
             if (this.enemies[var1].ap == 1) {
-               if (this.enemies[var1].ao) {
+               if (this.enemies[var1].facingRight) {
                   this.aW = 4;
                } else {
                   this.aW = 2;
                }
             } else if (this.enemies[var1].ap == 2) {
-               if (this.enemies[var1].ao) {
+               if (this.enemies[var1].facingRight) {
                   this.aW = 6;
                } else {
                   this.aW = 3;
                }
             } else if (this.enemies[var1].ap == 3) {
-               if (this.enemies[var1].ao) {
+               if (this.enemies[var1].facingRight) {
                   this.aW = 1;
                } else {
                   this.aW = 7;
                }
             }
-         } else if (this.enemies[var1].ao) {
+         } else if (this.enemies[var1].facingRight) {
             this.aW = 0;
          } else {
             this.aW = 5;
@@ -5392,48 +5392,48 @@ public final class Game {
 
       if (this.aS >= 0) {
          if (var1 == bb) {
-            this.aV = b.I[this.aS][this.aT][this.aU];
+            this.aV = Player.ANIM_FRAMES[this.aS][this.aT][this.aU];
             return;
          }
 
-         this.aV = f.o[this.aS][this.aT][this.aU];
+         this.aV = Enemy.ANIM_FRAMES[this.aS][this.aT][this.aU];
          this.M = (byte)(aG[this.aS].getHeight() / K);
       }
    }
 
    public final void a(Graphics var1, int var2, int var3, int var4) {
       this.p(bb);
-      e.b.drawImage(aH, var2, var3 - var4, 20, 8192);
+      CanvasShell.directGraphics.drawImage(aH, var2, var3 - var4, 20, 8192);
    }
 
    public final void c(Graphics var1, int var2, int var3, int var4, int var5) {
       this.p(var2);
       int var6 = 0;
-      if (this.enemies[var2].u) {
+      if (this.enemies[var2].wallCrawlFlipped) {
          var6 = K << 1;
       }
 
       switch (this.aW) {
          case 1:
-            e.b.drawImage(aG[this.aS], var3 - this.aV * K - var6, var4 - var5, 20, 90);
+            CanvasShell.directGraphics.drawImage(aG[this.aS], var3 - this.aV * K - var6, var4 - var5, 20, 90);
             return;
          case 2:
-            e.b.drawImage(aG[this.aS], var3, var4 - (this.M - 1 - this.aV) * K - var5 + var6, 20, 180);
+            CanvasShell.directGraphics.drawImage(aG[this.aS], var3, var4 - (this.M - 1 - this.aV) * K - var5 + var6, 20, 180);
             return;
          case 3:
-            e.b.drawImage(aG[this.aS], var3 - (this.M - 1 - this.aV) * K + var6, var4 - var5, 20, 270);
+            CanvasShell.directGraphics.drawImage(aG[this.aS], var3 - (this.M - 1 - this.aV) * K + var6, var4 - var5, 20, 270);
             return;
          case 4:
-            e.b.drawImage(aG[this.aS], var3, var4 - (this.M - 1 - this.aV) * K - var5 + var6, 20, 16384);
+            CanvasShell.directGraphics.drawImage(aG[this.aS], var3, var4 - (this.M - 1 - this.aV) * K - var5 + var6, 20, 16384);
             return;
          case 5:
-            e.b.drawImage(aG[this.aS], var3, var4 - this.aV * K - var5 - var6, 20, 8192);
+            CanvasShell.directGraphics.drawImage(aG[this.aS], var3, var4 - this.aV * K - var5 - var6, 20, 8192);
             return;
          case 6:
-            e.b.drawImage(aG[this.aS], var3 - (this.M - 1 - this.aV) * K + var6, var4 - var5, 20, 8282);
+            CanvasShell.directGraphics.drawImage(aG[this.aS], var3 - (this.M - 1 - this.aV) * K + var6, var4 - var5, 20, 8282);
             return;
          case 7:
-            e.b.drawImage(aG[this.aS], var3 - this.aV * K - var6, var4 - var5, 20, 16474);
+            CanvasShell.directGraphics.drawImage(aG[this.aS], var3 - this.aV * K - var6, var4 - var5, 20, 16474);
       }
    }
 
@@ -5498,7 +5498,7 @@ public final class Game {
             int var6 = this.bl[var2] / tileWidth;
 
             short var3;
-            while (var7 && ((var3 = this.levelMap.f[var6][var5 + 1]) < 19 || var3 > 27)) {
+            while (var7 && ((var3 = this.levelMap.tiles[var6][var5 + 1]) < 19 || var3 > 27)) {
                for (short var1 = 0; var1 < 50; var1++) {
                   if (this.bn[var1] != -1 && var1 != var2 && this.bl[var1] == this.bl[var2] && this.bm[var1] == var4 + tileHeight) {
                      var7 = false;
@@ -5592,30 +5592,30 @@ public final class Game {
 
    public final void e(int var1, int var2, int var3) {
       for (int var4 = 9; var4 >= 0; var4--) {
-         if (this.playerProjectiles[var4].f == -1) {
+         if (this.playerProjectiles[var4].type == -1) {
             if (var3 >= 0 && var3 <= 14 || var3 >= 18 && var3 <= 20) {
-               this.player.M[this.player.L]--;
+               this.player.ammo[this.player.currentWeapon]--;
                this.e = true;
             }
 
             if (var3 >= 9 && var3 <= 11 || var3 >= 15 && var3 <= 17) {
-               this.playerProjectiles[var4].p = 84;
-               this.playerProjectiles[var4].q = 11;
-               var1 += (this.player.ao ? 1 : -1) * 84 << 8;
+               this.playerProjectiles[var4].halfWidth = 84;
+               this.playerProjectiles[var4].halfHeight = 11;
+               var1 += (this.player.facingRight ? 1 : -1) * 84 << 8;
             } else {
-               this.playerProjectiles[var4].p = j.b[var3];
-               this.playerProjectiles[var4].q = j.c[var3];
+               this.playerProjectiles[var4].halfWidth = Projectile.HALF_WIDTHS[var3];
+               this.playerProjectiles[var4].halfHeight = Projectile.HALF_HEIGHTS[var3];
             }
 
-            this.playerProjectiles[var4].k = this.playerProjectiles[var4].i = this.playerProjectiles[var4].g = var1;
-            this.playerProjectiles[var4].l = this.playerProjectiles[var4].j = this.playerProjectiles[var4].h = var2;
-            this.playerProjectiles[var4].f = (byte)var3;
-            this.playerProjectiles[var4].m = (this.player.ao ? 1 : -1) * j.d[var3] << 8;
-            this.playerProjectiles[var4].n = 0;
-            this.playerProjectiles[var4].o = 0;
-            this.playerProjectiles[var4].s = this.player.ao ? var1 - this.player.ab : this.player.ab - var1;
+            this.playerProjectiles[var4].prev2X = this.playerProjectiles[var4].prevX = this.playerProjectiles[var4].posX = var1;
+            this.playerProjectiles[var4].prev2Y = this.playerProjectiles[var4].prevY = this.playerProjectiles[var4].posY = var2;
+            this.playerProjectiles[var4].type = (byte)var3;
+            this.playerProjectiles[var4].vx = (this.player.facingRight ? 1 : -1) * Projectile.SPEEDS[var3] << 8;
+            this.playerProjectiles[var4].vy = 0;
+            this.playerProjectiles[var4].age = 0;
+            this.playerProjectiles[var4].playerOffsetX = this.player.facingRight ? var1 - this.player.posX : this.player.posX - var1;
             if (var3 >= 3 && var3 <= 5) {
-               this.playerProjectiles[var4].n = 768;
+               this.playerProjectiles[var4].vy = 768;
                return;
             }
             break;
@@ -5625,39 +5625,39 @@ public final class Game {
 
    public final void a(int var1, int var2, int var3, boolean var4, boolean var5, int var6, byte var7) {
       for (int var8 = 9; var8 >= 0; var8--) {
-         if (this.enemyProjectiles[var8].f == -1) {
-            this.enemyProjectiles[var8].g = var1;
-            this.enemyProjectiles[var8].h = var2;
-            this.enemyProjectiles[var8].f = (byte)var3;
-            this.enemyProjectiles[var8].o = 0;
-            this.enemyProjectiles[var8].r = var7;
-            this.enemyProjectiles[var8].p = j.b[var3];
-            this.enemyProjectiles[var8].q = j.c[var3];
+         if (this.enemyProjectiles[var8].type == -1) {
+            this.enemyProjectiles[var8].posX = var1;
+            this.enemyProjectiles[var8].posY = var2;
+            this.enemyProjectiles[var8].type = (byte)var3;
+            this.enemyProjectiles[var8].age = 0;
+            this.enemyProjectiles[var8].sourceAnim = var7;
+            this.enemyProjectiles[var8].halfWidth = Projectile.HALF_WIDTHS[var3];
+            this.enemyProjectiles[var8].halfHeight = Projectile.HALF_HEIGHTS[var3];
             if (var6 != 0 && var6 != 1) {
                if (var5) {
-                  this.enemyProjectiles[var8].m = (short)((var6 == 3 ? -1 : 1) * j.d[var3] << 8);
-                  this.enemyProjectiles[var8].n = 0;
+                  this.enemyProjectiles[var8].vx = (short)((var6 == 3 ? -1 : 1) * Projectile.SPEEDS[var3] << 8);
+                  this.enemyProjectiles[var8].vy = 0;
                } else {
-                  this.enemyProjectiles[var8].m = 0;
-                  this.enemyProjectiles[var8].n = (short)((var4 ? -1 : 1) * j.d[var3] << 8);
+                  this.enemyProjectiles[var8].vx = 0;
+                  this.enemyProjectiles[var8].vy = (short)((var4 ? -1 : 1) * Projectile.SPEEDS[var3] << 8);
                }
             } else if (var5) {
-               this.enemyProjectiles[var8].m = 0;
+               this.enemyProjectiles[var8].vx = 0;
                if (var7 != 17 && var7 != 20 && var7 != 23) {
-                  this.enemyProjectiles[var8].n = (short)((var6 == 0 ? -1 : 1) * j.d[var3] << 8);
+                  this.enemyProjectiles[var8].vy = (short)((var6 == 0 ? -1 : 1) * Projectile.SPEEDS[var3] << 8);
                } else {
-                  this.enemyProjectiles[var8].n = (short)((var6 == 0 ? 1 : -1) * j.d[var3] << 8);
+                  this.enemyProjectiles[var8].vy = (short)((var6 == 0 ? 1 : -1) * Projectile.SPEEDS[var3] << 8);
                }
             } else {
-               this.enemyProjectiles[var8].m = (short)((var4 ? 1 : -1) * j.d[var3] << 8);
-               this.enemyProjectiles[var8].n = 0;
+               this.enemyProjectiles[var8].vx = (short)((var4 ? 1 : -1) * Projectile.SPEEDS[var3] << 8);
+               this.enemyProjectiles[var8].vy = 0;
             }
 
             if (var3 == 32) {
-               this.enemyProjectiles[var8].i = var1;
-               this.enemyProjectiles[var8].j = var2;
-               this.enemyProjectiles[var8].k = var1;
-               this.enemyProjectiles[var8].l = var2 - (4 * tileHeight << 8);
+               this.enemyProjectiles[var8].prevX = var1;
+               this.enemyProjectiles[var8].prevY = var2;
+               this.enemyProjectiles[var8].prev2X = var1;
+               this.enemyProjectiles[var8].prev2Y = var2 - (4 * tileHeight << 8);
                return;
             }
             break;
@@ -5669,7 +5669,7 @@ public final class Game {
       if (var4 == -1) {
          var4 = enemyPoolSize - 1;
 
-         while (var4 >= 0 && this.enemies[var4].Z != -1) {
+         while (var4 >= 0 && this.enemies[var4].kind != -1) {
             var4--;
          }
 
@@ -5693,58 +5693,58 @@ public final class Game {
       }
 
       if (var3 >= 0 && var3 <= 2) {
-         this.enemies[var4].Z = 1;
+         this.enemies[var4].kind = 1;
       } else if (var3 >= 3 && var3 <= 5) {
-         this.enemies[var4].Z = 0;
+         this.enemies[var4].kind = 0;
       } else if (var3 >= 6 && var3 <= 13) {
-         this.enemies[var4].Z = 2;
+         this.enemies[var4].kind = 2;
       } else {
-         this.enemies[var4].Z = 3;
+         this.enemies[var4].kind = 3;
       }
 
-      this.enemies[var4].ab = var1 * tileWidth + (tileWidth >> 1) << 8;
-      this.enemies[var4].aa = (byte)var2;
-      this.enemies[var4].ag = this.enemies[var4].ad = this.enemies[var4].ac = 0;
-      this.enemies[var4].ai = f.i[var3];
+      this.enemies[var4].posX = var1 * tileWidth + (tileWidth >> 1) << 8;
+      this.enemies[var4].row = (byte)var2;
+      this.enemies[var4].posInRow = this.enemies[var4].velX = this.enemies[var4].velY = 0;
+      this.enemies[var4].health = Enemy.HP_BY_ANIM[var3];
       this.enemies[var4].ap = 0;
-      this.enemies[var4].ao = true;
-      if (this.Z == 12 && this.player.ab < this.enemies[var4].ab) {
-         this.enemies[var4].ao = false;
+      this.enemies[var4].facingRight = true;
+      if (this.Z == 12 && this.player.posX < this.enemies[var4].posX) {
+         this.enemies[var4].facingRight = false;
       }
 
-      this.enemies[var4].tileHeight = false;
-      this.enemies[var4].u = false;
-      this.enemies[var4].E = 0;
-      this.enemies[var4].C = (byte)var4;
-      this.enemies[var4].w = 0;
-      this.enemies[var4].D = 0;
-      this.enemies[var4].E = 0;
-      this.enemies[var4].tileWidth = this.enemies[var4].ab;
-      if (this.enemies[var4].Z == 1) {
+      this.enemies[var4].flattenedRenderFlag = false;
+      this.enemies[var4].wallCrawlFlipped = false;
+      this.enemies[var4].stateTimer = 0;
+      this.enemies[var4].attackPhase = (byte)var4;
+      this.enemies[var4].bounceTimer = 0;
+      this.enemies[var4].spawnBitIndex = 0;
+      this.enemies[var4].stateTimer = 0;
+      this.enemies[var4].patrolTargetX = this.enemies[var4].posX;
+      if (this.enemies[var4].kind == 1) {
          this.enemies[var4].tileWidth = 0;
       }
 
-      if (this.enemies[var4].Z == 3) {
-         this.enemies[var4].ao = false;
+      if (this.enemies[var4].kind == 3) {
+         this.enemies[var4].facingRight = false;
          short var7;
-         if ((var7 = this.levelMap.a(var1 + 1, var2)) >= 19 && var7 <= 34) {
+         if ((var7 = this.levelMap.getTile(var1 + 1, var2)) >= 19 && var7 <= 34) {
             this.enemies[var4].ap = 3;
          }
 
-         if ((var7 = this.levelMap.a(var1 - 1, var2)) >= 19 && var7 <= 34) {
+         if ((var7 = this.levelMap.getTile(var1 - 1, var2)) >= 19 && var7 <= 34) {
             this.enemies[var4].ap = 2;
          }
 
-         if ((var7 = this.levelMap.a(var1, var2 - 1)) >= 19 && var7 <= 34) {
-            this.enemies[var4].ag = 3072;
+         if ((var7 = this.levelMap.getTile(var1, var2 - 1)) >= 19 && var7 <= 34) {
+            this.enemies[var4].posInRow = 3072;
             this.enemies[var4].ap = 1;
          }
       }
 
-      this.enemies[var4].v = var3;
-      this.enemies[var4].a((byte)0);
-      this.enemies[var4].am = 1;
-      this.enemies[var4].ah = 1;
+      this.enemies[var4].animKind = var3;
+      this.enemies[var4].setAnimState((byte)0);
+      this.enemies[var4].animRestart = 1;
+      this.enemies[var4].activeFlag = 1;
    }
 
    public final void a(byte var1, byte var2) {
@@ -5827,7 +5827,7 @@ public final class Game {
 
       for (int var10 = 0; var10 < 3; var10++) {
          if (this.bF[var10] != -1) {
-            int var9 = this.levelMap.a(this.bF[var10], this.bG[var10]);
+            int var9 = this.levelMap.getTile(this.bF[var10], this.bG[var10]);
             var9 -= 36;
             var9 = 1 << var9;
             int var11 = this.bF[var10] * tileWidth + x + (tileWidth - 19 >> 1);
@@ -5841,43 +5841,43 @@ public final class Game {
    }
 
    public final void q(int var1) {
-      if (this.enemies[var1].Z != -1 && this.enemies[var1].al != 5) {
+      if (this.enemies[var1].kind != -1 && this.enemies[var1].animState != 5) {
          byte var2 = 0;
-         short var3 = this.enemies[var1].c();
-         short var4 = this.enemies[var1].b();
-         byte var5 = this.enemies[var1].Z;
-         byte var6 = f.a[var5];
-         byte var7 = f.b[var5];
-         byte var8 = f.c[var5];
-         byte var9 = f.d[var5];
+         short var3 = this.enemies[var1].x();
+         short var4 = this.enemies[var1].y();
+         byte var5 = this.enemies[var1].kind;
+         byte var6 = Enemy.HITBOX_X_OFFSETS[var5];
+         byte var7 = Enemy.HITBOX_Y_OFFSETS[var5];
+         byte var8 = Enemy.HITBOX_WIDTHS[var5];
+         byte var9 = Enemy.HITBOX_HEIGHTS[var5];
          if (var3 - var6 + var8 + x >= 0 && var3 - var6 + x <= 176 && var4 + var7 + var9 + y >= 0 && var4 + var7 + y <= 220) {
             for (int var10 = 9; var10 >= 0; var10--) {
-               byte var11 = this.playerProjectiles[var10].f;
-               if (this.playerProjectiles[var10].f >= 0
+               byte var11 = this.playerProjectiles[var10].type;
+               if (this.playerProjectiles[var10].type >= 0
                   && var11 != 30
-                  && (this.playerProjectiles[var10].b() || var11 >= 9 && var11 <= 11 || var11 >= 15 && var11 <= 17 || var11 == 2 || var11 >= 21 && var11 <= 29)) {
-                  int var12 = (this.playerProjectiles[var10].g >> 8) - this.playerProjectiles[var10].p;
-                  int var13 = (this.playerProjectiles[var10].h >> 8) - this.playerProjectiles[var10].q;
-                  if (this.a(var3 - var6, var4 + var7, var8, var9, var12, var13, this.playerProjectiles[var10].p << 1, this.playerProjectiles[var10].q << 1)) {
-                     var2 = this.playerProjectiles[var10].c();
+                  && (this.playerProjectiles[var10].isActive() || var11 >= 9 && var11 <= 11 || var11 >= 15 && var11 <= 17 || var11 == 2 || var11 >= 21 && var11 <= 29)) {
+                  int var12 = (this.playerProjectiles[var10].posX >> 8) - this.playerProjectiles[var10].halfWidth;
+                  int var13 = (this.playerProjectiles[var10].posY >> 8) - this.playerProjectiles[var10].halfHeight;
+                  if (this.a(var3 - var6, var4 + var7, var8, var9, var12, var13, this.playerProjectiles[var10].halfWidth << 1, this.playerProjectiles[var10].halfHeight << 1)) {
+                     var2 = this.playerProjectiles[var10].weaponIndex();
                      if (var5 != 4 && var5 != 3 || var2 != 6) {
                         if (var11 >= 9 && var11 <= 11) {
                            int var14;
-                           if ((var14 = this.abs(this.player.b() - var3)) < tileWidth) {
-                              this.enemies[var1].ai = (byte)(this.enemies[var1].ai - j.a[var11]);
+                           if ((var14 = this.abs(this.player.x() - var3)) < tileWidth) {
+                              this.enemies[var1].health = (byte)(this.enemies[var1].health - Projectile.DAMAGE_BY_TYPE[var11]);
                            } else if (var14 >= tileWidth * 2 && var11 <= 10) {
-                              this.enemies[var1].ai = (byte)(this.enemies[var1].ai - (j.a[var11] >> 2));
+                              this.enemies[var1].health = (byte)(this.enemies[var1].health - (Projectile.DAMAGE_BY_TYPE[var11] >> 2));
                            } else {
-                              this.enemies[var1].ai = (byte)(this.enemies[var1].ai - (j.a[var11] >> 1));
+                              this.enemies[var1].health = (byte)(this.enemies[var1].health - (Projectile.DAMAGE_BY_TYPE[var11] >> 1));
                            }
                         } else {
-                           this.enemies[var1].ai = (byte)(this.enemies[var1].ai - j.a[var11]);
+                           this.enemies[var1].health = (byte)(this.enemies[var1].health - Projectile.DAMAGE_BY_TYPE[var11]);
                         }
 
-                        this.playerProjectiles[var10].a(false);
+                        this.playerProjectiles[var10].detonate(false);
                         this.e(var3 << 8, (var4 << 8) + (K << 7), 30);
                         dE++;
-                        if (this.enemies[var1].ai <= 0 && this.enemies[var1].al != 5) {
+                        if (this.enemies[var1].health <= 0 && this.enemies[var1].animState != 5) {
                            short var18 = this.X;
                            if (this.cV) {
                               var18 = 0;
@@ -5888,23 +5888,23 @@ public final class Game {
                            if (var2 == 6 && var5 != 4) {
                               du++;
 
-                              for (int var19 = 0; var19 < f.k[this.enemies[var1].v]; var19++) {
-                                 this.c((short)(this.enemies[var1].ab >> 8), this.enemies[var1].b(), 0);
+                              for (int var19 = 0; var19 < Enemy.BOLTS_DROPPED_BY_ANIM[this.enemies[var1].animKind]; var19++) {
+                                 this.c((short)(this.enemies[var1].posX >> 8), this.enemies[var1].y(), 0);
                               }
 
-                              this.enemies[var1].Z = 4;
-                              this.enemies[var1].v = 24;
-                              this.enemies[var1].ai = f.i[24];
-                              if (this.player.P[6] < 2) {
+                              this.enemies[var1].kind = 4;
+                              this.enemies[var1].animKind = 24;
+                              this.enemies[var1].health = Enemy.HP_BY_ANIM[24];
+                              if (this.player.weaponLevel[6] < 2) {
                                  this.player.N[6]++;
                               }
 
                               if (this.player.N[6] >= 20) {
-                                 this.player.P[6]++;
+                                 this.player.weaponLevel[6]++;
                                  this.player.N[6] = 0;
                                  this.cC = false;
                                  this.r(73);
-                                 do++;
+                                 do_++;
                                  if (this.aa && ++this.ab > 10) {
                                     this.ab = 10;
                                  }
@@ -5913,25 +5913,25 @@ public final class Game {
                                  return;
                               }
                            } else {
-                              do++;
+                              do_++;
                               if (this.aa && ++this.ab > 10) {
                                  this.ab = 10;
                               }
 
                               dK[this.X]++;
-                              this.enemies[var1].a((byte)5);
-                              this.enemies[var1].am = 1;
+                              this.enemies[var1].setAnimState((byte)5);
+                              this.enemies[var1].animRestart = 1;
                               if (var5 != 4) {
-                                 for (int var16 = 0; var16 < f.k[this.enemies[var1].v]; var16++) {
-                                    this.c((short)(this.enemies[var1].ab >> 8), this.enemies[var1].b(), 0);
+                                 for (int var16 = 0; var16 < Enemy.BOLTS_DROPPED_BY_ANIM[this.enemies[var1].animKind]; var16++) {
+                                    this.c((short)(this.enemies[var1].posX >> 8), this.enemies[var1].y(), 0);
                                  }
 
-                                 if (this.player.P[var2] < 2) {
+                                 if (this.player.weaponLevel[var2] < 2) {
                                     this.player.N[var2]++;
                                  }
 
                                  if (this.player.N[var2] >= 20) {
-                                    this.player.P[var2]++;
+                                    this.player.weaponLevel[var2]++;
                                     this.player.N[var2] = 0;
                                     this.cC = false;
                                     this.r(73);
@@ -5939,9 +5939,9 @@ public final class Game {
                                  }
                               }
                            }
-                        } else if (this.enemies[var1].al != 2) {
-                           this.enemies[var1].a((byte)4);
-                           this.enemies[var1].an = 0;
+                        } else if (this.enemies[var1].animState != 2) {
+                           this.enemies[var1].setAnimState((byte)4);
+                           this.enemies[var1].animHold = 0;
                         }
 
                         return;
@@ -5954,46 +5954,46 @@ public final class Game {
    }
 
    public final void R() {
-      short var1 = this.player.b();
-      int var2 = this.player.c() + L;
+      short var1 = this.player.x();
+      int var2 = this.player.y() + L;
       boolean var3 = false;
       boolean var4 = false;
       boolean var5 = false;
       boolean var6 = false;
 
       for (int var7 = 9; var7 >= 0; var7--) {
-         if (this.player.al == 10) {
+         if (this.player.animState == 10) {
             return;
          }
 
-         byte var8 = this.enemyProjectiles[var7].f;
-         if (this.enemyProjectiles[var7].f != -1 && var8 != 30 && this.enemyProjectiles[var7].b()) {
-            int var9 = (this.enemyProjectiles[var7].g >> 8) - this.enemyProjectiles[var7].p;
-            int var10 = (this.enemyProjectiles[var7].h >> 8) - this.enemyProjectiles[var7].q;
-            if (this.a(var1 - 11, var2 + 7, 18, 37, var9, var10, this.enemyProjectiles[var7].p << 1, this.enemyProjectiles[var7].q << 1)) {
-               byte var11 = this.enemyProjectiles[var7].r;
+         byte var8 = this.enemyProjectiles[var7].type;
+         if (this.enemyProjectiles[var7].type != -1 && var8 != 30 && this.enemyProjectiles[var7].isActive()) {
+            int var9 = (this.enemyProjectiles[var7].posX >> 8) - this.enemyProjectiles[var7].halfWidth;
+            int var10 = (this.enemyProjectiles[var7].posY >> 8) - this.enemyProjectiles[var7].halfHeight;
+            if (this.a(var1 - 11, var2 + 7, 18, 37, var9, var10, this.enemyProjectiles[var7].halfWidth << 1, this.enemyProjectiles[var7].halfHeight << 1)) {
+               byte var11 = this.enemyProjectiles[var7].sourceAnim;
                if (var8 != 3 && var8 != 6 && var8 != 18) {
                   if (!f) {
-                     this.player.ai = (byte)(this.player.ai - f.j[var11]);
+                     this.player.health = (byte)(this.player.health - Enemy.DAMAGE_BY_ANIM[var11]);
                   }
 
                   this.ab = 1;
                   dI = true;
                   this.e = true;
-                  this.player.a((byte)9);
-                  this.player.an = 0;
-                  if (this.player.s == 2) {
-                     this.player.s = 1;
+                  this.player.setAnimState((byte)9);
+                  this.player.animHold = 0;
+                  if (this.player.jumpPhase == 2) {
+                     this.player.jumpPhase = 1;
                   }
 
                   this.e(var1 << 8, (var2 << 8) + (K << 7), 30);
                }
 
                if (var8 == 32) {
-                  this.player.E = 10;
+                  this.player.invulnTimer = 10;
                }
 
-               this.enemyProjectiles[var7].a(true);
+               this.enemyProjectiles[var7].detonate(true);
             }
          }
       }
@@ -6054,7 +6054,7 @@ public final class Game {
             }
 
             if ((var13 = var3.charAt(var12)) == ' ') {
-               var9 += ratchetandclank.smallFont.a(var13);
+               var9 += ratchetandclank.smallFont.charWidth(var13);
                var12++;
                if (var8 + var9 > var7 && !var15) {
                   var17 = true;
@@ -6069,7 +6069,7 @@ public final class Game {
                var18 = var12;
             }
 
-            int var19 = ratchetandclank.smallFont.a(var13);
+            int var19 = ratchetandclank.smallFont.charWidth(var13);
             if (var8 + var9 + var19 > var7 && !var15) {
                var17 = true;
                break;
@@ -6096,40 +6096,40 @@ public final class Game {
 
             if ((var6 & 1) > 0) {
                if (var12 - var11 > 0) {
-                  ratchetandclank.currentFont.a(var1, var14, var11, var12 - var11, 88, var5, var6);
+                  ratchetandclank.currentFont.drawTextRange(var1, var14, var11, var12 - var11, 88, var5, var6);
                }
 
                return var12 + (var17 ? 0 : 1);
             } else {
                if (var12 - var11 > 0) {
-                  if (ratchetandclank.q == 3) {
+                  if (ratchetandclank.language == 3) {
                      int var20;
                      String var25;
                      if ((var20 = (var25 = new String(var14, var11, var12 - var11)).indexOf("Informations-netzwerks")) >= 0) {
                         if (var20 == 0) {
-                           ratchetandclank.currentFont.a(var1, "Informationsnetzwerks", var4, var5, var6);
+                           ratchetandclank.currentFont.drawText(var1, "Informationsnetzwerks", var4, var5, var6);
                            if (var25.length() > 22) {
-                              var1.drawSubstring(var25, 22, var25.length() - 22, var4 + ratchetandclank.smallFont.a("Informationsnetzwerks"), var5, var6);
+                              var1.drawSubstring(var25, 22, var25.length() - 22, var4 + ratchetandclank.smallFont.textWidth("Informationsnetzwerks"), var5, var6);
                            }
                         } else {
                            var1.drawSubstring(var25, 0, var20, var4, var5, var6);
-                           ratchetandclank.currentFont.a(var1, "Informationsnetzwerks", var4 + ratchetandclank.smallFont.a(var25, 0, var20), var5, var6);
+                           ratchetandclank.currentFont.drawText(var1, "Informationsnetzwerks", var4 + ratchetandclank.smallFont.textWidth(var25, 0, var20), var5, var6);
                            if (var25.length() > var20 + 1 + 22) {
                               var1.drawSubstring(
                                  var25,
                                  var20 + 1 + 22,
                                  var25.length() - var20 - 1 - 22,
-                                 var4 + ratchetandclank.smallFont.a(var25, 0, var20) + ratchetandclank.smallFont.a("Informationsnetzwerks"),
+                                 var4 + ratchetandclank.smallFont.textWidth(var25, 0, var20) + ratchetandclank.smallFont.textWidth("Informationsnetzwerks"),
                                  var5,
                                  var6
                               );
                            }
                         }
                      } else {
-                        ratchetandclank.currentFont.a(var1, var25, var4, var5, var6);
+                        ratchetandclank.currentFont.drawText(var1, var25, var4, var5, var6);
                      }
                   } else {
-                     ratchetandclank.currentFont.a(var1, var14, var11, var12 - var11, var4, var5, var6);
+                     ratchetandclank.currentFont.drawTextRange(var1, var14, var11, var12 - var11, var4, var5, var6);
                   }
                }
 
@@ -6174,7 +6174,7 @@ public final class Game {
    }
 
    public final void r(int var1) {
-      this.player.E = 0;
+      this.player.invulnTimer = 0;
       this.cF = 0;
       this.cH = var1;
       if (var1 == 112 && !this.h(4) && !this.h(5) && !this.h(6) && !this.h(7) && !this.h(9) && !this.h(10)) {
@@ -6256,7 +6256,7 @@ public final class Game {
       } else if (this.cH == 150) {
          this.cL |= 32768;
          this.di = 32768;
-         this.player.O = (byte)(this.player.O | 32);
+         this.player.ownedWeapons = (byte)(this.player.ownedWeapons | 32);
       } else if (this.cH == 125) {
          this.di &= -3;
          this.di |= 8192;
@@ -6341,8 +6341,8 @@ public final class Game {
          }
 
          if (this.cH + 1 == cA[32] + cz[32]) {
-            this.player.a((byte)1);
-            this.player.am = 0;
+            this.player.setAnimState((byte)1);
+            this.player.animRestart = 0;
          }
       }
    }
@@ -6353,12 +6353,12 @@ public final class Game {
       this.midlet.writeInt(this.bT, var1, 5);
       this.midlet.writeInt(this.bU, var1, 9);
       this.midlet.writeInt(this.cJ, var1, 13);
-      var1[17] = this.player.O;
+      var1[17] = this.player.ownedWeapons;
 
       for (int var2 = 0; var2 < 8; var2++) {
-         var1[18 + var2] = this.player.P[var2];
-         this.midlet.a(this.player.N[var2], var1, 26 + var2 * 2);
-         this.midlet.a(this.player.M[var2], var1, 42 + var2 * 2);
+         var1[18 + var2] = this.player.weaponLevel[var2];
+         this.midlet.writeShort(this.player.N[var2], var1, 26 + var2 * 2);
+         this.midlet.writeShort(this.player.ammo[var2], var1, 42 + var2 * 2);
       }
 
       this.midlet.writeInt(this.aX, var1, 58);
@@ -6382,12 +6382,12 @@ public final class Game {
          this.bT = this.midlet.readInt(var1, 5);
          this.bU = this.midlet.readInt(var1, 9);
          this.cJ = this.midlet.readInt(var1, 13);
-         this.player.O = var1[17];
+         this.player.ownedWeapons = var1[17];
 
          for (int var2 = 0; var2 < 8; var2++) {
-            this.player.P[var2] = var1[18 + var2];
+            this.player.weaponLevel[var2] = var1[18 + var2];
             this.player.N[var2] = this.midlet.readShort(var1, 26 + var2 * 2);
-            this.player.M[var2] = this.midlet.readShort(var1, 42 + var2 * 2);
+            this.player.ammo[var2] = this.midlet.readShort(var1, 42 + var2 * 2);
          }
 
          this.aX = this.midlet.readInt(var1, 58);
@@ -6410,13 +6410,13 @@ public final class Game {
    public final void T() {
       if (this.b == 0) {
          int var1 = this.cx & 63;
-         byte var2 = this.player.P[this.player.L];
+         byte var2 = this.player.weaponLevel[this.player.currentWeapon];
          if (var1 > 0) {
             this.cx++;
-            if (var1 >= b.g[var2][this.player.L]) {
+            if (var1 >= Player.CHARGE_TICKS[var2][this.player.currentWeapon]) {
                if ((this.cx & 128) != 0) {
                   this.cx = 129;
-                  this.player.p();
+                  this.player.fire();
                } else {
                   this.cx = 0;
                }
@@ -6499,10 +6499,10 @@ public final class Game {
 
    public final int a(Graphics var1, String var2, int var3, int var4, int var5) {
       int var6 = 0;
-      int var7 = ratchetandclank.currentFont.a;
-      var6 = ratchetandclank.currentFont.a(var2);
+      int var7 = ratchetandclank.currentFont.lineHeight;
+      var6 = ratchetandclank.currentFont.textWidth(var2);
       var1.setClip(var4, 0, var5 - var4, 220);
-      ratchetandclank.currentFont.a(var1, var2, this.l, var3, 20);
+      ratchetandclank.currentFont.drawText(var1, var2, this.l, var3, 20);
       this.l -= 2;
       if (this.l + var6 <= var4) {
          this.l = var5;
@@ -6526,7 +6526,7 @@ public final class Game {
    private void X() {
       this.cu = 0;
       dk = 0;
-      if ((this.player.O & 64) <= 0) {
+      if ((this.player.ownedWeapons & 64) <= 0) {
          for (int var1 = 0; var1 < 11; var1++) {
             if ((this.cL & 1 << 21 + var1) != 0) {
                this.cu++;
@@ -6548,7 +6548,7 @@ public final class Game {
       int[] var1 = new int[8];
 
       for (int var3 = 0; var3 < 8; var3++) {
-         var1[var3] = b.d[var3 * 3 + this.player.P[var3]] - this.player.M[var3];
+         var1[var3] = Player.AMMO_CAPACITY[var3 * 3 + this.player.weaponLevel[var3]] - this.player.ammo[var3];
          switch (var3) {
             case 0:
                this.aZ[var3] = 0;
@@ -6558,25 +6558,25 @@ public final class Game {
                this.aZ[var3] = var1[var3];
                break;
             case 2:
-               if ((this.player.O & 1 << var3) > 0) {
+               if ((this.player.ownedWeapons & 1 << var3) > 0) {
                   var2 += var1[var3];
                   this.aZ[var3] = var1[var3];
                }
                break;
             case 3:
-               if ((this.player.O & 1 << var3) > 0) {
+               if ((this.player.ownedWeapons & 1 << var3) > 0) {
                   var2 += var1[var3] * 3;
                   this.aZ[var3] = var1[var3] * 3;
                }
                break;
             case 4:
-               if ((this.player.O & 1 << var3) > 0) {
+               if ((this.player.ownedWeapons & 1 << var3) > 0) {
                   var2 += var1[var3] * 3;
                   this.aZ[var3] = var1[var3] * 3;
                }
                break;
             case 5:
-               if ((this.player.O & 1 << var3) > 0) {
+               if ((this.player.ownedWeapons & 1 << var3) > 0) {
                   var2 += var1[var3] * 2;
                   this.aZ[var3] = var1[var3] * 2;
                }
@@ -6585,7 +6585,7 @@ public final class Game {
                this.aZ[var3] = 0;
                break;
             case 7:
-               if ((this.player.O & 1 << var3) > 0) {
+               if ((this.player.ownedWeapons & 1 << var3) > 0) {
                   var2 += var1[var3] * 5;
                   this.aZ[var3] = var1[var3] * 5;
                }
@@ -6599,7 +6599,7 @@ public final class Game {
       int var7 = 0;
       int var8 = 0;
       int var9 = 0;
-      int var12 = ratchetandclank.currentFont.a;
+      int var12 = ratchetandclank.currentFont.lineHeight;
       char[] var14 = new char[var2.length()];
       var2.getChars(0, var2.length(), var14, 0);
       if ((var5 & 1) > 0) {
@@ -6632,7 +6632,7 @@ public final class Game {
             }
 
             if (var13 == ' ') {
-               var8 += ratchetandclank.currentFont.a(var13);
+               var8 += ratchetandclank.currentFont.charWidth(var13);
                var11++;
                if (var7 + var8 > var6 && !var15) {
                   var17 = true;
@@ -6643,7 +6643,7 @@ public final class Game {
                break;
             }
 
-            int var19 = ratchetandclank.currentFont.a(var13);
+            int var19 = ratchetandclank.currentFont.charWidth(var13);
             if (var7 + var8 + var19 > var6 && !var15) {
                var17 = true;
                break;
@@ -6669,10 +6669,10 @@ public final class Game {
             if (var11 - var10 > 0) {
                if ((var5 & 1) > 0) {
                   if (var11 - var10 > 0) {
-                     ratchetandclank.currentFont.a(var1, var14, var10, var11 - var10, 88, var4, var5);
+                     ratchetandclank.currentFont.drawTextRange(var1, var14, var10, var11 - var10, 88, var4, var5);
                   }
                } else if (var11 - var10 > 0) {
-                  ratchetandclank.currentFont.a(var1, var14, var10, var11 - var10, var3, var4, var5);
+                  ratchetandclank.currentFont.drawTextRange(var1, var14, var10, var11 - var10, var3, var4, var5);
                }
             }
 

@@ -1,6 +1,6 @@
 // Hand-written, faithfully renamed from decompiled_a1/f.java (class f).
 // a1's equivalent of the legacy build's Enemy (decompiled/d.java, see
-// ../src/Enemy.java) -- same 5-slot pool / 5-type shape (Game.ai[],
+// ../src/Enemy.java) -- same 5-slot pool / 5-type shape (Game.enemies[],
 // confirmed via Entity.java/Projectile.java cross-checks), same
 // hitbox-table split confirmed against BUILD_COMPARISON.md's note that
 // canonical `/q` is byte-identical to a1's `enemy_spr_box.bin`: the
@@ -82,9 +82,9 @@ public final class Enemy extends Entity {
 
    public Enemy(Game var1) {
       this.game = var1;
-      tileWidth = Game.F;
-      tileHeight = Game.G;
-      hudHeight = Game.H;
+      tileWidth = Game.tileWidth;
+      tileHeight = Game.tileHeight;
+      hudHeight = Game.hudHeight;
       super.kind = -1;
       super.ap = 0;
       this.stateTimer = 0;
@@ -175,7 +175,7 @@ public final class Enemy extends Entity {
       int var2 = (super.posX >> 8) / tileWidth;
       int var5 = Game.aJ.getWidth();
       if (var1) {
-         this.tileAhead = this.game.V.getTile(var2, super.row);
+         this.tileAhead = this.game.levelMap.getTile(var2, super.row);
       }
 
       int var3;
@@ -254,11 +254,11 @@ public final class Enemy extends Entity {
             super.posInRow = 0;
          }
 
-         if (this.game.a(this.x() - HITBOX_X_OFFSETS[super.kind], this.y() + HITBOX_Y_OFFSETS[super.kind], HITBOX_WIDTHS[super.kind], HITBOX_HEIGHTS[super.kind], this.game.aj.b() - 11, this.game.aj.c() + Game.L + 7, 18, 37)) {
+         if (this.game.a(this.x() - HITBOX_X_OFFSETS[super.kind], this.y() + HITBOX_Y_OFFSETS[super.kind], HITBOX_WIDTHS[super.kind], HITBOX_HEIGHTS[super.kind], this.game.player.x() - 11, this.game.player.y() + Game.L + 7, 18, 37)) {
             super.velX = 0;
             if (super.velY > 0) {
                super.velY = (short)(-super.velY / 2);
-               if (this.game.aj.b() < this.x()) {
+               if (this.game.player.x() < this.x()) {
                   super.velX = 510;
                   super.facingRight = false;
                } else {
@@ -287,7 +287,7 @@ public final class Enemy extends Entity {
          }
 
          super.posX = var2;
-         if (super.ae > 0 && super.ae < 27 && this.game.V.isWalkable(super.ae, super.af)) {
+         if (super.ae > 0 && super.ae < 27 && this.game.levelMap.isWalkable(super.ae, super.af)) {
             super.posX = super.posX + super.velX;
             if (this.attackBlockedByPlatform()) {
                super.posX = super.posX - super.velX;
@@ -315,8 +315,8 @@ public final class Enemy extends Entity {
             super.kind = -1;
          }
       } else if (super.animState != 7 && super.animState != 6) {
-         if (this.abs(this.game.aj.b() - this.x()) <= 176 && this.abs(this.game.aj.c() - this.y()) <= 220) {
-            if (super.kind != 3 || this.abs(this.game.aj.b() - this.x()) <= 3 * tileWidth + (tileWidth >> 1) && this.abs(this.game.aj.c() - this.y()) <= 5 * tileHeight) {
+         if (this.abs(this.game.player.x() - this.x()) <= 176 && this.abs(this.game.player.y() - this.y()) <= 220) {
+            if (super.kind != 3 || this.abs(this.game.player.x() - this.x()) <= 3 * tileWidth + (tileWidth >> 1) && this.abs(this.game.player.y() - this.y()) <= 5 * tileHeight) {
                this.updateWalk();
                if (this.bounceTimer != 0 && super.kind != 3) {
                   super.velX = (short)(this.bounceTimer << 8);
@@ -335,8 +335,8 @@ public final class Enemy extends Entity {
                   }
                } else {
                   this.flattenedRenderFlag = false;
-                  int var1 = this.game.aj.b() - this.x();
-                  int var2 = this.game.aj.c() + tileHeight - hudHeight - this.y();
+                  int var1 = this.game.player.x() - this.x();
+                  int var2 = this.game.player.y() + tileHeight - hudHeight - this.y();
                   byte var3 = tileWidth;
                   int var4 = tileWidth * 3;
                   if (super.kind == 0) {
@@ -661,9 +661,9 @@ public final class Enemy extends Entity {
    // before commit, see CLASS_MAP.md).
    public final void meleeAttack() {
       if (super.animState != 3) {
-         if (this.game.aj.animState != 10) {
+         if (this.game.player.animState != 10) {
             super.facingRight = false;
-            if (this.game.aj.b() - this.x() > 0) {
+            if (this.game.player.x() - this.x() > 0) {
                super.facingRight = true;
             }
 
@@ -673,14 +673,14 @@ public final class Enemy extends Entity {
                   this.setAnimState((byte)3);
                }
 
-               if (this.game.aj.E > 0) {
+               if (this.game.player.invulnTimer > 0) {
                   return;
                }
 
                if (this.game
                      .a(
-                        this.game.aj.b() - 11,
-                        this.game.aj.c() + 7 + Game.L,
+                        this.game.player.x() - 11,
+                        this.game.player.y() + 7 + Game.L,
                         18,
                         37,
                         this.x() + (super.facingRight ? ATTACK_X_OFFSETS[super.kind] : -ATTACK_X_OFFSETS[super.kind] - ATTACK_WIDTHS[super.kind]),
@@ -690,14 +690,14 @@ public final class Enemy extends Entity {
                      )
                   && this.game.Z != 0) {
                   if (!Game.f) {
-                     this.game.aj.health = (byte)(this.game.aj.health - DAMAGE_BY_ANIM[this.animKind]);
+                     this.game.player.health = (byte)(this.game.player.health - DAMAGE_BY_ANIM[this.animKind]);
                   }
 
                   this.game.ab = 1;
-                  this.game.aj.setAnimState((byte)9);
-                  this.game.aj.animHold = 0;
-                  if (this.game.aj.s == 2) {
-                     this.game.aj.s = 1;
+                  this.game.player.setAnimState((byte)9);
+                  this.game.player.animHold = 0;
+                  if (this.game.player.jumpPhase == 2) {
+                     this.game.player.jumpPhase = 1;
                   }
 
                   this.game.e = true;

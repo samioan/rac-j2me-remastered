@@ -1,6 +1,6 @@
 // Hand-written, faithfully renamed from decompiled_a1/b.java (class b).
 // a1's equivalent of the legacy build's Player (decompiled/a.java, see
-// ../src/Player.java). Single instance (Game.aj, confirmed via
+// ../src/Player.java). Single instance (Game.player, confirmed via
 // Entity.java/Projectile.java/Enemy.java cross-checks).
 //
 // IMPORTANT lesson from Enemy.java's self-review, doubly confirmed here:
@@ -156,9 +156,9 @@ public final class Player extends Entity {
 
    public Player(Game var1) {
       this.game = var1;
-      tileWidth = Game.F;
-      tileHeight = Game.G;
-      hudHeight = Game.H;
+      tileWidth = Game.tileWidth;
+      tileHeight = Game.tileHeight;
+      hudHeight = Game.hudHeight;
       currentWalkSpeed = 1536;
       this.jumpPhase = -1;
       this.swingPhase = -2;
@@ -252,24 +252,24 @@ public final class Player extends Entity {
       int var2 = (var1 = super.posX >> 8) / tileWidth;
       int var3;
       if ((var3 = var1 % tileWidth) < 10) {
-         if (this.game.V.tiles[var2 - 1][super.row + 1] != 19) {
+         if (this.game.levelMap.tiles[var2 - 1][super.row + 1] != 19) {
             return false;
          }
-      } else if (var3 > tileWidth - 10 && this.game.V.tiles[var2 + 1][super.row + 1] != 19) {
+      } else if (var3 > tileWidth - 10 && this.game.levelMap.tiles[var2 + 1][super.row + 1] != 19) {
          return false;
       }
 
-      return this.game.V.tiles[var2][super.row + 1] == 19;
+      return this.game.levelMap.tiles[var2][super.row + 1] == 19;
    }
 
    // TENTATIVE names -- wall/ledge detection at the near edge of the
    // current column, using the inherited Entity.column().
    public final boolean wallOnLeft() {
-      return !this.game.V.isWalkable(this.column() - 1, super.row + 1) && ((super.posX >> 8) - 8) % tileWidth < 8;
+      return !this.game.levelMap.isWalkable(this.column() - 1, super.row + 1) && ((super.posX >> 8) - 8) % tileWidth < 8;
    }
 
    public final boolean wallOnRight() {
-      return !this.game.V.isWalkable(this.column() + 1, super.row + 1) && ((super.posX >> 8) + 8) % tileWidth > tileWidth - 8;
+      return !this.game.levelMap.isWalkable(this.column() + 1, super.row + 1) && ((super.posX >> 8) + 8) % tileWidth > tileWidth - 8;
    }
 
    // Zip-line ride tick: on entry (swingPhase == -2, Game.cv sentinel
@@ -479,7 +479,7 @@ public final class Player extends Entity {
          this.game.cw = this.game.cv = 0;
          this.game.cx &= -129;
       } else if (super.health <= 0 && super.animState != 10) {
-         this.game.a.c(0);
+         this.game.midlet.playSoundIfEnabled(0);
          super.health = 0;
          super.animRestart = 1;
          this.setAnimState((byte)10);
@@ -610,18 +610,18 @@ public final class Player extends Entity {
                   super.af = (byte)(super.row + 1);
                }
 
-               if (super.ae >= 0 && super.ae <= 27 && this.game.V.isWalkable(super.ae, super.af) && (super.row < 17 || super.row == 17 && super.posInRow == 0)) {
+               if (super.ae >= 0 && super.ae <= 27 && this.game.levelMap.isWalkable(super.ae, super.af) && (super.row < 17 || super.row == 17 && super.posInRow == 0)) {
                   int var1 = super.posX;
                   super.posX = super.posX + super.velX;
                   super.ae = super.facingRight ? this.columnRight() : this.columnLeft();
                   if (this.game.G() != -1) {
                      super.posX = super.posX - super.velX * 3 / 2;
-                     if (!this.game.V.isWalkable((super.posX >> 8) / tileWidth, super.af)) {
+                     if (!this.game.levelMap.isWalkable((super.posX >> 8) / tileWidth, super.af)) {
                         super.posX = var1;
                      }
                   } else if (this.game.D()) {
                      super.posX = super.posX - super.velX;
-                  } else if (!this.game.V.isWalkable(super.ae, super.af)) {
+                  } else if (!this.game.levelMap.isWalkable(super.ae, super.af)) {
                      super.posX = super.posX - super.velX;
                   }
                } else {
@@ -666,9 +666,9 @@ public final class Player extends Entity {
                super.posInRow = (short)(var8 % tileHeight << 8);
                super.posX = super.posX + (this.ledgeSnapOffsetX << 8);
                super.velY = 0;
-               if (!this.game.V.isWalkable(this.columnLeft(), super.row)) {
+               if (!this.game.levelMap.isWalkable(this.columnLeft(), super.row)) {
                   super.posX = this.y() + 1 << 8;
-               } else if (!this.game.V.isWalkable(this.columnRight(), super.row)) {
+               } else if (!this.game.levelMap.isWalkable(this.columnRight(), super.row)) {
                   super.posX = this.y() - 1 << 8;
                }
             } else {
@@ -680,7 +680,7 @@ public final class Player extends Entity {
                   }
 
                   super.posInRow = super.posInRow - super.velY;
-                  if (super.velY > 0 && (!this.game.V.isWalkable(this.columnRight(), super.row) || !this.game.V.isWalkable(this.columnLeft(), super.row))) {
+                  if (super.velY > 0 && (!this.game.levelMap.isWalkable(this.columnRight(), super.row) || !this.game.levelMap.isWalkable(this.columnLeft(), super.row))) {
                      super.posInRow = super.posInRow + super.velY;
                      super.velY = 0;
                   }
@@ -726,36 +726,36 @@ public final class Player extends Entity {
 
                if (super.ap == 0) {
                   if (super.animState != 11 && super.velY < 0 && super.animState != 10) {
-                     for (int var2 = 0; var2 < Game.ba; var2++) {
-                        if (this.game.ai[var2].animState != 2 && this.game.k(var2) && this.game.ai[var2].b() > this.x()) {
+                     for (int var2 = 0; var2 < Game.enemyPoolSize; var2++) {
+                        if (this.game.enemies[var2].animState != 2 && this.game.k(var2) && this.game.enemies[var2].y() > this.x()) {
                            this.setAnimState((byte)3);
-                           if (this.y() > this.game.ai[var2].c()) {
-                              this.game.ai[var2].w = -10;
-                              if (this.game.V.isWalkable((super.posX >> 8) / tileWidth + 1, super.row + 1) && this.game.V.isWalkable((super.posX >> 8) / tileWidth, super.row + 1)) {
+                           if (this.y() > this.game.enemies[var2].x()) {
+                              this.game.enemies[var2].bounceTimer = -10;
+                              if (this.game.levelMap.isWalkable((super.posX >> 8) / tileWidth + 1, super.row + 1) && this.game.levelMap.isWalkable((super.posX >> 8) / tileWidth, super.row + 1)) {
                                  super.velY = 0;
                                  super.velX = 0;
                                  this.jumpPhase = 0;
-                                 if (this.game.V.isWalkable((super.posX >> 8) / tileWidth + 1, super.row)) {
+                                 if (this.game.levelMap.isWalkable((super.posX >> 8) / tileWidth + 1, super.row)) {
                                     super.posX += 510;
                                  }
 
-                                 if (!this.game.V.isWalkable((super.posX >> 8) / tileWidth + 1, super.row)) {
+                                 if (!this.game.levelMap.isWalkable((super.posX >> 8) / tileWidth + 1, super.row)) {
                                     super.posX -= 510;
                                  }
                               } else {
                                  this.jumpPhase = -1;
                               }
                            } else {
-                              this.game.ai[var2].w = 10;
-                              if (this.game.V.isWalkable((super.posX >> 8) / tileWidth - 1, super.row + 1) && this.game.V.isWalkable((super.posX >> 8) / tileWidth, super.row + 1)) {
+                              this.game.enemies[var2].bounceTimer = 10;
+                              if (this.game.levelMap.isWalkable((super.posX >> 8) / tileWidth - 1, super.row + 1) && this.game.levelMap.isWalkable((super.posX >> 8) / tileWidth, super.row + 1)) {
                                  super.velY = 0;
                                  super.velX = 0;
                                  this.jumpPhase = 0;
-                                 if (this.game.V.isWalkable((super.posX >> 8) / tileWidth - 1, super.row)) {
+                                 if (this.game.levelMap.isWalkable((super.posX >> 8) / tileWidth - 1, super.row)) {
                                     super.posX -= 510;
                                  }
 
-                                 if (!this.game.V.isWalkable((super.posX >> 8) / tileWidth - 1, super.row)) {
+                                 if (!this.game.levelMap.isWalkable((super.posX >> 8) / tileWidth - 1, super.row)) {
                                     super.posX += 510;
                                  }
                               } else {
@@ -849,7 +849,7 @@ public final class Player extends Entity {
          }
       }
 
-      short var3 = this.game.V.getTile(var1, var2);
+      short var3 = this.game.levelMap.getTile(var1, var2);
       Game.B = false;
       if (var3 >= 56 && var3 <= 61) {
          this.swingPhase = -1;
@@ -875,7 +875,7 @@ public final class Player extends Entity {
          Game.C = -1;
       } else {
          for (byte var4 = (byte)(--var2 + 2); var4 >= var2; var4--) {
-            if ((var3 = this.game.V.getTile(var1, var4)) == 99 || var3 == 100) {
+            if ((var3 = this.game.levelMap.getTile(var1, var4)) == 99 || var3 == 100) {
                this.game.ah = this.game.X;
                this.game.ad = var1;
                this.game.ae = var2;
@@ -1110,7 +1110,7 @@ public final class Player extends Entity {
          for (int var2 = var1; var2 < var1 + 3; var2++) {
             for (int var3 = super.row; var3 >= super.row - 3; var3--) {
                short var4;
-               if (var2 >= 0 && var3 >= 0 && ((var4 = this.game.V.getTile(var2, var3)) == 97 || var4 == 98)) {
+               if (var2 >= 0 && var3 >= 0 && ((var4 = this.game.levelMap.getTile(var2, var3)) == 97 || var4 == 98)) {
                   this.game.a(var2, var3, var4);
                }
             }
@@ -1124,7 +1124,7 @@ public final class Player extends Entity {
          for (int var6 = var5; var6 > var5 - 3; var6--) {
             for (int var7 = super.row; var7 >= super.row - 3; var7--) {
                short var8;
-               if (var6 >= 0 && var7 >= 0 && ((var8 = this.game.V.getTile(var6, var7)) == 97 || var8 == 98)) {
+               if (var6 >= 0 && var7 >= 0 && ((var8 = this.game.levelMap.getTile(var6, var7)) == 97 || var8 == 98)) {
                   this.game.a(var6, var7, var8);
                }
             }
@@ -1134,7 +1134,7 @@ public final class Player extends Entity {
 
    // Fire: checks ammo[currentWeapon] > 0, plays a fire sound only
    // while actually in-game (ratchetandclank.gameStarted, confirmed via
-   // `this.game.a.i` = Game.a (the midlet instance) .gameStarted, and
+   // `this.game.midlet.i` = Game.midlet (the midlet instance) .gameStarted, and
    // `.c(2)` = ratchetandclank.playSoundIfEnabled(2)), then spawns a
    // projectile per weapon slot via Game.e(x,y,type) -- the same method
    // Enemy.rangedAttack() uses. NOTE: this means Game.e(int,int,int) is
@@ -1151,8 +1151,8 @@ public final class Player extends Entity {
       }
 
       if (this.ammo[this.currentWeapon] > 0) {
-         if (this.game.a.gameStarted) {
-            this.game.a.playSoundIfEnabled(2);
+         if (this.game.midlet.gameStarted) {
+            this.game.midlet.playSoundIfEnabled(2);
          }
 
          switch (this.currentWeapon) {
@@ -1211,7 +1211,7 @@ public final class Player extends Entity {
                   && this.abs(var2 - this.y()) <= tileHeight
                   && this.game
                      .a(var1, var2, 19, 19, (super.posX >> 8) + (super.facingRight ? SWING_X_OFFSET[this.swingTargetType] : -SWING_X_OFFSET[this.swingTargetType] - SWING_WIDTH[this.swingTargetType]), this.y() + SWING_Y_OFFSET[this.swingTargetType], SWING_WIDTH[this.swingTargetType], SWING_HEIGHT[this.swingTargetType])) {
-                  int var7 = this.game.V.getTile(this.game.bF[var6], this.game.bG[var6]);
+                  int var7 = this.game.levelMap.getTile(this.game.bF[var6], this.game.bG[var6]);
                   var7 -= 36;
                   if (var7 == 2 && (this.game.bw & 1 << var7) > 0) {
                      this.game.cC = true;
@@ -1231,37 +1231,37 @@ public final class Player extends Entity {
             }
          }
 
-         for (int var15 = Game.ba - 1; var15 >= 0; var15--) {
-            byte var5 = this.game.ai[var15].kind;
-            if (this.game.ai[var15].kind != -1 && this.game.ai[var15].animState != 5) {
-               int var11 = this.game.ai[var15].c() - Enemy.a[var5];
-               int var12 = this.game.ai[var15].b() + Enemy.b[var5];
-               var3 = Enemy.c[var5];
-               var4 = Enemy.d[var5];
+         for (int var15 = Game.enemyPoolSize - 1; var15 >= 0; var15--) {
+            byte var5 = this.game.enemies[var15].kind;
+            if (this.game.enemies[var15].kind != -1 && this.game.enemies[var15].animState != 5) {
+               int var11 = this.game.enemies[var15].x() - Enemy.HITBOX_X_OFFSETS[var5];
+               int var12 = this.game.enemies[var15].y() + Enemy.HITBOX_Y_OFFSETS[var5];
+               var3 = Enemy.HITBOX_WIDTHS[var5];
+               var4 = Enemy.HITBOX_HEIGHTS[var5];
                if (this.abs(var11 - this.x()) <= 3 * tileWidth >> 1
                   && this.abs(var12 - this.y()) <= tileHeight
                   && this.game
                      .a(var11, var12, var3, var4, (super.posX >> 8) + (super.facingRight ? SWING_X_OFFSET[this.swingTargetType] : -SWING_X_OFFSET[this.swingTargetType] - SWING_WIDTH[this.swingTargetType]), this.y() + SWING_Y_OFFSET[this.swingTargetType], SWING_WIDTH[this.swingTargetType], SWING_HEIGHT[this.swingTargetType])
-                  && (!this.game.ai[var15].G || super.animState != 11)) {
+                  && (!this.game.enemies[var15].flattenedRenderFlag || super.animState != 11)) {
                   if (super.animState == 11) {
-                     this.game.ai[var15].G = true;
+                     this.game.enemies[var15].flattenedRenderFlag = true;
                   }
 
                   if (super.animState == 11) {
-                     this.game.ai[var15].health = (byte)(this.game.ai[var15].health - MELEE_DAMAGE_BY_LEVEL[this.weaponLevel[1]]);
+                     this.game.enemies[var15].health = (byte)(this.game.enemies[var15].health - MELEE_DAMAGE_BY_LEVEL[this.weaponLevel[1]]);
                   } else {
-                     this.game.ai[var15].health = (byte)(this.game.ai[var15].health - MELEE_DAMAGE_BY_LEVEL[this.weaponLevel[0]]);
+                     this.game.enemies[var15].health = (byte)(this.game.enemies[var15].health - MELEE_DAMAGE_BY_LEVEL[this.weaponLevel[0]]);
                   }
 
-                  if (this.game.ai[var15].animState != 2) {
-                     if (this.game.ai[var15].posX > super.posX) {
-                        this.game.ai[var15].w = 10;
+                  if (this.game.enemies[var15].animState != 2) {
+                     if (this.game.enemies[var15].posX > super.posX) {
+                        this.game.enemies[var15].bounceTimer = 10;
                      } else {
-                        this.game.ai[var15].w = -10;
+                        this.game.enemies[var15].bounceTimer = -10;
                      }
                   }
 
-                  if (this.game.ai[var15].health <= 0) {
+                  if (this.game.enemies[var15].health <= 0) {
                      short var8 = this.game.X;
                      if (this.game.cV) {
                         var8 = 0;
@@ -1269,8 +1269,8 @@ public final class Player extends Entity {
 
                      int var9 = var15 + var8 * 10 >> 5;
                      this.game.bv[var9] = this.game.bv[var9] & ~(1 << var15 + var8 * 10 - (var9 << 5));
-                     this.game.ai[var15].setAnimState((byte)5);
-                     this.game.ai[var15].animRestart = 1;
+                     this.game.enemies[var15].setAnimState((byte)5);
+                     this.game.enemies[var15].animRestart = 1;
                      if (var5 != 4) {
                         Game.do_++;
                         if (this.game.aa && ++this.game.ab > 10) {
@@ -1278,14 +1278,14 @@ public final class Player extends Entity {
                         }
 
                         if (this.game.Z != 0) {
-                           for (int var10 = 0; var10 < Enemy.BOLTS_DROPPED_BY_ANIM[this.game.ai[var15].animKind]; var10++) {
-                              this.game.c(this.game.ai[var15].c(), this.game.ai[var15].b(), 0);
+                           for (int var10 = 0; var10 < Enemy.BOLTS_DROPPED_BY_ANIM[this.game.enemies[var15].animKind]; var10++) {
+                              this.game.c(this.game.enemies[var15].x(), this.game.enemies[var15].y(), 0);
                            }
                         }
                      }
-                  } else if (this.game.ai[var15].animState != 2) {
-                     this.game.ai[var15].setAnimState((byte)4);
-                     this.game.ai[var15].animHold = 0;
+                  } else if (this.game.enemies[var15].animState != 2) {
+                     this.game.enemies[var15].setAnimState((byte)4);
+                     this.game.enemies[var15].animHold = 0;
                   }
                }
             }

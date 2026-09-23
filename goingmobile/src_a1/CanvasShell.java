@@ -41,7 +41,7 @@ public final class CanvasShell extends Canvas implements Runnable, CommandListen
             this.canvasState = 1;
             if (this.midlet.gameStarted) {
                if (this.midlet.game != null) {
-                  this.midlet.game.p();
+                  this.midlet.game.pause();
                }
             } else if (this.midlet.introManager != null) {
                this.midlet.introManager.d();
@@ -66,7 +66,7 @@ public final class CanvasShell extends Canvas implements Runnable, CommandListen
    public final void activate() {
       if (this.midlet.gameStarted) {
          if (this.midlet.game != null) {
-            this.midlet.game.q();
+            this.midlet.game.resume();
             return;
          }
       } else if (this.midlet.introManager != null) {
@@ -90,7 +90,7 @@ public final class CanvasShell extends Canvas implements Runnable, CommandListen
             directGraphics = DirectUtils.getDirectGraphics(var1);
             if (this.midlet.gameStarted) {
                if (this.midlet.game != null) {
-                  this.midlet.game.w(var1);
+                  this.midlet.game.render(var1);
                }
             } else if (this.midlet.introManager != null) {
                this.midlet.introManager.a(var1);
@@ -115,7 +115,7 @@ public final class CanvasShell extends Canvas implements Runnable, CommandListen
             if (this.canvasState == 0) {
                if (this.midlet.gameStarted) {
                   if (this.midlet.game != null) {
-                     this.midlet.game.r();
+                     this.midlet.game.tick();
                   }
                } else if (this.midlet.introManager != null) {
                   this.midlet.introManager.h();
@@ -152,7 +152,7 @@ public final class CanvasShell extends Canvas implements Runnable, CommandListen
          } else if (this.canvasState == 0) {
             if (this.midlet.gameStarted) {
                if (this.midlet.game != null) {
-                  this.midlet.game.b(var1);
+                  this.midlet.game.keyPressed(var1);
                }
             } else if (this.midlet.introManager != null) {
                this.midlet.introManager.b(var1);
@@ -165,7 +165,7 @@ public final class CanvasShell extends Canvas implements Runnable, CommandListen
    public final void keyReleased(int var1) {
       try {
          if (this.canvasState == 0 && this.midlet.gameStarted && this.midlet.game != null) {
-            this.midlet.game.c(var1);
+            this.midlet.game.keyReleased(var1);
          }
       } catch (Exception var3) {
       }

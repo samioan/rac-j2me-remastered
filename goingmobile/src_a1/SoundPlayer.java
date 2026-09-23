@@ -121,7 +121,7 @@ public final class SoundPlayer implements Runnable, PlayerListener {
 
    public final void run() {
       while (Thread.currentThread() == this.thread) {
-         Game.e(30);
+         Game.sleep(30);
          if (this.pendingSound > -1) {
             if (this.pendingSound != this.playingSound && this.player != null) {
                this.haltPlayer();

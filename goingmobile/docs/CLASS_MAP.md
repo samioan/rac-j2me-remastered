@@ -429,6 +429,92 @@ about `Game.e(int,int,int)` being enemy-shot-specific is a *different*
 overload from the `sleep(int)` confirmed here (different arity) and is
 still unconfirmed.
 
+### Cross-file consistency pass -- `src_a1/` now compiles clean (2026-09-23)
+
+`PORT_ROADMAP.md`'s milestone 3.1a is gated on a *compile-checked* `src_a1/`
+tree (same bar `../src/` already met for the legacy build). That check had
+never actually been run against a1 -- doing it for the first time surfaced
+**1479 compile errors**, almost entirely the exact cross-file staleness this
+file's per-class sections already flagged as "known follow-ups" (each
+class's own phase-1 renamed its members without updating the *other*
+files that reference them by old letter, since earlier files are
+intentionally not retroactively touched -- see the policy note at the top
+of this section). Fixed mechanically, file by file, using a small
+extraction tool (positionally diffs each `decompiled_a1/X.java` against its
+renamed `src_a1/` counterpart to recover the exact old->new member map,
+since declaration order is preserved even where the file was hand-written
+rather than scripted) plus targeted regex substitution scoped to each
+known receiver expression (`this.player.`, `this.enemies[n].`,
+`this.midlet.game.player.`, etc.), with arity/argument-type sniffing to
+disambiguate overloaded single-letter names and manual resolution for the
+genuinely ambiguous remainder. Down to 0 errors; all 11 classes now produce
+`.class` files against the real MIDP-2.0/CLDC/Nokia-UI stub jars (same
+command as `../src/README.md`, output dir swapped to `goingmobile/src_a1/`).
+
+Beyond the expected staleness, this pass found four **new, genuine bug
+classes** (not just missed renames) that no amount of reading-and-renaming
+would have caught without an actual compiler:
+
+1. **A decompiler artifact**: one of `Game`'s obfuscated static fields is
+   literally named `do` (`Game.java:498` and 7 other sites) -- a legal
+   obfuscated bytecode name that collides with the Java keyword. Vineflower
+   emitted it uncompilable as-is; renamed to `do_` (a placeholder, not a
+   real rename -- the field's role is still unconfirmed) at exactly the 8
+   sites that meant the field, leaving the one real `do { ... }` loop
+   (`Game.java:6617`) untouched.
+2. **`Game`'s and `IntroManager`'s own scripted substitution missed bare
+   class-qualified static references.** Both were produced by a rename
+   script that clearly handled `new X(`/typed-declaration/instance-field
+   contexts but never a bare `X.member` static access -- so `Game.java`
+   still had literal `e.b.fillTriangle(...)` (meant `CanvasShell.
+   directGraphics.fillTriangle(...)`), `d.d[d.i[...]]` (`LevelMap`'s own
+   statics), `b.d`/`b.h` (`Player`'s), `f.a..k` (`Enemy`'s HITBOX/ATTACK
+   tables), `j.a..d` (`Projectile`'s per-type tables) -- 100 sites in
+   `Game.java` alone, plus a handful more in `IntroManager.java`
+   (`e.b.drawImage(...)`). Fixed by renaming the bare class letter first,
+   then re-applying that class's own confirmed member map to the newly
+   class-qualified access.
+3. **A new, wider field/method collision class, discovered by the fix
+   above**: `Game`'s own kept-obfuscated single-letter fields (`b`, `d`,
+   `e`, `f`, `j` -- deliberately left obfuscated per this file's "Game"
+   section) happen to reuse the *same letters* as five of the other
+   top-level class names (`b`=Player, `d`=LevelMap, `e`=CanvasShell,
+   `f`=Enemy, `j`=Projectile). Blanket-renaming Game's own `F`/`G`/`H`
+   statics (`tileWidth`/`tileHeight`/`hudHeight`) during *last* session's
+   Game pass also corrupted unrelated same-letter fields on *other*
+   classes reached through `this.player.`/`this.enemies[n].` -- `Player`
+   independently has its own `F`/`G`/`H` (`grabTileType`/`ledgeAhead`/
+   `ledgeSnapOffsetX`) and `Enemy` its own `F`/`G` (`patrolTargetX`/
+   `flattenedRenderFlag`), all silently rewritten to `tileWidth`/
+   `tileHeight`/`hudHeight` wherever accessed via `this.player.`/
+   `this.enemies[n].`. Caught by the compiler (type mismatches: a
+   `boolean` field written `= false` where `tileHeight` is declared
+   `byte`, etc.) at 4 sites, fixed by reverting each to the correct
+   class's own member.
+4. **An overload-blind blanket rename**: `Game`'s `e(int)` -> `sleep(int)`
+   and `d(int)` -> `abs(int)` renames (confirmed, unambiguous) were applied
+   textually to *every* `this.e(`/`this.d(` call regardless of argument
+   type, corrupting ~19 calls to the genuinely different, still-obfuscated
+   `e(Graphics)`/`d(Graphics)` overloads (render-dispatch helpers) into
+   `this.sleep(var1)`/`this.abs(var1)` with a `Graphics` argument --
+   caught by the compiler (`incompatible types: Graphics cannot be
+   converted to int`), reverted to `this.e(var1)`/`this.d(var1)`.
+
+Two smaller, unrelated fixes surfaced the same way: `ratchetandclank`'s
+`stopSoundSoft()`/`refreshSaveSlotSummaries()` were marked `private` but
+called from `Game` (now `public`, same fix `SoundPlayer.haltPlayer()`
+needed earlier); `IntroManager.java:467`'s `this.midlet.canvas.a = -1`
+was a stale `CanvasShell.canvasState` reference never caught before
+because nothing had compiled this file against `CanvasShell.java` until now.
+
+**Not fixed by this pass** (would need actual gameplay to verify, not just
+compilation): every `TENTATIVE`-marked field/method name in every class's
+section above is unchanged: the compiler proves the *reference* is valid
+Java, not that the *name* is correct. This pass also did not touch any of
+the ~150 fields/methods deliberately left obfuscated on `Game`/
+`IntroManager` -- those still compile fine under their original letters,
+which was never in question.
+
 ---
 
 ## Legacy build's class map (done, reference only)

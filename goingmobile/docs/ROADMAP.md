@@ -113,18 +113,23 @@ mapping (`a` = font, `b` = Player, `c` = SoundPlayer, `d` = LevelMap, `e`
 = canvas shell, `f` = Enemy, `g` = intro/unlock manager, `h` = Game/
 engine, `i` = Entity, `j` = Projectile), and a1's own member-level
 read-through is now done too: all 11 classes renamed into
-[`../src_a1/`](../src_a1/) (not yet compile-checked -- too few of its
-own internals are renamed for a meaningful link-check on the densest
-classes, see `src_a1/README.md`), with the complete mapping in
-`CLASS_MAP.md`'s "a1 class map" section. `Game` (the 195KB engine) and
+[`../src_a1/`](../src_a1/) and **now compile clean** with zero errors
+against the real MIDP/CLDC/Nokia-UI stub jars (see `src_a1/README.md`),
+with the complete mapping in `CLASS_MAP.md`'s "a1 class map" section.
+Getting the compile check to pass (it had never actually been run until
+milestone 3.1a's prerequisites were checked) surfaced 1479 errors, mostly
+the already-documented cross-file staleness plus four new bug classes
+fixed along the way -- see `CLASS_MAP.md`'s "Cross-file consistency pass"
+section. `Game` (the 195KB engine) and
 `IntroManager` (58KB) were done via scripted substitution rather than
 full hand-transcription given their size, with a documented set of
 fields/methods deliberately left obfuscated on both (same treatment the
-legacy build gave its own `Game`); a handful of known cross-file
-follow-ups (some `CanvasShell.java`/`SoundPlayer.java` call sites still
-using pre-rename names, a few undocumented `ratchetandclank` methods
-surfaced by `Game`'s own read-through) are tracked in `CLASS_MAP.md`
-rather than fixed up immediately.
+legacy build gave its own `Game`); the cross-file follow-ups this raised
+(`CanvasShell.java`/`SoundPlayer.java` call sites using pre-rename names,
+and more) were resolved by the compile-check pass above rather than left
+open -- the remaining open item is `ratchetandclank.java` still having a
+few of its own members undocumented (surfaced by `Game`'s read-through,
+tracked in `CLASS_MAP.md`).
 
 **Phase 2 is done for both the legacy build and a1.** Every legacy-build
 asset format is confirmed *and tool-verified*: `tools/parse_gm.py`

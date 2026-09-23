@@ -179,11 +179,11 @@ public class ratchetandclank extends MIDlet {
       this.soundPlayer.haltPlayer();
    }
 
-   private final void stopSoundSoft() {
+   public final void stopSoundSoft() {
       this.soundPlayer.stop();
    }
 
-   private final void refreshSaveSlotSummaries() {
+   public final void refreshSaveSlotSummaries() {
       for (int var1 = 0; var1 < 3; var1++) {
          this.readSaveSlotRaw(var1);
          this.saveSlotFlags[var1] = this.saveBuffer[0];
@@ -282,7 +282,7 @@ public class ratchetandclank extends MIDlet {
 
       try {
          var2 = RecordStore.openRecordStore("RANDCSm", false);
-         this.game.a(this.saveBuffer);
+         this.game.writeSaveData(this.saveBuffer);
          var2.setRecord(this.SAVE_RECORD_IDS[var1], this.saveBuffer, 0, 214);
          var2.closeRecordStore();
       } catch (Exception var6) {
@@ -299,7 +299,7 @@ public class ratchetandclank extends MIDlet {
       try {
          (var2 = RecordStore.openRecordStore("RANDCSm", false)).getRecord(this.SAVE_RECORD_IDS[var1], this.saveBuffer, 0);
          var2.closeRecordStore();
-         this.game.b(this.saveBuffer);
+         this.game.readSaveData(this.saveBuffer);
       } catch (Exception var6) {
          try {
             var2.closeRecordStore();

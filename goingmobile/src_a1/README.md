@@ -48,13 +48,26 @@ renamed its own `b()`/`c()`.
 
 ## Compile check
 
-Not yet run against `src_a1/` (too few files exist for a meaningful
-link-check). Once enough of the tree exists, the same command as the
-legacy build's (`../src/README.md`) applies, swapping in
-`goingmobile/src_a1/*.java` and a different output dir -- a1 still targets
-MIDP-2.0/CLDC-1.0 and still uses `com.nokia.mid.ui.DirectGraphics`/
-`DirectUtils` for pixel ops (just not `FullCanvas`), so the same stub jars
-in `tools/midp-stubs/` apply.
+`src_a1/` now compiles **standalone** against the real MIDP-2.0/CLDC/
+Nokia-UI API stub jars, same command as the legacy build's
+(`../src/README.md`), swapping in `goingmobile/src_a1/*.java` and a
+different output dir:
+
+```
+javac -encoding UTF-8 -nowarn ^
+  -classpath "tools/midp-stubs/midpapi20.jar;tools/midp-stubs/cldcapi11.jar;tools/midp-stubs/nokiaui.jar" ^
+  -d build_src_a1 goingmobile/src_a1/*.java
+```
+
+Zero errors. This was the last prerequisite `PORT_ROADMAP.md` sets for
+milestone 3.1a. Getting there surfaced (and fixed) far more than the
+already-known cross-file staleness -- see `../docs/CLASS_MAP.md`'s
+"Cross-file consistency pass" section for the four new bug classes it
+found (a decompiler-artifact keyword collision, missed bare class-
+qualifier renames in `Game`/`IntroManager`'s scripted substitution, a
+wider field-letter collision between `Game`'s own kept-obfuscated fields
+and five other classes' names, and an overload-blind blanket rename that
+corrupted a `Graphics`-arg overload).
 
 ## Method and limits
 

@@ -36,7 +36,7 @@ public class Entity {
    public byte ap;          // unconfirmed -- zeroed at spawn/reset, tested `== 0` in Player physics
 
    public final byte column() {
-      return (byte)((this.posX >> 8) / Game.F);
+      return (byte)((this.posX >> 8) / Game.tileWidth);
    }
 
    public final void setAnimState(byte var1) {
@@ -46,15 +46,15 @@ public class Entity {
 
    public final void wrapRow() {
       if (this.posInRow < 0) {
-         this.posInRow += Game.G << 8;
+         this.posInRow += Game.tileHeight << 8;
          this.row--;
          if (this.row < 0) {
             this.row = 0;
             this.posInRow = 0;
             return;
          }
-      } else if (this.posInRow > Game.G << 8) {
-         this.posInRow -= Game.G << 8;
+      } else if (this.posInRow > Game.tileHeight << 8) {
+         this.posInRow -= Game.tileHeight << 8;
          this.row++;
       }
    }

@@ -43,18 +43,18 @@ public final class Projectile {
    public int halfWidth;   // copy of HALF_WIDTHS[type], set at spawn (confirmed decompiled_a1/h.java:5513,5541)
    public int halfHeight;  // copy of HALF_HEIGHTS[type], set at spawn
    private boolean detonated;
-   private short homingTargetEnemy; // -1 = none yet; index into Game.ai[] (the enemy pool)
+   private short homingTargetEnemy; // -1 = none yet; index into Game.enemies[] (the enemy pool)
    public byte sourceAnim;          // damage/weapon-hit class, set only for player shots (h.java:5540, `this.al[var8].r = var7`)
    public int playerOffsetX;        // horizontal offset from the player's posX at spawn, facing-adjusted (h.java:5523)
    public static byte tileWidth;
    public static byte tileHeight;
-   public static short hudHeight;   // Game.H -- clip-below-HUD y offset, used by setClip(0, hudHeight, 176, 220-hudHeight)
+   public static short hudHeight;   // Game.hudHeight -- clip-below-HUD y offset, used by setClip(0, hudHeight, 176, 220-hudHeight)
    private Game game;
 
    public Projectile(Game var1) {
-      tileWidth = Game.F;
-      tileHeight = Game.G;
-      hudHeight = Game.H;
+      tileWidth = Game.tileWidth;
+      tileHeight = Game.tileHeight;
+      hudHeight = Game.hudHeight;
       this.game = var1;
       this.type = -1;
       this.posX = this.posY = 0;
@@ -289,10 +289,10 @@ public final class Projectile {
          if ((this.type != 15 || this.type != 16 || this.type != 17 || this.type != 9 || this.type != 10 || this.type != 11) && this.type < 21 || this.type == 31) {
             int var10 = (this.posX >> 8) / tileWidth;
             int var15 = (this.posY >> 8) / tileHeight;
-            if (!this.game.V.isWalkable(var10, var15)) {
+            if (!this.game.levelMap.isWalkable(var10, var15)) {
                this.detonate(var1);
-               if (this.type >= 12 && this.type <= 14 && this.game.V.getTile(var10, var15) == 34) {
-                  this.game.V.tiles[var10][var15] = 0;
+               if (this.type >= 12 && this.type <= 14 && this.game.levelMap.getTile(var10, var15) == 34) {
+                  this.game.levelMap.tiles[var10][var15] = 0;
                   LevelMap.columnSolidMasks[var10] = LevelMap.columnSolidMasks[var10] & ~(1 << var15);
                }
             }
@@ -312,19 +312,19 @@ public final class Projectile {
          int var5 = this.posX >> 8;
          int var6 = this.posY >> 8;
 
-         for (int var2 = Game.ba - 1; var2 >= 0; var2--) {
-            if (this.game.ai[var2].kind != -1 && this.game.ai[var2].animState != 5) {
-               short var3 = this.game.ai[var2].c();
-               short var4 = this.game.ai[var2].b();
+         for (int var2 = Game.enemyPoolSize - 1; var2 >= 0; var2--) {
+            if (this.game.enemies[var2].kind != -1 && this.game.enemies[var2].animState != 5) {
+               short var3 = this.game.enemies[var2].x();
+               short var4 = this.game.enemies[var2].y();
                if ((var3 - var5) * (var3 - var5) + (var4 - var6) * (var4 - var6) <= 15876 && (this.vx > 0 ? var3 > var5 : var3 < var5)) {
                   this.homingTargetEnemy = (short)var2;
                   break;
                }
             }
          }
-      } else if (this.game.ai[this.homingTargetEnemy].kind != -1 && this.game.ai[this.homingTargetEnemy].animState != 5) {
-         short var9 = this.game.ai[this.homingTargetEnemy].c();
-         int var10 = this.game.ai[this.homingTargetEnemy].b() + Enemy.b[this.game.ai[this.homingTargetEnemy].kind] + (Enemy.d[this.game.ai[this.homingTargetEnemy].kind] >> 1);
+      } else if (this.game.enemies[this.homingTargetEnemy].kind != -1 && this.game.enemies[this.homingTargetEnemy].animState != 5) {
+         short var9 = this.game.enemies[this.homingTargetEnemy].x();
+         int var10 = this.game.enemies[this.homingTargetEnemy].y() + Enemy.HITBOX_Y_OFFSETS[this.game.enemies[this.homingTargetEnemy].kind] + (Enemy.HITBOX_HEIGHTS[this.game.enemies[this.homingTargetEnemy].kind] >> 1);
          int var11 = this.posX >> 8;
          int var12 = this.posY >> 8;
          int var13 = var9 - var11;
@@ -347,7 +347,7 @@ public final class Projectile {
             this.prev2Y = this.prevY;
             this.prevX = this.posX;
             this.prevY = this.posY;
-            if (this.game.d(var13) > this.game.d(var7)) {
+            if (this.game.abs(var13) > this.game.abs(var7)) {
                if (var13 > 0) {
                   this.vx = var8;
                } else {
@@ -445,12 +445,12 @@ public final class Projectile {
                }
 
                if (this.type >= 15 && this.type <= 17) {
-                  if (this.game.aj.facingRight) {
-                     if (this.posX < this.game.aj.posX + this.playerOffsetX) {
-                        this.posX = this.game.aj.posX + this.playerOffsetX;
+                  if (this.game.player.facingRight) {
+                     if (this.posX < this.game.player.posX + this.playerOffsetX) {
+                        this.posX = this.game.player.posX + this.playerOffsetX;
                      }
-                  } else if (this.posX > this.game.aj.posX - this.playerOffsetX) {
-                     this.posX = this.game.aj.posX - this.playerOffsetX;
+                  } else if (this.posX > this.game.player.posX - this.playerOffsetX) {
+                     this.posX = this.game.player.posX - this.playerOffsetX;
                   }
 
                   var27 = (this.posX >> 8) + var2;

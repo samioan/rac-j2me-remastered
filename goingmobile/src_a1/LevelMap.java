@@ -76,8 +76,8 @@ public final class LevelMap {
 
    public LevelMap(Game var1) {
       this.game = var1;
-      tileWidth = Game.F;
-      tileHeight = Game.G;
+      tileWidth = Game.tileWidth;
+      tileHeight = Game.tileHeight;
       tileAnimCounter = 0;
       subGridNeighbors = new byte[12][4];
       subGridIndexMap = new byte[12];
@@ -165,8 +165,8 @@ public final class LevelMap {
          this.game.bn[var14] = -1;
       }
 
-      for (int var15 = Game.ba - 1; var15 >= 0; var15--) {
-         this.game.ai[var15].kind = -1;
+      for (int var15 = Game.enemyPoolSize - 1; var15 >= 0; var15--) {
+         this.game.enemies[var15].kind = -1;
       }
 
       this.game.bP = -1;
@@ -187,11 +187,11 @@ public final class LevelMap {
       }
 
       for (int var19 = 9; var19 >= 0; var19--) {
-         this.game.al[var19].f = -1;
+         this.game.enemyProjectiles[var19].type = -1;
       }
 
       for (int var20 = 9; var20 >= 0; var20--) {
-         this.game.ak[var20].f = -1;
+         this.game.playerProjectiles[var20].type = -1;
       }
 
       this.game.cc = -1;
