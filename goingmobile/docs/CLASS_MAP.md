@@ -259,15 +259,57 @@ initializer (`static { byte[] var10000 = new byte[]{10,10,10,10,10}; }`,
 never stored anywhere -- same flavor as the legacy build's Vineflower
 artifacts).
 
+### Player (from a1's `b`) -- done, in `../src_a1/Player.java`
+
+The densest class so far (41KB, 6 fields declared but never referenced
+anywhere in this file -- `h`/`N`/`Q`/`R`/`S`/`T`/`U` -- presumably read
+or written by `Game`, left obfuscated). Confirmed statics via exact-value
+or exact-formula matches to the legacy build's already-documented Player
+tables: `AMMO_CAPACITY` (`weapon*3+level` indexing, matches the legacy
+build's `d` byte-for-byte in shape), `INITIAL_AMMO`/`AMMO_PER_PICKUP`
+(byte-for-byte identical values to the legacy build's `e`/`f`).
+`Player.x()`/`.y()` (pixel position) are confirmed to be the **opposite
+letters of Enemy's** (`Enemy.b()`=y, `.c()`=x; `Player.b()`=x, `.c()`=y)
+-- the Enemy.java header's warning about not assuming cross-class letter
+consistency paid off immediately here.
+
+**Self-review found and fixed a serious bug before this was done**, more
+severe than Enemy.java's: an early draft collapsed three genuinely
+distinct fields -- `s` (jumpPhase), `t` (a separate, rarely-touched
+zip-grab-retry-delay field, confirmed distinct from the *method* `t()` =
+`updatePickupMagnet()`, itself a field/method letter collision like
+every other class here), and `u`/`v` (the real swing-phase state machine
+and its countdown) -- into a single misleadingly-named field
+(`ziplineCooldown`), because superficially-similar `if (this.X == N)`
+branches *looked* like one state machine on a skim. This silently
+swapped which field `handleTileInteractions()` (`m()`) read/wrote in
+several branches. **Caught by systematically grepping the original for
+every bare `this.<letter>` field access (no call parens) and building a
+ground-truth table before trusting any rename** -- the same technique is
+worth applying up front for `IntroManager`/`Game`, rather than as a
+recovery step. After the fix, every other field in this file (`w`/`x`/
+`y`/`z`/`A`/`B`/`C`/`D`/`E`/`F`/`G`/`H`/`L`/`M`/`O`/`P`/`V`/`W`/`X`/`Y`)
+was independently re-verified against that same ground-truth grep and
+checked out correct on the first pass.
+
+One cross-class finding worth flagging for `Game`'s own phase-1:
+`Player.fire()` calls `Game.e(int,int,int)` to spawn projectiles -- the
+*same* method `Projectile.java`'s header speculated (from a single
+`h.java` call site) was the enemy-shot-specific spawner writing to
+`Game.ak[]`. It evidently isn't enemy-only; `Projectile.java`'s header
+comment should be corrected once `Game`'s phase-1 clarifies what it
+actually does.
+
 ### Not started yet
 
-`b` (Player, 41KB), `g` (IntroManager, 58KB), `h` (Game, 195KB) are the
-remaining classes, `h` by a wide margin (it's larger than the legacy
-build's entire `f.java` engine class, 127KB). All 8 done files already
-reference the not-yet-started classes by their renamed class names per
-this section's class-level-rename policy note -- but per the lesson
-above, only *inherited* (Entity) members of those classes are trustworthy
-until each one gets its own phase-1 pass.
+`g` (IntroManager, 58KB), `h` (Game, 195KB) are the remaining classes,
+`h` by a wide margin (it's larger than the legacy build's entire
+`f.java` engine class, 127KB). All 9 done files already reference the
+not-yet-started classes by their renamed class names per this section's
+class-level-rename policy note -- but per the lessons above, only
+*inherited* (Entity) members of those classes are trustworthy until each
+one gets its own phase-1 pass, and every bare-field rename should start
+from a full `this.<letter>` grep, not an in-context skim.
 
 ---
 

@@ -20,12 +20,12 @@ confidence levels, and open questions are in
 | `LevelMap.java` | `d.java` | tilemaps, room/sub-grid tables | done |
 | `Enemy.java` | `f.java` | the enemy pool | done |
 | `Projectile.java` | `j.java` | both projectile pools | done |
-| `Player.java` | `b.java` | Ratchet: physics, weapons, melee | not started |
+| `Player.java` | `b.java` | Ratchet: physics, weapons, melee | done |
 | `IntroManager.java` | `g.java` | splash + unlock-code UI | not started |
 | `Game.java` | `h.java` | the engine (195KB, the big one) | not started |
 
-8 of 11 classes done (all the small ones, plus `LevelMap`/`Projectile`/
-`Enemy`). Remaining
+9 of 11 classes done (all the small ones, plus `LevelMap`/`Projectile`/
+`Enemy`/`Player`). Remaining
 orchestration methods on `ratchetandclank` (`startNewGame`/
 `continueGame`/`returnToIntro`/`playSoundIfEnabled`) and most of
 `LevelMap`'s tile legend are tentative pending `IntroManager`/`Game`'s
