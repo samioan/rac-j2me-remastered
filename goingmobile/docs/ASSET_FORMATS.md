@@ -1,8 +1,16 @@
 # Going Mobile -- asset formats
 
-All paths below are relative to `extracted/` (regenerate with
-`python ../../tools/extract_jar.py goingmobile`). Where noted, the
-`extracted_a1/` build (unobfuscated asset names) confirms the format.
+> **Target changed 2026-09-22** to `roms/RAC-GoingMobile-a1.jar` -- see
+> `ROADMAP.md`. The "Confirmed from the loader code" section below is the
+> **canonical/legacy build's** phase-2 work (`extracted/`, paths below
+> relative to it), kept as a reference/pattern library; it's no longer
+> the port target's own asset set. a1's own formats are in the
+> "a1-build-only formats" section, relative to `extracted_a1/`.
+
+All paths in the first section below are relative to `extracted/`
+(regenerate with `python ../../tools/extract_jar.py goingmobile`). Where
+noted, the `extracted_a1/` build (unobfuscated asset names) confirms the
+format.
 
 ## Confirmed from the loader code
 
@@ -21,29 +29,33 @@ All paths below are relative to `extracted/` (regenerate with
 | `*.png` (`a`..`h`, `p`, `hhg`, `icon`, `logo`, `sony`, `uc`) | Standard PNG sprite sheets | No RE needed; confirmed roles (phase 1): `a` = tileset, `b` = rotating enemy segments, `c` = player, `d` = actors/platforms/boss, `e` = titanium-bolt boxes, `f` = weapon in hand, `g` = HUD icons, `h` = 8x8 projectiles/pickups, `p` = dialogue portraits, `uc` = digit strip, `sony`/`hhg`/`logo` = splash chain, `icon` = MIDlet icon. |
 | `t` | **Dead data -- 35 bytes, referenced by no code path** | Byte-identical in the two builds that share this code (canonical and `(a)`), absent from the a1 build's file list, and every resource load in all three decompiled trees is accounted for without it (`/n*`, `/m*`, `/o`, `/p`, `/q`, `/r`, `/f2.v`, `/help`/`about`/`credits`, sounds, `.png`s). Leftover from an earlier build; the port should never load it. (Settled by the cross-build comparison, `../docs/BUILD_COMPARISON.md`.) |
 
-## a1-build-only files (formats to document as they get read)
+## a1-build-only formats: confirmed and tool-verified
 
-These exist only in `extracted_a1/`, named; they are the same game's newer
-data pipeline and the Rosetta stone for the canonical build's `o`/`p`/`r`:
+a1's phase 1 (`src_a1/`, see `CLASS_MAP.md`) read through every loader for
+these; `tools/parse_gm_a1.py` replicates each one against
+`extracted_a1/` and **all validations pass** (see "Status" below).
 
-| File(s) | Format | Notes |
+| File(s) | Format | Evidence |
 |---|---|---|
-| `level0.bin` .. `level12.bin` | Tilemaps, same cell scheme as `n*` but multi-grid per file | Sizes are multiples of 504 (504, 1512, 2016, 2520, 3024) = 1/3/4/5/6 grids of 28x18 -- bigger levels than the canonical build's one-grid-per-file. `mapData.txt` indexes them. |
-| `mapData.txt` | Plain text: `level,x,y,\r\n` per line | 62 lines -- world-map node positions (level index + coordinates on the galactic map screen), read by `h.t()` (`decompiled_a1/h.java` line ~2648). |
-| `enemy.bin` (149B), `player.bin` (58B) | Binary animation/state scripts | Small-index byte streams -- per-entity animation sequences, almost certainly the readable equivalents of canonical `p`/`r`. **Not yet read through.** |
-| `txt_en/fr/gr/it/sp.txt` | `\n`-separated string tables | Superset of canonical `m*.txt` (includes per-level names: `Circuit Circuit`, `Battleland`, `Communication Station`, ...). |
-| `*.wav` (`box`, `bubble`, `death`, `msound`, `shoot`) | Standard WAV (MIDP-2.0 audio) | Replaces some of the canonical build's `.mid`s on MIDP-2.0 handsets. |
-| `bg_*.png`, `en_*.png`, named sprites (`clank.png`, `ratcht.png`, `weapon.png`, ...) | Standard PNG | Named per-role, unlike canonical `a`..`h.png`. |
+| `level0.bin` .. `level12.bin` | **Tilemaps, same cell scheme as the canonical build's `n*` (28x18, column-major, tile id = raw byte - 0x20) but multi-grid per file: `LEVEL_ROOM_TABLES[level][0]` "logical room" grids read consecutively.** File size is `distinct_physical_grids x 504`, where distinct grids come from that level's `subGridIndexMap` (several logical rooms can share one physical grid -- confirmed exactly against every file's byte count). | `LevelMap.loadLevelFile(int)`/`loadRoomTable(int)` (`src_a1/LevelMap.java`). **Level 11 edge case**: its table declares 12 logical rooms over only 6 distinct grids (`index_map=[0,1,2,3,0,4,1,2,5,3,4,5]`); the loader's read loop uses the *logical* room count (12) as its bound, so it reads 6 grids' worth past the real 3024-byte file, and `InputStream.read()` returning -1 (EOF) produces tile id `-33` for `subGrids[6..11]`. Those slots are never selected by `getTile()` (the index map only ever points at 0-5), so this never surfaces in normal play, but a port must not replicate the OOB-style read verbatim -- clamp the room-table read loop to the data actually present, mirroring the canonical build's own documented "must bounds-check instead of replicating" lesson below. |
+| `mapData.txt` | **Plain text, two blocks, 105 lines total: 62 lines of `id,x,y,` (world-map node positions) then 43 lines of `a,b,` (node-to-node edges, the lines drawn between planets on the map screen).** Every edge's endpoints resolve to a real node id. | `Game.t()` (`src_a1/Game.java:2739`, unrenamed -- see `Game`'s CLASS_MAP.md section): `this.dd[62][3]` (shorts) then `this.de[43][2]` (bytes), each block terminated by scanning for `\n`. |
+| `enemy_spr_box.bin` | **40 bytes -- 8 tables x 5 enemy types (x-off/y-off/width/height for hitbox, then attack), same shape as the canonical build's `/q`.** Odd/even tables are scaled by `Game.J`/`Game.K` (both currently 44 in this build, so scaling is a no-op on the shipped data). Hitbox is uniform across all 5 types (14, 8, 28, 36); only type 1 (the boss) carries nonzero attack geometry (2, 0, 35, 21). | `Enemy.loadHitboxTables(String)` (`src_a1/Enemy.java:761`). |
+| `enemy.bin` | **149 bytes -- 5 enemy types x 8 anim slots, each `{frameCount, extraTicks}` byte pair + `frameCount` frame-index bytes.** Same shape as the canonical build's `/p`, but 8 anim slots per type instead of 6. | `Enemy.loadAnimTables(String)` (`src_a1/Enemy.java:791`). |
+| `player.bin` | **58 bytes -- 15 anim slots, same `{frameCount, extraTicks}` + frame-index-bytes shape as one enemy.bin type.** Same shape as the canonical build's `/r`. | `Player.loadAnimFile(String)` (`src_a1/Player.java:1408`). |
+| `f3.v` | **Bitmap font, byte-identical format to the already-confirmed `f2.v`** (192 glyph records, `fillRect`-run encoding) -- 1778 bytes, consumed exactly, 192 glyphs. Constructed with line height 13 (vs. `f2.v`'s 10) and spacing 1; the point size isn't stored in the file, it's a constructor arg. | `ratchetandclank.largeFont = new Font("/f3.v", 13, 1)` (`Game`'s boot step, `src_a1/Game.java` header comment). |
+| `txt_en/fr/gr/it/sp.txt` | `\n`-separated string tables | Superset of canonical `m*.txt` (includes per-level names: `Circuit Circuit`, `Battleland`, `Communication Station`, ...). Loaded by `ratchetandclank.loadStrings()` (already confirmed, phase 1). Byte-level format not re-parsed here (plain line-per-string, same as the canonical build's `m*.txt`, already documented above) -- nothing new to confirm. |
+| `*.wav` (`box`, `bubble`, `death`, `msound`, `shoot`) | Standard WAV (MIDP-2.0 audio) | No RE needed. Replaces some of the canonical build's `.mid`s on MIDP-2.0 handsets; loaded by `SoundPlayer` (already confirmed, phase 1), same one-at-a-time playback model as the canonical build. |
+| `bg_*.png`, `en_*.png`, named sprites (`clank.png`, `ratcht.png`, `weapon.png`, ...) | Standard PNG | No RE needed. Named per-role, unlike canonical `a`..`h.png`; roles confirmed by `Game.java`'s boot-step image loads (phase 1). |
 
-## Status: every canonical format is tool-verified
+## Status: every format in both builds is tool-verified
 
-`tools/parse_gm.py` parses each format above by replicating its loader
-byte-for-byte, and **all validations pass**: exact byte consumption for
-`/o` (297/297), `f2.v` (1740/1740, also the a1 copy), `/p` (99/99), `/r`
-(50/50), `/q` (40/40) and all 11 `n*` files (504 bytes, zero unexplained
-tiles); the font renders readable text from its rect runs; the menu tree
-resolves every string. Two things the parsers exposed, now folded into
-the table above:
+**Canonical/legacy build**: `tools/parse_gm.py` parses each format in the
+first section by replicating its loader byte-for-byte, and **all
+validations pass**: exact byte consumption for `/o` (297/297), `f2.v`
+(1740/1740, also the a1 copy), `/p` (99/99), `/r` (50/50), `/q` (40/40)
+and all 11 `n*` files (504 bytes, zero unexplained tiles); the font
+renders readable text from its rect runs; the menu tree resolves every
+string. Two things the parsers exposed, now folded into the table above:
 
 - The shipped level set is `n1..n10` + `n12` -- **there is no n11**: the
   level select deliberately maps "11" to the boss (12), so the `Q == 11`
@@ -54,12 +66,17 @@ the table above:
   tiles there, so the original never crashes; **the port must
   bounds-check instead of replicating this**.
 
-Only the a1-only formats (`mapData.txt`, `enemy.bin`, `player.bin`,
-multi-grid `level*.bin`) remain unparsed -- they are not the port target.
+**a1 (the current target)**: `tools/parse_gm_a1.py` parses every
+a1-build-only format the same way, against `extracted_a1/`, and **all
+validations pass**: exact byte consumption for `enemy.bin` (149/149),
+`player.bin` (58/58), `f3.v` (1778/1778), all 13 `level*.bin` files
+(byte count matches each level's distinct-physical-grid count x 504),
+and `mapData.txt` (105/105 lines, every edge resolves to a real node
+id). One thing the parser exposed, folded into the table above: level
+11's room table claims more logical rooms (12) than the file has
+physical grids for (6) -- an a1-specific cousin of the canonical build's
+"n11 doesn't exist" finding, same "port must bounds-check, not
+replicate" conclusion.
 
-## How to make progress on these
-
-The remaining unknowns are only in the **a1 build's** formats
-(`mapData.txt`, `enemy.bin`, `player.bin`, the multi-grid `level*.bin`)
--- readable names, straightforward loaders in `decompiled_a1/`, but not
-needed for the canonical-build port.
+Both builds' phase 2 is now done; nothing asset-format-related remains
+unparsed for either.

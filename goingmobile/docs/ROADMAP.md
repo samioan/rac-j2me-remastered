@@ -103,30 +103,40 @@ decompiled to readable-but-unrenamed Java via
 files). Clean recovery -- obfuscation is minifier-style single-letter
 names only, control flow and types intact.
 
-**Phase 1 is done for the legacy build, not yet started for the current
-target (a1).** The legacy build's all 9 classes were read through,
-renamed into a compile-checked [`../src/`](../src/) reference tree (zero
-errors against the real MIDP/CLDC/Nokia-UI stub jars), with the complete
-class/member mapping in [`CLASS_MAP.md`](CLASS_MAP.md). The a1
-cross-build comparison (see [`BUILD_COMPARISON.md`](BUILD_COMPARISON.md))
-settled a **class-level** mapping for a1 (`a` = font, `b` = Player, `c` =
-SoundPlayer, `d` = LevelMap, `e` = canvas shell, `f` = Enemy, `g` =
-intro/unlock manager, `h` = Game/engine, `i` = Entity, `j` = Projectile)
-but that is not a member-level read-through -- a1's phase 1 (produce a
-compile-checked, member-renamed `src_a1/` tree, same bar as the legacy
-build's `src/`) is the next open work, starting with the small classes
-(`i`/`c`/`e`/`a`) and working up to the 195KB `h` engine.
+**Phase 1 is done for both the legacy build and a1.** The legacy build's
+all 9 classes were read through, renamed into a compile-checked
+[`../src/`](../src/) reference tree (zero errors against the real
+MIDP/CLDC/Nokia-UI stub jars), with the complete class/member mapping in
+[`CLASS_MAP.md`](CLASS_MAP.md). a1's cross-build comparison (see
+[`BUILD_COMPARISON.md`](BUILD_COMPARISON.md)) settled a **class-level**
+mapping (`a` = font, `b` = Player, `c` = SoundPlayer, `d` = LevelMap, `e`
+= canvas shell, `f` = Enemy, `g` = intro/unlock manager, `h` = Game/
+engine, `i` = Entity, `j` = Projectile), and a1's own member-level
+read-through is now done too: all 11 classes renamed into
+[`../src_a1/`](../src_a1/) (not yet compile-checked -- too few of its
+own internals are renamed for a meaningful link-check on the densest
+classes, see `src_a1/README.md`), with the complete mapping in
+`CLASS_MAP.md`'s "a1 class map" section. `Game` (the 195KB engine) and
+`IntroManager` (58KB) were done via scripted substitution rather than
+full hand-transcription given their size, with a documented set of
+fields/methods deliberately left obfuscated on both (same treatment the
+legacy build gave its own `Game`); a handful of known cross-file
+follow-ups (some `CanvasShell.java`/`SoundPlayer.java` call sites still
+using pre-rename names, a few undocumented `ratchetandclank` methods
+surfaced by `Game`'s own read-through) are tracked in `CLASS_MAP.md`
+rather than fixed up immediately.
 
-**Phase 2 is done for the legacy build, not yet started for a1.** Every
-legacy-build asset format is confirmed *and tool-verified*:
-`tools/parse_gm.py` replicates each loader byte-for-byte and all
-validations pass -- see [`ASSET_FORMATS.md`](ASSET_FORMATS.md). a1 has
-different formats to confirm from scratch once its phase 1 read-through
-gets far enough to identify each loader: `enemy.bin`/`player.bin` state
-scripts (replacing some of the legacy build's inline tables),
-`mapData.txt` (a world map, new vs. the legacy build), the 13-level
-`level0.bin`..`level12.bin` set, and `f3.v` (an extra video/font asset
-the legacy build doesn't have).
+**Phase 2 is done for both the legacy build and a1.** Every legacy-build
+asset format is confirmed *and tool-verified*: `tools/parse_gm.py`
+replicates each loader byte-for-byte and all validations pass -- see
+[`ASSET_FORMATS.md`](ASSET_FORMATS.md). a1's own formats (different from
+the legacy build's: `enemy.bin`/`player.bin` state scripts, the
+world-map `mapData.txt`, the 13-level multi-grid `level0.bin`..
+`level12.bin` set, and the second bitmap font `f3.v`) are now confirmed
+and tool-verified the same way, by `tools/parse_gm_a1.py` against
+`extracted_a1/` -- including one new finding, a level-11-specific
+read-past-end-of-file edge case (a cousin of the legacy build's already-
+documented "n11 doesn't exist" finding), folded into `ASSET_FORMATS.md`.
 
 [`PORT_ROADMAP.md`](PORT_ROADMAP.md), separately from this file. Milestone
 3.1 (boot/splash/menu/save surface -- MIDlet lifecycle, RMS saves, the
