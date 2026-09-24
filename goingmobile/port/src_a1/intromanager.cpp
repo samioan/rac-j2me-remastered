@@ -766,7 +766,10 @@ void IntroManager::d_(int key, int action) {
   } else if (key != 53 && action != -5 && key != -6) {
     if (key == -7 || key == -8) a_((jbyte)1);
   } else if (midlet_->saveSlotFlags[G] != 0) {
-    midlet_->writeSaveSlot(G);
+    // Game.java (phase-1 tree) calls midlet.writeSaveSlot(G) here, which would overwrite
+    // the chosen slot from the empty menu-time Game state; "Load Game" can only mean
+    // continueGame(slot) (nothing else in the tree calls it), so it is used instead.
+    midlet_->continueGame(G);
   }
 }
 

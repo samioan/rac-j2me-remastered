@@ -433,6 +433,7 @@ void Game::keyPressed(int key) {
       return;
     case 1: extrasKey(key, action); return;
     case 2: endStatsKey(key, action); return;
+    case 22: wheelKey(key, action); return;
     case 23: restartKey(key, action); return;
     case 3: mapKey(key, action); return;
     case 11: weaponBuyKey(key, action); return;
@@ -1215,7 +1216,8 @@ void Game::tick() {
     dT = -1;
     d = true;
   } else if (dU != -1) {
-    // Loading a saved slot (midlet.readSaveSlot) is not ported yet.
+    midlet->readSaveSlot(dU);
+    ac = (jbyte)dU;
     dU = -1;
     d = true;
   }

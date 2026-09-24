@@ -358,5 +358,3 @@ String Game::a_(const String& fmt, std::initializer_list<String> args) {
 
 int Game::k_() { return 75; }
 
-void Game::writeSaveData(jbyte*) {}
-void Game::readSaveData(const jbyte*) {}

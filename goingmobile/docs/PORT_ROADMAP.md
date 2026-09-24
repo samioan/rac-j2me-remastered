@@ -306,7 +306,14 @@ re-basing onto a1 rather than finishing the legacy build's gameplay.
       y() < floorY" and "y() >= floorY && velY < 0"). Other `x()`/`y()`
       pairs in Player.java that look swapped (enemy-stomp check, line ~730 of
       Player.java) were left literal and may need the same treatment.
-      Not yet: the in-game weapon wheel (b==22), the
+      Weapon wheel + save/load slice: in-game weapon wheel (b==22, `#` key;
+      the port maps Tab to `#`), `Game.writeSaveData/readSaveData` (214-byte
+      slot format) and the dU load path. Verified by screenshots (wheel cycling
+      and closing; a slot written on level load then listed in Load Game and
+      loaded to the level-select map). The phase-1 IntroManager Load Game
+      handler calls `writeSaveSlot(G)` where only `continueGame(G)` makes
+      sense (nothing else calls continueGame), so the port calls continueGame.
+      Not yet: a full playthrough of levels 1-11, sound, the
       other levels' level-specific scripting beyond what level 0 exercised,
       boss fight (Z==12, states 16/24), save/load of slots, challenge rooms
       (cV), the store/weapon-select screens, sound.

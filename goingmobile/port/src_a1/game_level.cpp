@@ -609,8 +609,8 @@ void Game::render(Graphics* g) {
     case 5: f_(g); return;
     case 7: v_(g); return;
     case 8: u_(g); return;
+    case 22: drawWheel(g); return;
     case 6: case 9:
-    case 22:
       return;  // Game's own pause/store/results/game-over screens: later 3.2a slice
     default:
       break;
@@ -659,6 +659,12 @@ void Game::render(Graphics* g) {
   if (cD) {
     H_(g);
     cG = a_(g, cF);
+  }
+  if (dX != -1) {
+    cu = dX;
+    drawWheel(g);
+    b = 22;
+    dX = -1;
   }
 }
 

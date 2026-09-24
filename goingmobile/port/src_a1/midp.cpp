@@ -325,6 +325,10 @@ void Graphics::drawImageManip(Image* img, int x, int y, int anchor, int manipula
   }
 }
 
+void Graphics::fillPolygon(const int* xs, const int* ys, int n, int argb) {
+  for (int k2 = 1; k2 + 1 < n; k2++) fillTriangle(xs[0], ys[0], xs[k2], ys[k2], xs[k2 + 1], ys[k2 + 1], argb);
+}
+
 void Graphics::drawTriangle(int x1, int y1, int x2, int y2, int x3, int y3, int argb) {
   int saved = color_;
   color_ = argb & 0xFFFFFF;
@@ -566,6 +570,7 @@ static int mapVirtualKey(WPARAM vk) {
     case VK_SPACE: return KEY_FIRE;
     case VK_ESCAPE: return KEY_SOFT_LEFT;
     case VK_BACK: return KEY_SOFT_RIGHT;
+    case VK_TAB: return 35;  // '#' (weapon wheel)
     case VK_OEM_2: return KEY_STAR;  // '/' -- stand-in for the keypad '*'
     default:
       if (vk >= '0' && vk <= '9') return (int)vk;

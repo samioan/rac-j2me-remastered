@@ -398,3 +398,59 @@ void Game::infoKey(int key, int action) {
     midlet->playSoundIfEnabled(3);
   }
 }
+
+void Game::writeSaveData(jbyte* buf) {
+  buf[0] = (jbyte)(Z == 0 ? 2 : 1);
+  midlet->writeInt(cL, buf, 1);
+  midlet->writeInt(bT, buf, 5);
+  midlet->writeInt(bU, buf, 9);
+  midlet->writeInt(cJ, buf, 13);
+  buf[17] = player->ownedWeapons;
+  for (int k2 = 0; k2 < 8; k2++) {
+    buf[18 + k2] = player->weaponLevel[k2];
+    midlet->writeShort(player->N[k2], buf, 26 + k2 * 2);
+    midlet->writeShort(player->ammo[k2], buf, 42 + k2 * 2);
+  }
+  midlet->writeInt(aX, buf, 58);
+  buf[62] = bw;
+  midlet->writeInt(bx, buf, 63);
+  midlet->writeInt(by, buf, 67);
+  midlet->writeInt(cr, buf, 195);
+  buf[199] = (jbyte)(bZ ? 1 : 0);
+  midlet->writeInt(di, buf, 200);
+  midlet->writeInt(cK, buf, 204);
+  midlet->writeInt(dA, buf, 208);
+  buf[212] = (jbyte)(aa ? 1 : 0);
+  buf[213] = ac;
+}
+
+void Game::readSaveData(const jbyte* buf) {
+  if (buf[0] == 2) {
+    f_(0);
+    return;
+  }
+  cL = midlet->readInt(buf, 1);
+  bT = midlet->readInt(buf, 5);
+  bU = midlet->readInt(buf, 9);
+  cJ = midlet->readInt(buf, 13);
+  player->ownedWeapons = buf[17];
+  for (int k2 = 0; k2 < 8; k2++) {
+    player->weaponLevel[k2] = buf[18 + k2];
+    player->N[k2] = midlet->readShort(buf, 26 + k2 * 2);
+    player->ammo[k2] = midlet->readShort(buf, 42 + k2 * 2);
+  }
+  aX = midlet->readInt(buf, 58);
+  bw = buf[62];
+  bx = midlet->readInt(buf, 63);
+  by = midlet->readInt(buf, 67);
+  cr = midlet->readInt(buf, 195);
+  bZ = buf[199] == 1;
+  di = midlet->readInt(buf, 200);
+  cK = midlet->readInt(buf, 204);
+  dA = midlet->readInt(buf, 208);
+  aa = buf[212] != 0;
+  ac = buf[213];
+  ec = cu = 0;
+  W_();
+  b = 3;
+}

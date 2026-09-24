@@ -276,6 +276,13 @@ class Game {
   void endStatsKey(int key, int action);
   void restartKey(int key, int action);
   void restartGame();                            // Game.O()
+  // --- weapon wheel (game_wheel.cpp) ---
+  static const jbyte R[8], S[8];
+  static const jshort dM[7][2];
+  void wheelOutline(Graphics* g, int ox, int oy);
+  void wheelFill(Graphics* g, int ox, int oy);
+  void drawWheel(Graphics* g);
+  void wheelKey(int key, int action);
   void confirmScreen(Graphics* g, int titleIdx);
   int a_(Graphics* g, const String& text, int y, int left, int right);  // scrolling ticker
   void confirmKey(int key, int action, bool toDesktop);  // b==7 / b==8 input
