@@ -318,10 +318,12 @@ re-basing onto a1 rather than finishing the legacy build's gameplay.
       and plays (MCI rc=0), all five .wav cues open. Every Game/Player
       `playSoundIfEnabled` call site in the Java tree is ported except the one
       in Game's unused own slot picker (b==9). Not audibly compared.
-      Not yet: a full playthrough of levels 1-11, the
-      other levels' level-specific scripting beyond what level 0 exercised,
-      boss fight (Z==12, states 16/24), save/load of slots, challenge rooms
-      (cV), the store/weapon-select screens, sound.
+      Remaining for 3.2a: an end-to-end playthrough of levels 1-11 (only
+      levels 0, 1 and 12 have been exercised) to shake out further
+      transcription bugs like the Player x()/y() landing swap, the
+      still-literal x()/y() pairs in Player.java's enemy-stomp check, Game's
+      own unused slot picker (b==6/9), and a pixel/behaviour comparison
+      against the original.
       Original scope: Same scope as the legacy build's stubbed 3.2
       (`LevelMap`'s level parser and 22x14-equivalent tile renderer at
       a1's resolution, `Player`/`Enemy`/`Projectile` physics/AI/rendering,
