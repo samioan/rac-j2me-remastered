@@ -250,7 +250,7 @@ void Game::loadLevel(int level, jshort room) {
   d = true;
   b_((int)X, 6541);
   levelMap->enterRoom(X, true);
-  // Z == 12 (boss) setup N(): not ported yet.
+  if (Z == 12) bossInit();
   player->posX = (ad * tileWidth + (J >> 1)) << 8;
   player->row = (jbyte)(player->af = ae);
   player->animFrame = 1;

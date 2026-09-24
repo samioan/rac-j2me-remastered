@@ -61,6 +61,7 @@ add_executable(goingmobile_port_a1 WIN32
   src_a1/game_menus.cpp
   src_a1/game_flow.cpp
   src_a1/game_store.cpp
+  src_a1/game_boss.cpp
   src_a1/game_tables.cpp
   src_a1/player_behavior.cpp
   src_a1/enemy_behavior.cpp

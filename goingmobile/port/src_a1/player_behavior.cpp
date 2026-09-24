@@ -441,7 +441,7 @@ void Player::tick() {
         if (!gm->levelMap->isWalkable(columnLeft(), row)) posX = (y() + 1) << 8;
         else if (!gm->levelMap->isWalkable(columnRight(), row)) posX = (y() - 1) << 8;
       } else {
-        if ((jumpPhase >= 0 || x() < floorY) && ap == 0) {
+        if ((jumpPhase >= 0 || y() < floorY) && ap == 0) {
           if (jumpPhase == 2) velY = -768;
           else velY = (jshort)(velY - 384);
 
@@ -511,7 +511,7 @@ void Player::tick() {
             }
           }
 
-          if (x() >= floorY && velY < 0) {
+          if (y() >= floorY && velY < 0) {
             row = (jbyte)(floorY / tileHeight);
             posInRow = (jshort)((floorY % tileHeight) << 8);
             roomEdgeReached = true;

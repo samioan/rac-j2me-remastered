@@ -432,6 +432,8 @@ void Game::keyPressed(int key) {
       A_(key, action);
       return;
     case 1: extrasKey(key, action); return;
+    case 2: endStatsKey(key, action); return;
+    case 23: restartKey(key, action); return;
     case 3: mapKey(key, action); return;
     case 11: weaponBuyKey(key, action); return;
     case 12: buyConfirmKey(key, action); return;
@@ -1232,7 +1234,16 @@ void Game::tick() {
       d_(k);
       if (!cD) updateCamera();
     }
-    // b == 24 / b == 16 (boss-fight scripting: Game.c(byte)/b(byte)) not ported yet.
+    if (b == 24) {
+      bossOutro(s);
+      updateCamera();
+      for (int k2 = 9; k2 >= 0; k2--) playerProjectiles[k2]->update(false);
+    }
+    if (b == 16) {
+      for (int k2 = 9; k2 >= 0; k2--) playerProjectiles[k2]->update(false);
+      bossIntro(h);
+      updateCamera();
+    }
 
     if (b == 2) {
       q++;
@@ -1306,8 +1317,18 @@ void Game::tick() {
         player->animRestart = 0;
         player->facingRight = true;
       }
-      // Z == 12 (boss room) branch: not ported yet.
-      if (Z != 12 && cV) A_();
+      if (Z == 12) {
+        if (!g && (player->posX >> 8) >= 6 * tileWidth && (player->posX >> 8) <= 9 * tileWidth &&
+            player->y() >= player->groundYAhead(false)) {
+          b = 16;
+          e = false;
+          player->setAnimState(1);
+          player->animRestart = 0;
+        }
+        if (g) bossUpdate();
+      } else if (cV) {
+        A_();
+      }
     }
     ct = cs;
   } else if (d) {

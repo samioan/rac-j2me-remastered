@@ -260,6 +260,22 @@ class Game {
   void challengeEndKey(int key, int action);
   void startChallenge(int room);
   void A_();                                     // challenge-room tick
+  // --- boss fight (game_boss.cpp) ---
+  bool bossT = false;
+  void bossInit();                               // Game.N()
+  void bossIntro(jbyte step);                    // Game.b(byte), b==16
+  void bossOutro(jbyte step);                    // Game.c(byte), b==24
+  void bossEffect();                             // Game.U()
+  void bossFire();                               // Game.L()
+  void bossHit(int part);                        // Game.o(int)
+  void bossUpdate();                             // Game.M()
+  void bossRender(Graphics* g);                  // Game.F(g)
+  void bossMaxRender(Graphics* g, jbyte frame);  // Game.c(g,byte)
+  void drawEndStats(Graphics* g);                // b==2
+  void drawRestartPrompt(Graphics* g);           // b==23
+  void endStatsKey(int key, int action);
+  void restartKey(int key, int action);
+  void restartGame();                            // Game.O()
   void confirmScreen(Graphics* g, int titleIdx);
   int a_(Graphics* g, const String& text, int y, int left, int right);  // scrolling ticker
   void confirmKey(int key, int action, bool toDesktop);  // b==7 / b==8 input

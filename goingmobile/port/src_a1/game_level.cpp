@@ -1,3 +1,5 @@
+#include <cstdio>
+#include <cstdlib>
 // game_level.cpp -- Game's level-entry, spawn helpers, camera and in-level
 // render pipeline, transcribed from src_a1/Game.java (see game.h for the
 // obfuscated-name -> C++ overload map). Split out of game.cpp to keep that
@@ -591,6 +593,8 @@ void Game::render(Graphics* g) {
   if (aF == nullptr) return;
   switch (b) {
     case 1: drawExtras(g); return;
+    case 2: drawEndStats(g); return;
+    case 23: drawRestartPrompt(g); return;
     case 3: drawWorldMap(g); return;
     case 11: drawWeaponBuy(g); return;
     case 12: drawBuyConfirm(g); return;
@@ -605,8 +609,8 @@ void Game::render(Graphics* g) {
     case 5: f_(g); return;
     case 7: v_(g); return;
     case 8: u_(g); return;
-    case 2: case 6: case 9:
-    case 22: case 23:
+    case 6: case 9:
+    case 22:
       return;  // Game's own pause/store/results/game-over screens: later 3.2a slice
     default:
       break;
@@ -623,9 +627,15 @@ void Game::render(Graphics* g) {
   if (cc != -1) c_(g);
   E_(g);
   a_(g);
+  if (b == 16 && h == 4) bossMaxRender(g, j);
+  if (Z == 12) bossRender(g);
   if (b != 16 && b != 17 && b != 24) {
     y_(g);
   } else {
+    if (b == 24) {
+      bossRender(g);
+      for (int k2 = 9; k2 >= 0; k2--) playerProjectiles[k2]->render(g);
+    }
     g->setClip(0, 0, 176, hudHeight);
     g->setColor(0);
     g->fillRect(0, 0, 176, hudHeight);
@@ -633,6 +643,14 @@ void Game::render(Graphics* g) {
     g->setColor(0);
     g->fillRect(0, 220 - hudHeight, 176, hudHeight);
     midlet->introManager->a_(g, -1, -1, this);
+  }
+  if (Z == 11) {
+    g->setClip(0, 220 - hudHeight, 176, hudHeight);
+    g->setColor(0);
+    g->fillRect(0, 220 - hudHeight, 176, hudHeight);
+    ratchetandclank::currentFont = ratchetandclank::smallFont;
+    g->setColor(1882828);
+    ratchetandclank::currentFont->drawText(g, ratchetandclank::strings[311] + " " + std::to_string(db), 88, 220 - hudHeight + 3, 17);
   }
   if (e) {
     x_(g);

@@ -292,7 +292,21 @@ re-basing onto a1 rather than finishing the legacy build's gameplay.
       `Game.s(int)`/`A()`); screens verified via a temporary state-jump hook
       (removed). The Player sprite overlaps the store text column as drawn by
       `Player::render(g,0,0,-20)`; not compared against the original.
-      Not yet: end-of-game stats (b==2), b==22/23 screens, the
+      Boss slice (game_boss.cpp): level-12 boss intro cutscene (b==16), boss
+      AI/damage/render (Game.M/L/o/F, `c(g,byte)`), win outro (b==24), "You
+      Win!" stats (b==2) and the Challenge Mode prompt (b==23 -> `Game.O()`).
+      Verified by screenshots (intro dialogue, rotating cannon firing, outro,
+      stats, prompt) using temporary env-var hooks that jumped to level 12 /
+      forced the win, since removed. Boss damage from real player shots was
+      not exercised.
+      Bug fix found while testing: Player.java's landing checks read
+      `this.x() < floor` / `this.x() >= floor` (a decompile x/y swap); with
+      the literal transcription the player fell through floors in some rooms.
+      player_behavior.cpp now uses `y()` there (lines "jumpPhase >= 0 ||
+      y() < floorY" and "y() >= floorY && velY < 0"). Other `x()`/`y()`
+      pairs in Player.java that look swapped (enemy-stomp check, line ~730 of
+      Player.java) were left literal and may need the same treatment.
+      Not yet: the in-game weapon wheel (b==22), the
       other levels' level-specific scripting beyond what level 0 exercised,
       boss fight (Z==12, states 16/24), save/load of slots, challenge rooms
       (cV), the store/weapon-select screens, sound.
