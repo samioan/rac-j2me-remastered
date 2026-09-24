@@ -1,8 +1,193 @@
-// game.cpp -- stub implementation of Game (see game.h). Everything is a
-// no-op until the real boot-chain/gameplay transcription lands.
+// game.cpp -- implementation of Game (see game.h): the real constructor,
+// boot chain (runBootStep, all 42 steps, transcribed from
+// src_a1/Game.java), t()'s mapData.txt parser, and sleep(). Everything
+// else is still a no-op stub (see game.h's header note).
 #include "game.h"
+#include "midlet.h"
+#include "intromanager.h"
+#include "font.h"
+#include <cstddef>
+#include <cstdlib>
 
-Game::Game(ratchetandclank* midlet) : midlet_(midlet) {}
+const String Game::aR[4] = {"/bg_agclnk.png", "/bg_arena.png", "/bg_os.png", "/bg_menu.png"};
+
+jbyte Game::tileWidth = 42;
+jbyte Game::tileHeight = 28;
+jbyte Game::hudHeight = 20;
+jbyte Game::J = 44;
+jbyte Game::K = 44;
+jbyte Game::enemyPoolSize = 10;
+jbyte Game::bb = Game::enemyPoolSize;
+
+Image* Game::am = nullptr; Image* Game::an = nullptr; Image* Game::ao = nullptr; Image* Game::ap = nullptr;
+Image* Game::aq = nullptr; Image* Game::ar = nullptr; Image* Game::as = nullptr; Image* Game::at = nullptr;
+Image* Game::au = nullptr; Image* Game::av = nullptr; Image* Game::aw = nullptr; Image* Game::ax = nullptr;
+Image* Game::ay = nullptr; Image* Game::az = nullptr; Image* Game::aA = nullptr; Image* Game::aB = nullptr;
+Image* Game::aC = nullptr; Image* Game::aD = nullptr; Image* Game::aE = nullptr; Image* Game::aF = nullptr;
+Image** Game::aG = nullptr; Image* Game::aH = nullptr; Image* Game::aI = nullptr; Image* Game::aJ = nullptr;
+Image* Game::aK = nullptr; Image* Game::aL = nullptr; Image* Game::aM = nullptr; Image* Game::aN = nullptr;
+Image* Game::aO = nullptr; Image* Game::aP = nullptr;
+jbyte Game::dk = 0;
+jint Game::dA = 0;
+jshort Game::v = 0;
+jshort Game::w = 0;
+jint* Game::dJ = nullptr;
+jint* Game::dK = nullptr;
+bool* Game::dL = nullptr;
+
+Game::Game(ratchetandclank* midlet_in) : midlet(midlet_in) {}
+
+void Game::sleep(int ms) { sleepMs(ms); }
+
+String Game::readResourceText(const String& path) {
+  ByteArray raw = loadResource(path);
+  String text;
+  text.resize(raw.size());
+  for (size_t i = 0; i < raw.size(); i++) text[i] = (char)std::to_integer<uint8_t>(raw[i]);
+  return text;
+}
+
+// Parses mapData.txt (world-map data, tool-verified in phase 2, see
+// ASSET_FORMATS.md) into dd[62][3] and de[43][2].
+void Game::t() {
+  String text = readResourceText("/mapData.txt");
+  size_t pos = 0;
+  for (int i = 0; i < 62; i++) {
+    for (int j = 0; j < 3; j++) {
+      size_t comma = text.find(',', pos);
+      if (comma == String::npos) comma = text.size();
+      dd[i][j] = (jshort)atoi(trim(text.substr(pos, comma - pos)).c_str());
+      pos = comma + 1;
+    }
+    size_t nl = text.find('\n', pos);
+    pos = (nl == String::npos) ? text.size() : nl + 1;
+  }
+  for (int i = 0; i < 43; i++) {
+    for (int j = 0; j < 2; j++) {
+      size_t comma = text.find(',', pos);
+      if (comma == String::npos) comma = text.size();
+      de[i][j] = (jbyte)atoi(trim(text.substr(pos, comma - pos)).c_str());
+      pos = comma + 1;
+    }
+    size_t nl = text.find('\n', pos);
+    pos = (nl == String::npos) ? text.size() : nl + 1;
+  }
+}
+
+void Game::runBootStep(int step) {
+  switch (step) {
+    case 4:
+      ratchetandclank::smallFont = new Font("/f2.v", 10, 1);
+      ratchetandclank::smallFontAlias = ratchetandclank::smallFont;
+      ratchetandclank::largeFont = new Font("/f3.v", 13, 1);
+      ratchetandclank::currentFont = ratchetandclank::smallFontAlias;
+      midlet->introManager->d_(2);
+      return;
+    case 5:
+      random = new JRandom();
+      dk = 0;
+      aG = new Image*[5];
+      aG[0] = Image::createImage("/en_disdro.png");
+      midlet->introManager->d_(2);
+      return;
+    case 6: aG[1] = Image::createImage("/en_micbot.png"); midlet->introManager->d_(2); return;
+    case 7: aG[2] = Image::createImage("/en_patbot.png"); midlet->introManager->d_(2); return;
+    case 8: aG[3] = Image::createImage("/en_turret.png"); midlet->introManager->d_(2); return;
+    case 9: aG[4] = Image::createImage("/en_boar.png"); midlet->introManager->d_(2); return;
+    case 10:
+      am = Image::createImage("/arrows.png");
+      at = Image::createImage("/prtrts.png");
+      midlet->introManager->d_(2);
+      return;
+    case 11: an = Image::createImage("/hud.png"); midlet->introManager->d_(2); return;
+    case 12: aq = Image::createImage("/wpnhud.png"); midlet->introManager->d_(2); return;
+    case 13: ap = Image::createImage("/menuhl.png"); midlet->introManager->d_(2); return;
+    case 14: ao = Image::createImage("/diabox.png"); midlet->introManager->d_(2); return;
+    case 15: aA = Image::createImage("/bltctr.png"); midlet->introManager->d_(2); return;
+    case 16: aE = Image::createImage("/icons.png"); midlet->introManager->d_(2); return;
+    case 17: aC = Image::createImage("/doors.png"); midlet->introManager->d_(2); return;
+    case 18: aM = Image::createImage("/explod.png"); midlet->introManager->d_(2); return;
+    case 19: aJ = Image::createImage("/box.png"); midlet->introManager->d_(2); return;
+    case 20: aI = Image::createImage("/weapon.png"); midlet->introManager->d_(2); return;
+    case 21: aL = Image::createImage("/bolts.png"); midlet->introManager->d_(2); return;
+    case 22: aD = Image::createImage("/pltfrm.png"); midlet->introManager->d_(2); return;
+    case 23: aK = Image::createImage("/strtpt.png"); midlet->introManager->d_(2); return;
+    case 24: aN = Image::createImage("/cnnbse.png"); midlet->introManager->d_(2); return;
+    case 25: aO = Image::createImage("/cnnprj.png"); midlet->introManager->d_(2); return;
+    case 26: aP = Image::createImage("/cnnbrl.png"); midlet->introManager->d_(2); return;
+    case 27: av = Image::createImage("/maxmil.png"); midlet->introManager->d_(2); return;
+    case 28: ar = Image::createImage("/mpicns.png"); midlet->introManager->d_(2); return;
+    case 29: ay = Image::createImage("/flmbot.png"); midlet->introManager->d_(2); return;
+    case 30: midlet->introManager->d_(2); return;
+    case 31: aB = Image::createImage("/wpnmnu.png"); midlet->introManager->d_(2); return;
+    case 32: au = Image::createImage("/spike.png"); midlet->introManager->d_(2); return;
+    case 33: aw = Image::createImage("/payola.png"); midlet->introManager->d_(2); return;
+    case 34: ax = Image::createImage("/bncbot.png"); midlet->introManager->d_(2); return;
+    case 35: as = Image::createImage("/menuhd.png"); midlet->introManager->d_(2); return;
+    case 36: aH = Image::createImage("/ratcht.png"); midlet->introManager->d_(2); return;
+    case 37: aF = Image::createImage(aR[3]); midlet->introManager->d_(2); return;
+    case 38: {
+      I = 0;
+      while (I < 220 - tileHeight * 2) I = I + tileHeight;
+      I += 12;
+      r = false;
+      dA = 0;
+      v = (jshort)(28 * -tileWidth + 176);
+      w = (jshort)(18 * -tileHeight + 220);
+      if (10 > hudHeight) hudHeight = 16;
+      levelMap = new LevelMap(this);
+      midlet->introManager->d_(7);
+      return;
+    }
+    case 39:
+      player = new Player(this);
+      player->loadAssets();
+      midlet->introManager->d_(5);
+      return;
+    case 40: {
+      enemies = new Enemy*[enemyPoolSize];
+      for (int i = enemyPoolSize - 1; i >= 0; i--) enemies[i] = new Enemy(this);
+      enemies[0]->loadAssets();
+      midlet->introManager->d_(5);
+      playerProjectiles = new Projectile*[10];
+      for (int i = 9; i >= 0; i--) playerProjectiles[i] = new Projectile(this);
+      enemyProjectiles = new Projectile*[10];
+      for (int i = 9; i >= 0; i--) enemyProjectiles[i] = new Projectile(this);
+      midlet->introManager->d_(2);
+      return;
+    }
+    case 41:
+      bH = new jbyte[4](); bI = new jbyte[4](); bJ = new jint[5]();
+      bF = new jbyte[3](); bG = new jbyte[3](); bC = new jbyte[3]();
+      bD = new jbyte[3](); bE = new jbyte[3]();
+      bc = new jshort[4](); bd = new jshort[4](); be = new jshort[4]();
+      bf = new jshort[4](); bg = new jshort[4]();
+      bh = new jint[4](); bi = new jint[4]();
+      bj = new jshort[8](); bk = new jshort[8]();
+      bl = new jshort[50](); bm = new jshort[50](); bn = new jbyte[50]();
+      bo = new jshort[50](); bp = new jshort[50]();
+      bu = new jint[10]();
+      bq = new jshort[50](); bs = new bool[50](); br = new jshort[50]();
+      bt = new bool[6]();
+      bv = new jint[2]();
+      cg = new jint[12](); ch = new jint[12](); ck = new jbyte[12]();
+      ci = new jshort[12](); cj = new jshort[12]();
+      cm = new jshort[4](); cn = new jshort[4](); co = new jshort[4]();
+      cp = new jshort[4](); cq = new jbyte[4]();
+      dJ = new jint[12](); dK = new jint[12](); dL = new bool[12]();
+      dc = new jint[13]();
+      aZ = new jint[8]();
+      midlet->introManager->d_(5);
+      return;
+    case 42:
+      t();
+      aQ = 3;
+      midlet->introManager->d_(5);
+      return;
+    default:
+      return;
+  }
+}
 
 void Game::pause() {}
 void Game::resume() {}

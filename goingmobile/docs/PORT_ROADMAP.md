@@ -158,46 +158,54 @@ proved the boot/menu/save architecture works, so the next real work is
 re-basing onto a1 rather than finishing the legacy build's gameplay.
 
 - [ ] **3.1a -- re-base boot/splash/menu/save onto a1.** In progress.
-      Scaffold slice done (this session, mirrors milestone 3.0's original
-      scope applied to a1): a new `port/src_a1/` tree, built as a separate
-      `goingmobile_port_a1` CMake target alongside the legacy build's
-      (untouched, still `port/src/`). Real and building clean (`/W4`,
-      zero errors) as of this slice: the MIDP/Nokia shim (`midp.h`/`.cpp`
-      -- Graphics/Image/RecordStore/resource-loading carried over verbatim
-      from milestone 3.1's, since that layer isn't build-specific; a1's
-      own `SoundPlayer` re-modeled for 6 cues + a .wav/.mid mix instead of
-      the legacy build's 7 all-.mid cues; screen resized to 176x220; new
-      `Command`/`Displayable` placeholders for the `CommandListener` input
-      model), `Font` (new standalone class, `font.h`/`.cpp`, transcribed
-      from `Font.java`), `ratchetandclank`'s MIDlet lifecycle and RMS
-      saves (`midlet.h`/`.cpp` -- **confirmed 214-byte game-slot records**,
-      not the legacy build's 220-byte layout, verified by a real
-      verify/rebuild/write/read round trip against the real Win32
-      RecordStore shim), and `CanvasShell`'s input/paint dispatch
-      (`canvasshell.h`/`.cpp`, the actual `Canvas`+`CommandListener`
-      re-base point). Verified by building clean and launching
-      `goingmobile_port_a1.exe`: the 176x220 window opens, the MIDlet
-      boots (RMS store verify/rebuild, save-slot summaries, font/sound
-      init), and it stays up with no crash.
 
-      Declared and stubbed (real bodies still to come, matching the
-      "declared and stubbed until built" pattern milestone 3.1 itself used
-      for `Player`/`Enemy`/`LevelMap`/`Projectile`): `Game` and
-      `IntroManager`, to just the call surface `CanvasShell`/
-      `ratchetandclank` exercise (pause/resume/render/tick/keyPressed/
-      keyReleased/writeSaveData/readSaveData on `Game`; paint/keyPressed/
-      tick/hideNotify/activate/commandAction on `IntroManager`). Not
-      started: the real boot-chain/splash/menu transcription from
-      `Game.java`/`IntroManager.java` (a1 moved the legacy build's
-      in-`Game` menu system entirely into `IntroManager` -- see
-      `src_a1/README.md` -- so this is comparable in scope to milestone
-      3.1's own ~1,500-line slice, maybe larger given `IntroManager.java`
-      alone is 1,800 lines), the MIDP `Canvas` key-code mapping (kept the
-      legacy build's Nokia values as a documented, not yet independently
-      verified, assumption -- see `src_a1/midp.h`'s `KeyCode` comment), and
-      real `Command`/`Displayable` construction for the menu screens.
-      Legacy build's `game.h`/`.cpp` etc. stay in `port/src/` as a
-      transcription reference, not deleted.
+      **Scaffold slice** (first session): a new `port/src_a1/` tree, built
+      as a separate `goingmobile_port_a1` CMake target alongside the
+      legacy build's (untouched, still `port/src/`). The MIDP/Nokia shim
+      (`midp.h`/`.cpp`), `Font` (new standalone class, a1 factors it out
+      of the MIDlet), `ratchetandclank`'s MIDlet lifecycle and RMS saves
+      (**confirmed 214-byte game-slot records**, not the legacy build's
+      220-byte layout), and `CanvasShell`'s input/paint dispatch (the
+      actual `Canvas`+`CommandListener` re-base point) are real.
+
+      **Boot chain + splash slice** (second session): reaching even the
+      splash screen turned out to need much more than `Game`/
+      `IntroManager` stubs -- `Game::runBootStep()` (all 42 steps) loads
+      30+ image assets and constructs real `Player`/`Enemy`/`LevelMap`/
+      `Projectile` objects (their static data tables, constructors, and
+      `loadAssets()`/`player.bin`/`enemy.bin`/`enemy_spr_box.bin` parsers
+      are now real and building clean, `/W4` zero errors -- behavior
+      methods stay declared-and-stubbed, same precedent milestone 3.1 set
+      for the legacy build). `IntroManager`'s boot dispatcher and splash
+      sequencer (3 logos with a progress bar, `Game::t()`'s `mapData.txt`
+      parse) are transcribed and **visually verified** by screenshotting
+      the running `goingmobile_port_a1.exe`: the real "Ratchet & Clank
+      Going Mobile" splash logo renders correctly, matching the original
+      asset. No crash.
+
+      **Structural finding correcting `src_a1/README.md`'s framing**:
+      `IntroManager` owns the *pre-game* flow (splash, main menu, language/
+      sound settings, save slots, credits/help/about, the unlock-code UI),
+      but `Game` independently has its own ~20-screen state machine (field
+      `b`, `keyPressed`/`keyReleased`/`d(Graphics)` et al.) for the
+      *in-level* UI -- pause menu, weapon store, results, game over --
+      reached only once gameplay starts. That slice is gameplay-adjacent
+      and stays deferred to milestone 3.2a, not 3.1a.
+
+      **Not started**: `IntroManager`'s interactive menu screens (main
+      menu, language select, sound toggle, save-slot pickers, credits/
+      help/about) -- `IntroManager::b_(int)` (keyPressed) and the paint
+      dispatch's per-screen renderers are still stubbed no-ops past the
+      splash sequence, so the port currently stalls on the last splash
+      frame once `IntroManager` transitions to the main-menu/language-
+      select state. The MIDP `Canvas` key-code mapping is still a
+      documented, not yet independently verified, assumption (confirmed
+      partially this session: `IntroManager`'s key handlers accept *both*
+      the legacy build's Nokia negative codes *and* raw numeric-keypad
+      ASCII digits -- see `src_a1/midp.h`'s `KeyCode` comment). Real
+      `Command`/`Displayable` construction for the menu screens is also
+      not started. Legacy build's `game.h`/`.cpp` etc. stay in `port/src/`
+      as a transcription reference, not deleted.
 
 - [ ] **3.2a -- gameplay.** Same scope as the legacy build's stubbed 3.2
       (`LevelMap`'s level parser and 22x14-equivalent tile renderer at

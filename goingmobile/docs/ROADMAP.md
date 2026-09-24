@@ -148,11 +148,17 @@ documented "n11 doesn't exist" finding), folded into `ASSET_FORMATS.md`.
 string/font pipeline, every menu screen, the whole `game.h`/`.cpp` boot
 chain) is done and builds clean against the legacy build's data.
 Milestone **3.1a** (re-basing that slice onto a1, now that phase 1/2 are
-both done for a1) is in progress: a scaffold slice lands a new
-`port/src_a1/` tree/CMake target building clean at a1's real screen size
-(176x220) with a real MIDlet boot (RMS saves confirmed 214 bytes/slot, not
-the legacy build's 220), `Font`, and `CanvasShell`'s `Canvas`+
-`CommandListener` input dispatch; `Game`/`IntroManager` (the engine and,
-new in a1, the menu/splash controller the legacy build didn't split out)
-are declared and stubbed, with the real boot-chain/menu transcription
-still to come -- see `PORT_ROADMAP.md`'s 3.1a entry for the current state.
+both done for a1) is in progress: a new `port/src_a1/` tree/CMake target
+builds clean at a1's real screen size (176x220) with a real MIDlet boot
+(RMS saves confirmed 214 bytes/slot, not the legacy build's 220), `Font`,
+`CanvasShell`'s `Canvas`+`CommandListener` input dispatch, `Game`'s full
+42-step boot chain (asset loading plus constructing real `Player`/`Enemy`/
+`LevelMap`/`Projectile` objects -- data tables and asset loaders real,
+behavior still stubbed, same precedent milestone 3.1 set for the legacy
+build), and `IntroManager`'s splash sequence -- visually verified by
+screenshotting the running exe, real splash logos render correctly.
+`IntroManager`'s interactive menu screens (main menu, language select,
+save slots, etc.) are the next slice -- see `PORT_ROADMAP.md`'s 3.1a entry
+for the full current state, including a structural correction (`Game`
+turns out to have its own separate in-level UI state machine, deferred to
+3.2a rather than being part of `IntroManager` as first assumed).

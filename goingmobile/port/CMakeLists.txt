@@ -35,21 +35,27 @@ endif()
 # ROADMAP.md's "Status") onto the same raw Win32 software-rendered window
 # as milestone 3.1, resized to a1's own screen (176x220, not 128x128) and
 # using a plain MIDP Canvas + CommandListener input model instead of the
-# legacy build's FullCanvas keyPressed state machine. This first slice is
-# scaffold-scoped (mirrors milestone 3.0's original scope, applied to a1):
-# the shim (midp), font, MIDlet lifecycle + 214-byte RMS saves (midlet),
-# and canvas shell/input dispatch (canvasshell) are real; Game and
-# IntroManager (a1's engine + menu/splash controller -- IntroManager
-# absorbed the legacy build's in-Game menu system) are declared and
-# stubbed to the call surface CanvasShell/ratchetandclank exercise. The
-# real boot-chain/menu transcription (comparable in scope to milestone
-# 3.1's ~1500 lines) is still to come.
+# legacy build's FullCanvas keyPressed state machine. The scaffold slice
+# (shim/font/midlet/canvasshell) plus the boot chain and splash sequence
+# are real: Game::runBootStep (all 42 steps -- asset loading and
+# constructing the Player/Enemy/LevelMap/Projectile pools) and
+# IntroManager's splash/boot dispatch. Player/Enemy/LevelMap/Projectile
+# are real for their data tables + constructor + asset loading, behavior
+# stubbed (same precedent milestone 3.1 set for the legacy build). The
+# interactive menu system (main menu, language select, save slots,
+# credits/help/about, ...) is declared-and-stubbed still; that's the next
+# slice of milestone 3.1a.
 add_executable(goingmobile_port_a1 WIN32
   src_a1/main.cpp
   src_a1/midp.cpp
   src_a1/font.cpp
   src_a1/midlet.cpp
   src_a1/canvasshell.cpp
+  src_a1/entity.cpp
+  src_a1/player.cpp
+  src_a1/enemy.cpp
+  src_a1/levelmap.cpp
+  src_a1/projectile.cpp
   src_a1/game.cpp
   src_a1/intromanager.cpp
 )
