@@ -249,12 +249,13 @@ void Game::S_() {
     cC = false;
     cI = 0;
     if (cH >= 104 && cH <= 156 + cz[17] && Z != 0) {
-      // Results/summary screen (Game.a(dB) + state 18): not ported yet.
       y_();
+      a_(dB);
       b = 18;
     }
     if (cH + 1 == cA[33] + cz[33]) {
       y_();
+      a_(dB);
       b = 18;
     }
     if (cH + 1 == cA[31] + cz[31]) g = true;
@@ -430,7 +431,11 @@ void Game::keyPressed(int key) {
     case 0: case 16: case 17: case 24:
       A_(key, action);
       return;
+    case 3: mapKey(key, action); return;
     case 4: h_(key, action); return;
+    case 10: infoKey(key, action); return;
+    case 18: resultsKey(key, action); return;
+    case 21: levelEndKey(key, action); return;
     case 5: i_(key, action); return;
     case 7: confirmKey(key, action, true); return;
     case 8: confirmKey(key, action, false); return;

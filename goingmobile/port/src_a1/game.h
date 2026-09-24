@@ -88,6 +88,7 @@ class Game {
   jint aX = 0, aY = 0;
   jbyte bK = 0, bL = 0, bM = 0, bP = 0, bQ = 0, bX = 0, bY = 0;
   jint bV = 0, bW = 0;
+  jbyte bz = 0, bA = 0, bB = 0;
   bool bZ = true;
   jbyte ca = 0, cb = 0, cc = 0, cd = 0, ce = 0, cf = 0;
   jint cr = 0;
@@ -220,6 +221,25 @@ class Game {
   void u_(Graphics* g);            // quit-to-menu confirm (b==8)
   void h_(int key, int action);    // b==4 input
   void i_(int key, int action);    // b==5 input
+  // --- level flow: results (b==18), world map (b==3), level-end (b==21), info (b==10) ---
+  static const jbyte N[20], O[20], P[20], Q[20], T[13];
+  static const jlong dx[17];
+  static const jbyte cQ[20];
+  static const jshort cR[20];
+  static const jbyte df[16], dg[16], dh[16][8];
+  static void a_(jbyte page);                    // Game.a(byte) static score computation
+  int i_();                                      // content width (wpnhud width - 20)
+  int i_(int level);                             // secrets collected in a level
+  void drawResults(Graphics* g, jbyte page);
+  void drawWorldMap(Graphics* g);
+  void drawInfo(Graphics* g);
+  void drawLevelEnd(Graphics* g);
+  void resultsKey(int key, int action);
+  void mapKey(int key, int action);
+  void levelEndKey(int key, int action);
+  void infoKey(int key, int action);
+  void W_();                                     // cu = first unlocked map node
+  void loadLevel(int level, jshort room);        // Game.a(int,short)
   void confirmScreen(Graphics* g, int titleIdx);
   int a_(Graphics* g, const String& text, int y, int left, int right);  // scrolling ticker
   void confirmKey(int key, int action, bool toDesktop);  // b==7 / b==8 input

@@ -130,6 +130,7 @@ class Graphics {
   void setColor(int rgb) { color_ = rgb & 0xFFFFFF; }
   void fillRect(int x, int y, int w, int h);
   void drawRect(int x, int y, int w, int h);
+  void fillArc(int x, int y, int w, int h, int startAngle, int arcAngle);  // full ellipse only
   void drawLine(int x1, int y1, int x2, int y2);
   void fillRoundRect(int x, int y, int w, int h, int arcWidth, int arcHeight);
   void drawImage(Image* img, int x, int y, int anchor);

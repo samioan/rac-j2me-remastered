@@ -281,9 +281,13 @@ re-basing onto a1 rather than finishing the legacy build's gameplay.
       scrolling mission-objective ticker), sound toggle (b==5), quit-to-menu
       (b==8, -> returnToIntro) and quit-to-desktop (b==7) confirms. Game.e(g)
       is now exact (wpnhud frame at y=75) instead of the old tiled backdrop.
-      Not yet: level-
-      exit/results screens (state 18/3/15) and level completion, levels 1+
-      (`f_(level)` only implements level 0; `a(level,room)` is not ported),
+      Level flow (game_flow.cpp): results pages (b==18, `Game.a(byte)` score
+      maths), Save/Replay menu (b==21), "Game Saved" info (b==10), world-map
+      level select (b==3, `Game.j(g)`/`m(key)`) and `Game.a(int,short)` level
+      load, so Enter on a map node loads that level (level 1 verified to
+      render; screens verified via a temporary state-jump hook, since removed).
+      Not yet: weapon store / weapon select (b==1/11/12, map nodes 18/19), the
+      other levels' level-specific scripting beyond what level 0 exercised,
       boss fight (Z==12, states 16/24), save/load of slots, challenge rooms
       (cV), the store/weapon-select screens, sound.
       Original scope: Same scope as the legacy build's stubbed 3.2

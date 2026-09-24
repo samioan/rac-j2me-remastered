@@ -3,6 +3,7 @@
 // logic as ../src/midp.cpp (generic MIDP, not build-specific); only
 // SoundPlayer (6 cues, wav/mid mix) and platform:: (176x220 canvas, RMS
 // path) differ for a1.
+#include <cmath>
 #include "midp.h"
 
 #define WIN32_LEAN_AND_MEAN
@@ -183,6 +184,19 @@ void Graphics::clipRect(int x, int y, int w, int h) {
 }
 
 void Graphics::translate(int dx, int dy) { transX_ += dx; transY_ += dy; }
+
+void Graphics::fillArc(int x, int y, int w, int h, int, int) {
+  if (w <= 0 || h <= 0) return;
+  double a = w / 2.0, b = h / 2.0;
+  for (int yy = 0; yy < h; yy++) {
+    double dy = (yy + 0.5 - b) / b;
+    double t = 1.0 - dy * dy;
+    if (t <= 0) continue;
+    int half = (int)(a * std::sqrt(t) + 0.5);
+    int cx = x + (int)a;
+    fillRect(cx - half, y + yy, 2 * half + (w & 1 ? 1 : 0), 1);
+  }
+}
 
 void Graphics::fillRect(int x, int y, int w, int h) {
   if (!target_ || w <= 0 || h <= 0) return;
