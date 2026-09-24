@@ -240,6 +240,26 @@ class Game {
   void infoKey(int key, int action);
   void W_();                                     // cu = first unlocked map node
   void loadLevel(int level, jshort room);        // Game.a(int,short)
+  // --- store / challenge rooms (game_store.cpp) ---
+  static const jint cl[12];
+  int numText(Graphics* g, int idx, int num, int x, int y, bool sel);
+  void X_();                                     // extras list entry
+  int Y_();                                      // ammo refill cost, fills aZ[]
+  void drawExtras(Graphics* g);
+  void drawWeaponBuy(Graphics* g);
+  void drawBuyConfirm(Graphics* g);
+  void drawNoFunds(Graphics* g);
+  void drawChallengeIntro(Graphics* g);
+  void drawChallengeEnd(Graphics* g);
+  void drawChallengeFail(Graphics* g);
+  void extrasKey(int key, int action);
+  void weaponBuyKey(int key, int action);
+  void buyConfirmKey(int key, int action);
+  void noFundsKey(int key, int action);
+  void challengeIntroKey(int key, int action);
+  void challengeEndKey(int key, int action);
+  void startChallenge(int room);
+  void A_();                                     // challenge-room tick
   void confirmScreen(Graphics* g, int titleIdx);
   int a_(Graphics* g, const String& text, int y, int left, int right);  // scrolling ticker
   void confirmKey(int key, int action, bool toDesktop);  // b==7 / b==8 input

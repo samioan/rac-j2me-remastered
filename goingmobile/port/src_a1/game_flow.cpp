@@ -302,10 +302,28 @@ void Game::mapKey(int key, int action) {
   }
   if (!(key == 53 || action == -5 || key == -6)) return;
   if (cu == 19) {
-    // Weapon-select entry (b==11): store screens are not ported yet.
+    if (cL != 1572865) {
+      player->facingRight = true;
+      player->setAnimState(0);
+      player->animRestart = 0;
+      player->row = 2;
+      player->posX = 22528;
+      player->velY = 0;
+      player->velX = 0;
+      player->invulnTimer = 0;
+      player->posInRow = 0;
+      b = 11;
+      cU = player->currentWeapon;
+      player->Q = Y_();
+      cu = 0;
+    }
     return;
   } else if (cu == 18) {
-    // Weapon store (b==1): not ported yet.
+    bv[0] = -1;
+    bv[1] = -1;
+    X_();
+    b = 1;
+    for (int k2 = 0; k2 < 8; k2++) player->T[k2] = player->ammo[k2];
     return;
   }
   if (cu == 0 && h_(0)) o = 0;

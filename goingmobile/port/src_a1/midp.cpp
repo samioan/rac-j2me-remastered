@@ -325,6 +325,15 @@ void Graphics::drawImageManip(Image* img, int x, int y, int anchor, int manipula
   }
 }
 
+void Graphics::drawTriangle(int x1, int y1, int x2, int y2, int x3, int y3, int argb) {
+  int saved = color_;
+  color_ = argb & 0xFFFFFF;
+  drawLine(x1, y1, x2, y2);
+  drawLine(x2, y2, x3, y3);
+  drawLine(x3, y3, x1, y1);
+  color_ = saved;
+}
+
 void Graphics::fillTriangle(int x1, int y1, int x2, int y2, int x3, int y3, int argb) {
   if (!target_) return;
   int a = (argb >> 24) & 0xFF;

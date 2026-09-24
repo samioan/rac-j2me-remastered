@@ -286,7 +286,13 @@ re-basing onto a1 rather than finishing the legacy build's gameplay.
       level select (b==3, `Game.j(g)`/`m(key)`) and `Game.a(int,short)` level
       load, so Enter on a map node loads that level (level 1 verified to
       render; screens verified via a temporary state-jump hook, since removed).
-      Not yet: weapon store / weapon select (b==1/11/12, map nodes 18/19), the
+      Store/challenge slice (game_store.cpp): Extras list (b==1, map node 18),
+      weapon store + purchase confirm + not-enough-bolts (b==11/12/13, node
+      19), and challenge arena briefing/start/tick/reward/failure (b==14/15/19,
+      `Game.s(int)`/`A()`); screens verified via a temporary state-jump hook
+      (removed). The Player sprite overlaps the store text column as drawn by
+      `Player::render(g,0,0,-20)`; not compared against the original.
+      Not yet: end-of-game stats (b==2), b==22/23 screens, the
       other levels' level-specific scripting beyond what level 0 exercised,
       boss fight (Z==12, states 16/24), save/load of slots, challenge rooms
       (cV), the store/weapon-select screens, sound.

@@ -431,7 +431,13 @@ void Game::keyPressed(int key) {
     case 0: case 16: case 17: case 24:
       A_(key, action);
       return;
+    case 1: extrasKey(key, action); return;
     case 3: mapKey(key, action); return;
+    case 11: weaponBuyKey(key, action); return;
+    case 12: buyConfirmKey(key, action); return;
+    case 13: noFundsKey(key, action); return;
+    case 14: challengeIntroKey(key, action); return;
+    case 15: case 19: challengeEndKey(key, action); return;
     case 4: h_(key, action); return;
     case 10: infoKey(key, action); return;
     case 18: resultsKey(key, action); return;
@@ -1300,7 +1306,8 @@ void Game::tick() {
         player->animRestart = 0;
         player->facingRight = true;
       }
-      // Z == 12 (boss room) and cV (challenge rooms) branches: not ported yet.
+      // Z == 12 (boss room) branch: not ported yet.
+      if (Z != 12 && cV) A_();
     }
     ct = cs;
   } else if (d) {

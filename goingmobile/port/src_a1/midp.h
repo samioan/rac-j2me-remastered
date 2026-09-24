@@ -144,6 +144,7 @@ class Graphics {
   // rather than a separate DirectGraphics class (see canvasshell.h's
   // directGraphics field).
   void drawImageManip(Image* img, int x, int y, int anchor, int manipulation);
+  void drawTriangle(int x1, int y1, int x2, int y2, int x3, int y3, int argb);
   void fillTriangle(int x1, int y1, int x2, int y2, int x3, int y3, int argb);
 
  private:

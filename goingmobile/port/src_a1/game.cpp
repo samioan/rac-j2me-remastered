@@ -356,7 +356,7 @@ String Game::a_(const String& fmt, std::initializer_list<String> args) {
   return out;
 }
 
-int Game::k_() { return hudHeight + 20; }
+int Game::k_() { return 75; }
 
 void Game::writeSaveData(jbyte*) {}
 void Game::readSaveData(const jbyte*) {}
