@@ -210,43 +210,53 @@ void Game::e_(Graphics* g) {
 
 int Game::a_(Graphics* g, const String& text, int x, int y, int anchor, int width) {
   Font* font = ratchetandclank::currentFont;
-  if (!font || text.empty() || width <= 0) return y;
-  int curY = y;
-  size_t start = 0;
-  while (start < text.size()) {
-    size_t paraEnd = text.find('\n', start);
-    bool hasNl = paraEnd != String::npos;
-    if (!hasNl) paraEnd = text.size();
-
-    size_t lineStart = start;
-    do {
-      size_t bestBreak = paraEnd;
-      size_t scan = lineStart;
-      bool any = false;
-      while (scan <= paraEnd) {
-        size_t spacePos = text.find(' ', scan);
-        size_t wordEnd = (spacePos == String::npos || spacePos > paraEnd) ? paraEnd : spacePos;
-        String candidate = text.substr(lineStart, wordEnd - lineStart);
-        if (font->textWidth(candidate) <= width || !any) {
-          bestBreak = wordEnd;
-          any = true;
-          if (wordEnd >= paraEnd) break;
-          scan = wordEnd + 1;
-        } else {
-          break;
-        }
+  int var12 = font->lineHeight;
+  int len = (int)text.size();
+  int var7;
+  if ((anchor & 1) > 0) { x = 0; var7 = 0; } else { var7 = x; }
+  int var10 = 0, var11 = 0;
+  bool var15 = false;
+  do {
+    int var8 = 0;
+    bool var16 = false, var17 = false;
+    int var18 = -1;
+    int var9 = var11;
+    while (true) {
+      if (var11 >= len) { var16 = true; break; }
+      char c = text[var11];
+      if (c == '.' || c == '/') var18 = var11;
+      if (c == ' ') {
+        var8 += font->charWidth(c);
+        var11++;
+        if (var7 + var8 > width && !var15) { var17 = true; break; }
+        var15 = true;
+        break;
       }
-      String line = text.substr(lineStart, bestBreak - lineStart);
-      font->drawText(g, line, x, curY, anchor);
-      curY += font->lineHeight;
-      lineStart = bestBreak;
-      while (lineStart < paraEnd && text[lineStart] == ' ') lineStart++;
-    } while (lineStart < paraEnd);
-
-    if (!hasNl) break;
-    start = paraEnd + 1;
-  }
-  return curY;
+      int cw = font->charWidth(c);
+      if (var7 + var8 + cw > width && !var15) { var17 = true; break; }
+      var8 += cw;
+      var11++;
+    }
+    if (var7 + var8 <= width && !var16 && !var17) {
+      var7 += var8;
+    } else {
+      if (var7 + var8 > width) {
+        if (!var17) var11 = var9;
+        else if (var18 > 0) var11 = var18;
+      } else if (var17 && var18 > 0) {
+        var11 = var18;
+      }
+      if (var11 - var10 > 0) {
+        font->drawTextRange(g, text.c_str(), len, var10, var11 - var10,
+                            (anchor & 1) > 0 ? 88 : x, y, anchor);
+      }
+      y += var12;
+      var7 = x;
+      var15 = false;
+      var10 = var11;
+    }
+  } while (var11 < len);
+  return y;
 }
 
 String Game::a_(const String& fmt, std::initializer_list<String> args) {

@@ -192,7 +192,12 @@ re-basing onto a1 rather than finishing the legacy build's gameplay.
       reached only once gameplay starts. That slice is gameplay-adjacent
       and stays deferred to milestone 3.2a, not 3.1a.
 
-      **Menu-screens slice** (third session): `IntroManager::b_(int)`
+      **Menu-screens slice** (third session; later verification pass
+      screenshotted every reachable screen -- slot pickers, skin
+      message, Help/About pagers, exit confirm, language -- and fixed
+      `Game::a_(Graphics*,String,x,y,anchor,width)` to a line-for-line
+      transcription of Game.java's word-wrap, which centers at x=88
+      when anchor has the HCENTER bit): `IntroManager::b_(int)`
       (keyPressed) is real, and the paint dispatch now covers 11 of the
       ~20 screens -- main menu, options (sound/delete-save/language),
       save-write picker, weapon store, delete-save picker, a shared
