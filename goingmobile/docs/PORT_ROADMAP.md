@@ -192,20 +192,64 @@ re-basing onto a1 rather than finishing the legacy build's gameplay.
       reached only once gameplay starts. That slice is gameplay-adjacent
       and stays deferred to milestone 3.2a, not 3.1a.
 
-      **Not started**: `IntroManager`'s interactive menu screens (main
-      menu, language select, sound toggle, save-slot pickers, credits/
-      help/about) -- `IntroManager::b_(int)` (keyPressed) and the paint
-      dispatch's per-screen renderers are still stubbed no-ops past the
-      splash sequence, so the port currently stalls on the last splash
-      frame once `IntroManager` transitions to the main-menu/language-
-      select state. The MIDP `Canvas` key-code mapping is still a
-      documented, not yet independently verified, assumption (confirmed
-      partially this session: `IntroManager`'s key handlers accept *both*
-      the legacy build's Nokia negative codes *and* raw numeric-keypad
-      ASCII digits -- see `src_a1/midp.h`'s `KeyCode` comment). Real
-      `Command`/`Displayable` construction for the menu screens is also
-      not started. Legacy build's `game.h`/`.cpp` etc. stay in `port/src/`
-      as a transcription reference, not deleted.
+      **Menu-screens slice** (third session): `IntroManager::b_(int)`
+      (keyPressed) is real, and the paint dispatch now covers 11 of the
+      ~20 screens -- main menu, options (sound/delete-save/language),
+      save-write picker, weapon store, delete-save picker, a shared
+      Yes/No confirm, the credits/help/about pager, exit-game confirm,
+      new-game slot picker, "Get Ratchet Skin" message, and language
+      select (states 1/2/4/5/6/7/8/9/11/16/20) -- with real per-screen
+      input handlers, the Konami-style cheat-code recorder, and every
+      shared widget (selection-highlight bracket, softkey hint row,
+      bordered wallpaper backdrop, save-slot label, page-indicator
+      footer). **Visually verified** across four distinct screens
+      (language select, main menu, options, delete-save picker) by
+      screenshotting the running exe and driving it with real key input
+      (English selects into the main menu; New Game/Load Game/Get Ratchet
+      Skin/Settings/Help/About/Exit all render with correct labels and
+      selection highlight; Settings -> Clear Save reaches the 3-slot
+      picker showing "1.(empty)" etc). States 15/17 (the unlock-code
+      Form/TextField entry and its post-submit screen) stay unreachable/
+      untranscribed -- gated behind `isGameWon()`, and the shipped a1.jar
+      carries no Unlock-Code manifest attribute either. States 3/10/12/
+      13/14/18/19 are unused by `IntroManager` itself (case 10 just blanks
+      the screen).
+
+      Two things were deliberately given SIMPLIFIED (not stubbed, not
+      pixel-exact) bodies rather than reverse-engineered ones, since
+      `Game`'s own phase-1 read-through is still deferred to 3.2a (see
+      `game.h`'s note): `Game::e_()` (full-screen backdrop -- tiles
+      `Game::aF` across the whole canvas instead of whatever the real
+      compositing does) and `Game::k_()` (a content-area top-y constant).
+      `Game::a_(Graphics*,String,...)` (word-wrap paragraph draw) and
+      `Game::a_(String, {...})` (`%N` placeholder substitution) ARE exact
+      -- generic MIDP text layout and pure string logic, no `Game`
+      internals needed. One interesting confirmed-by-transcription
+      finding: the shared text-draw helper's `anchor` parameter is
+      **dead** in the original (`IntroManager.java`'s 7-arg `a(Graphics,
+      String,...)` core always hardcodes `HCENTER|TOP` regardless of what
+      callers pass) -- invisible at the screen-center x values every
+      other screen uses, but visible on the language-select screen (which
+      passes x=0), where each item's text is centered *on* x=0 and so
+      shows only its trailing characters. Transcribed faithfully, not
+      "fixed."
+
+      **Still stubbed** (needs `Player`/`Enemy` behavior methods --
+      `render()`/`updateAnimation()`/`fire()` -- which don't exist yet,
+      same milestone-3.2a boundary as `Game`'s own tick/render): the
+      main menu's decorative Player+4xEnemy walk-in animation, the
+      weapon store's decorative player pose/projectile render, and the
+      idle-tick cases that would drive both (`IntroManager::i_()`'s
+      screen-1/5 branches stay no-ops). Real `Command`/`Displayable`
+      construction (the soft-key `Command` objects `CanvasShell`'s
+      `commandAction` would receive) is also not started -- the port
+      drives everything through raw key codes instead, which is
+      sufficient for a numeric-keypad-equipped input path but not for a
+      softkey-label-driven one. The MIDP `Canvas` key-code mapping
+      (Nokia negative codes assumed to reach a plain `Canvas` the same
+      way they reach `FullCanvas`) remains an unverified assumption.
+      Legacy build's `game.h`/`.cpp` etc. stay in `port/src/` as a
+      transcription reference, not deleted.
 
 - [ ] **3.2a -- gameplay.** Same scope as the legacy build's stubbed 3.2
       (`LevelMap`'s level parser and 22x14-equivalent tile renderer at

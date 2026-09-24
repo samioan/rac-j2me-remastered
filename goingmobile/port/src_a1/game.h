@@ -22,6 +22,7 @@
 #include "player.h"
 #include "enemy.h"
 #include "projectile.h"
+#include <initializer_list>
 
 class ratchetandclank;
 
@@ -108,6 +109,25 @@ class Game {
   void t();  // parses mapData.txt into dd/de
   static void sleep(int ms);
   static String readResourceText(const String& path);  // Game.a(String)
+
+  // --- menu-screen rendering helpers (Game.a(...)/e(...)/k()/g()) --------
+  // Game's own phase-1 read-through isn't done (see game.h's top-of-file
+  // note and CLASS_MAP.md's "Game" section, deferred to milestone 3.2a) --
+  // these are the handful of its methods IntroManager's menu screens call
+  // into, given real SIMPLIFIED bodies rather than reverse-engineered
+  // pixel-perfect ones (documented per call): a tile-clear rect, a
+  // full-screen tiled backdrop, a word-wrap paragraph draw (this one IS
+  // exact -- generic MIDP text layout, no Game internals needed), a %N
+  // placeholder formatter (exact, pure string logic), and two int getters
+  // approximated from their call-site usage (a content-area top y and a
+  // content width). Revisit for pixel fidelity once Game's own phase-1
+  // lands.
+  void a_(Graphics* g, int x, int y, int w, int h);  // approx: clear-rect
+  void e_(Graphics* g);                              // approx: tiled backdrop
+  int a_(Graphics* g, const String& text, int x, int y, int anchor, int width);  // exact: word-wrap draw, returns new y
+  static String a_(const String& fmt, std::initializer_list<String> args);      // exact: %0/%1 substitution
+  int k_();  // approx: content-area top y (only game.g() call site is on the
+             // unlock-code screen, out of scope -- see intromanager.cpp)
 
   // --- call surface CanvasShell.java/ratchetandclank.java exercise -------
   void pause();

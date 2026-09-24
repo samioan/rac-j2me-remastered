@@ -52,6 +52,9 @@ class ratchetandclank {
   void startNewGame(int level);
   void continueGame(int slot);
   void returnToIntro();
+  void notifyDestroyed();  // MIDlet built-in; the port's "Exit Game" path
+  String getAppProperty(const String& key);  // no manifest API in the port
+                                              // (PORT_ROADMAP.md) -- always null
 
   void stopSoundHard();
   void playSoundIfEnabled(int id);

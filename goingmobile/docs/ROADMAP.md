@@ -157,8 +157,17 @@ builds clean at a1's real screen size (176x220) with a real MIDlet boot
 behavior still stubbed, same precedent milestone 3.1 set for the legacy
 build), and `IntroManager`'s splash sequence -- visually verified by
 screenshotting the running exe, real splash logos render correctly.
-`IntroManager`'s interactive menu screens (main menu, language select,
-save slots, etc.) are the next slice -- see `PORT_ROADMAP.md`'s 3.1a entry
-for the full current state, including a structural correction (`Game`
-turns out to have its own separate in-level UI state machine, deferred to
-3.2a rather than being part of `IntroManager` as first assumed).
+`IntroManager`'s interactive menu screens are now real too: main menu,
+options (sound/delete-save/language), save-write and new-game/delete-save
+pickers, weapon store, a shared Yes/No confirm, the credits/help/about
+pager, exit-game confirm, the "Get Ratchet Skin" message, and language
+select (11 of the ~20 screens) all render and navigate correctly,
+visually verified across four of them by driving the running exe with
+real key input. The unlock-code Form/TextField screens stay unreachable
+(gated behind `isGameWon()`, and the shipped jar has no Unlock-Code
+attribute), and the decorative Player/Enemy menu animations stay stubbed
+pending `Player`/`Enemy` behavior methods -- see `PORT_ROADMAP.md`'s 3.1a
+entry for the full current state, including a structural correction
+(`Game` turns out to have its own separate in-level UI state machine,
+deferred to 3.2a rather than being part of `IntroManager` as first
+assumed).

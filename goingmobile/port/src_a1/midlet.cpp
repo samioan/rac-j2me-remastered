@@ -68,6 +68,18 @@ void ratchetandclank::returnToIntro() {
   if (introManager) introManager->c_();
 }
 
+void ratchetandclank::notifyDestroyed() {
+  destroyApp(true);
+  platform::requestQuit();
+}
+
+String ratchetandclank::getAppProperty(const String&) {
+  // No MIDlet manifest API in the port (PORT_ROADMAP.md's "Decisions
+  // carried through every milestone") -- every property lookup misses,
+  // same as the shipped a1.jar's own missing Unlock-Code attribute.
+  return "";
+}
+
 void ratchetandclank::stopSoundHard() {
   if (soundPlayer) soundPlayer->haltPlayer();
 }

@@ -8,6 +8,8 @@
 #include "font.h"
 #include <cstddef>
 #include <cstdlib>
+#include <cctype>
+#include <vector>
 
 const String Game::aR[4] = {"/bg_agclnk.png", "/bg_arena.png", "/bg_os.png", "/bg_menu.png"};
 
@@ -188,6 +190,81 @@ void Game::runBootStep(int step) {
       return;
   }
 }
+
+// --- menu-screen rendering helpers (see game.h's note on these) -----------
+
+void Game::a_(Graphics* g, int x, int y, int w, int h) {
+  g->setClip(x, y, w, h);
+  g->setColor(0);
+  g->fillRect(x, y, w, h);
+}
+
+void Game::e_(Graphics* g) {
+  g->setClip(0, 0, 176, 220);
+  if (!aF) return;
+  int iw = aF->getWidth(), ih = aF->getHeight();
+  if (iw <= 0 || ih <= 0) return;
+  for (int yy = 0; yy < 220; yy += ih)
+    for (int xx = 0; xx < 176; xx += iw) g->drawImage(aF, xx, yy, 0);
+}
+
+int Game::a_(Graphics* g, const String& text, int x, int y, int anchor, int width) {
+  Font* font = ratchetandclank::currentFont;
+  if (!font || text.empty() || width <= 0) return y;
+  int curY = y;
+  size_t start = 0;
+  while (start < text.size()) {
+    size_t paraEnd = text.find('\n', start);
+    bool hasNl = paraEnd != String::npos;
+    if (!hasNl) paraEnd = text.size();
+
+    size_t lineStart = start;
+    do {
+      size_t bestBreak = paraEnd;
+      size_t scan = lineStart;
+      bool any = false;
+      while (scan <= paraEnd) {
+        size_t spacePos = text.find(' ', scan);
+        size_t wordEnd = (spacePos == String::npos || spacePos > paraEnd) ? paraEnd : spacePos;
+        String candidate = text.substr(lineStart, wordEnd - lineStart);
+        if (font->textWidth(candidate) <= width || !any) {
+          bestBreak = wordEnd;
+          any = true;
+          if (wordEnd >= paraEnd) break;
+          scan = wordEnd + 1;
+        } else {
+          break;
+        }
+      }
+      String line = text.substr(lineStart, bestBreak - lineStart);
+      font->drawText(g, line, x, curY, anchor);
+      curY += font->lineHeight;
+      lineStart = bestBreak;
+      while (lineStart < paraEnd && text[lineStart] == ' ') lineStart++;
+    } while (lineStart < paraEnd);
+
+    if (!hasNl) break;
+    start = paraEnd + 1;
+  }
+  return curY;
+}
+
+String Game::a_(const String& fmt, std::initializer_list<String> args) {
+  std::vector<String> argv(args);
+  String out;
+  for (size_t i = 0; i < fmt.size(); i++) {
+    if (fmt[i] == '%' && i + 1 < fmt.size() && std::isdigit((unsigned char)fmt[i + 1])) {
+      int idx = fmt[i + 1] - '0';
+      if (idx >= 0 && (size_t)idx < argv.size()) out += argv[(size_t)idx];
+      i++;
+    } else {
+      out += fmt[i];
+    }
+  }
+  return out;
+}
+
+int Game::k_() { return hudHeight + 20; }
 
 void Game::pause() {}
 void Game::resume() {}
