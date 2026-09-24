@@ -2,6 +2,7 @@
 // src_a1/Player.java's constructor and asset loading.
 #include "player.h"
 #include "game.h"
+#include "canvasshell.h"
 #include <cstddef>
 
 const jbyte Player::MUZZLE_X_BY_FRAME[28] = {
@@ -93,5 +94,109 @@ void Player::loadAnimFile(const String& path) {
     ANIM_FRAME_COUNTS[0][i] = count;
     ANIM_FRAME_EXTRA[0][i] = extra;
     for (int j = 0; j < count && j < 4; j++) ANIM_FRAMES[0][i][j] = readByte();
+  }
+}
+
+void Player::resetAttackAnim() {
+  hyperCastTimer = 0;
+  if (animState == 7 || animState == 8 || animState == 9 || animState == 0 || animState == 4) {
+    animRestart = 0;
+    setAnimState(0);
+  } else if (animState == 13) {
+    animRestart = 0;
+    setAnimState(12);
+  } else if (animState == 14) {
+    animRestart = 0;
+    setAnimState(11);
+  }
+}
+
+void Player::updateAnimation() {
+  if (animRestart == 2) return;
+  if (animState == 14) velY = 0;
+  animCounter++;
+  if (animCounter > ANIM_FRAME_EXTRA[kind][animState]) {
+    animCounter = 0;
+    animFrame++;
+    if (animFrame >= ANIM_FRAME_COUNTS[kind][animState]) {
+      if (animRestart == 0) {
+        animFrame = 0;
+      } else {
+        animFrame--;
+        animRestart = 2;
+        resetAttackAnim();
+      }
+    }
+    game_->d = true;
+  }
+}
+
+void Player::render(Graphics* g, int, int cameraX, int cameraY) {
+  Game::x = (jshort)cameraX;
+  Game::y = (jshort)cameraY;
+  int var5 = (posX >> 8) - (Game::J >> 1) + Game::x;
+  int var6 = row * tileHeight + (posInRow >> 8) + Game::y + Game::L;
+  if (animState == 6) var6 += tileHeight >> 1;
+
+  if (swingPhase >= 0) {
+    int var11 = 26 * tileWidth / 44;
+    if (!facingRight) var11 = tileWidth - var11;
+    int var12 = 10 * tileHeight / 44;
+    int var13 = (var5 + var11 - 9) << 8;
+    int var14 = (var6 + var12 - 9) << 8;
+    int var15 = swingCurX + (Game::x << 8);
+    int var16 = swingCurY + (Game::y << 8);
+    if (swingPhase == 0) var14 += 2304;
+    if (facingRight) var15 -= 1216; else var15 -= 2432;
+    int var17 = (var15 - var13) / 19;
+    int var18 = (var16 - var14) / 19;
+    for (int i = 0; i < 20; i++) {
+      int var20 = var13 >> 8;
+      int var21 = var14 >> 8;
+      if (var20 < 176 && var21 < 220 && var20 + 19 >= 0 && var21 + 19 >= 0) {
+        game_->b_(g, var20, var21, 19, 19);
+        g->drawImage(Game::aL, var20, var21 - 114, 0);
+      }
+      var13 += var17;
+      var14 += var18;
+    }
+    int var33 = (var13 - var17) >> 8;
+    int var25 = ((var14 - var18) >> 8) - 9;
+    if (var33 < 176 && var25 < 220 && var33 + 19 >= 0 && var25 + 19 >= 0) {
+      game_->b_(g, var33, var25, 19, 19);
+      if (facingRight) g->drawImage(Game::aL, var33, var25 - 95, 20);
+      else CanvasShell::directGraphics->drawImageManip(Game::aL, var33, var25 - 95, 20, 8192);
+    }
+  }
+
+  if (var6 + Game::K > hudHeight && var6 < 220 && invulnTimer % 2 == 0) {
+    jbyte fr = ANIM_FRAMES[kind][animState][animFrame];
+    const jbyte* f = FRAME_GEOMETRY[fr];
+    int f0 = f[0] & 255, f1 = f[1] & 255, f2 = f[2] & 255, f3 = f[3] & 255, f4 = f[4] & 255, f5 = f[5] & 255;
+    if (var5 + f4 < 176 && var6 + f5 < 220 && var5 + f4 + f2 >= 0 && var6 + f5 + f3 >= 0) {
+      game_->b_(g, var5 + f4, var6 + f5, f2, f3);
+      if (ap == 0 && facingRight) {
+        g->drawImage(Game::aH, var5 + f4 - f0, var6 + f5 - f1, 20);
+      } else {
+        game_->a_(g, var5 + f4 - (Game::aH->getWidth() - f0 - f2), var6 + f5 - f1, 0);
+      }
+    }
+  }
+
+  if (currentWeapon != 0) {
+    jbyte fr = ANIM_FRAMES[kind][animState][animFrame];
+    int mx = MUZZLE_X_BY_FRAME[fr];
+    int my = MUZZLE_Y_BY_FRAME[fr];
+    if (animState == 6) my += tileHeight >> 1;
+    if (mx != 44 && my != 44) {
+      int w = Game::aI->getWidth();
+      if (facingRight) var5 = (posX >> 8) + Game::x + mx;
+      else var5 = (posX >> 8) + Game::x - mx - w;
+      var6 = row * tileHeight + (posInRow >> 8) + Game::y + Game::L + my;
+      int wi = currentWeapon - 1;
+      game_->b_(g, var5, var6, w, 25);
+      if (facingRight) g->drawImage(Game::aI, var5, var6 - wi * 25, 20);
+      else CanvasShell::directGraphics->drawImageManip(Game::aI, var5, var6 - wi * 25, 20, 8192);
+    }
   }
 }

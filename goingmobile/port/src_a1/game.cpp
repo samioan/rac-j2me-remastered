@@ -3,6 +3,7 @@
 // src_a1/Game.java), t()'s mapData.txt parser, and sleep(). Everything
 // else is still a no-op stub (see game.h's header note).
 #include "game.h"
+#include "canvasshell.h"
 #include "midlet.h"
 #include "intromanager.h"
 #include "font.h"
@@ -18,6 +19,9 @@ jbyte Game::tileHeight = 28;
 jbyte Game::hudHeight = 20;
 jbyte Game::J = 44;
 jbyte Game::K = 44;
+jbyte Game::L = -16;
+jint Game::x = 0;
+jint Game::y = 0;
 jbyte Game::enemyPoolSize = 10;
 jbyte Game::bb = Game::enemyPoolSize;
 
@@ -206,6 +210,65 @@ void Game::e_(Graphics* g) {
   if (iw <= 0 || ih <= 0) return;
   for (int yy = 0; yy < 220; yy += ih)
     for (int xx = 0; xx < 176; xx += iw) g->drawImage(aF, xx, yy, 0);
+}
+
+void Game::b_(Graphics* g, int x, int y, int w, int h) {
+  if (x < 0) { w -= -x; x = 0; }
+  if (y < hudHeight) { h -= hudHeight - y; y = hudHeight; }
+  if (x + w > 176) w = 176 - x;
+  if (y + h > 220) h = 220 - y;
+  g->setClip(x, y, w, h);
+}
+
+void Game::p_(int idx) {
+  if (idx == bb) {
+    aS = player->kind;
+    aT = player->animState;
+    aU = player->animFrame;
+    aW = player->facingRight ? 0 : 5;
+  } else if (idx >= 0) {
+    Enemy* e = enemies[idx];
+    aS = e->kind;
+    aT = e->animState;
+    aU = e->animFrame;
+    if (e->ap != 0) {
+      if (e->ap == 1) aW = e->facingRight ? 4 : 2;
+      else if (e->ap == 2) aW = e->facingRight ? 6 : 3;
+      else if (e->ap == 3) aW = e->facingRight ? 1 : 7;
+    } else {
+      aW = e->facingRight ? 0 : 5;
+    }
+  }
+  if (aS >= 0) {
+    if (idx == bb) {
+      aV = Player::ANIM_FRAMES[aS][aT][aU];
+      return;
+    }
+    aV = Enemy::ANIM_FRAMES[aS][aT][aU];
+    M = (jbyte)(aG[aS]->getHeight() / K);
+  }
+}
+
+void Game::c_(Graphics* g, int idx, int x, int y, int yOffset) {
+  p_(idx);
+  int flip = enemies[idx]->wallCrawlFlipped ? (K << 1) : 0;
+  Graphics* dg = CanvasShell::directGraphics;
+  Image* im = aG[aS];
+  switch (aW) {
+    case 1: dg->drawImageManip(im, x - aV * K - flip, y - yOffset, 20, 90); break;
+    case 2: dg->drawImageManip(im, x, y - (M - 1 - aV) * K - yOffset + flip, 20, 180); break;
+    case 3: dg->drawImageManip(im, x - (M - 1 - aV) * K + flip, y - yOffset, 20, 270); break;
+    case 4: dg->drawImageManip(im, x, y - (M - 1 - aV) * K - yOffset + flip, 20, 16384); break;
+    case 5: dg->drawImageManip(im, x, y - aV * K - yOffset - flip, 20, 8192); break;
+    case 6: dg->drawImageManip(im, x - (M - 1 - aV) * K + flip, y - yOffset, 20, 8282); break;
+    case 7: dg->drawImageManip(im, x - aV * K - flip, y - yOffset, 20, 16474); break;
+    default: break;
+  }
+}
+
+void Game::a_(Graphics* g, int x, int y, int yOffset) {
+  p_(bb);
+  CanvasShell::directGraphics->drawImageManip(aH, x, y - yOffset, 20, 8192);
 }
 
 int Game::a_(Graphics* g, const String& text, int x, int y, int anchor, int width) {

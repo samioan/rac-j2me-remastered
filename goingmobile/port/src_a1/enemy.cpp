@@ -2,6 +2,7 @@
 // src_a1/Enemy.java's constructor and asset loading.
 #include "enemy.h"
 #include "game.h"
+#include "canvasshell.h"
 #include <cstddef>
 
 const jbyte Enemy::HP_BY_ANIM[27] = {6,  10, 16, 5,  8,  10, 5, 5, 5,  15, 15, 15, 22, 22,
@@ -90,6 +91,44 @@ void Enemy::loadAnimTables(const String& path) {
       ANIM_FRAME_COUNTS[type][anim] = count;
       ANIM_FRAME_EXTRA[type][anim] = extra;
       for (int f = 0; f < count && f < 5; f++) ANIM_FRAMES[type][anim][f] = readByte();
+    }
+  }
+}
+
+void Enemy::updateAnimation() {
+  if (animRestart == 2) return;
+  if (kind == -1) { animFrame = animCounter = 0; return; }
+  animCounter++;
+  if (animCounter > ANIM_FRAME_EXTRA[kind][animState]) {
+    animCounter = 0;
+    animFrame++;
+    if (animFrame >= ANIM_FRAME_COUNTS[kind][animState]) {
+      if (animRestart == 0) animFrame = 0;
+      else { animFrame--; animRestart = 2; }
+      if (animState == 6 || animState == 7) setAnimState(0);
+      if (animState == 3) {
+        setAnimState(0);
+        if (kind == 1) { facingRight = !facingRight; stateTimer = 20; }
+      }
+    }
+    game_->d = true;
+  }
+}
+
+void Enemy::render(Graphics* g, int enemyIndex, int visibilityFlags, int cameraX, int cameraY) {
+  Game::x = (jshort)cameraX;
+  Game::y = (jshort)cameraY;
+  int px = x() + Game::x - (Game::J >> 1);
+  int py = y() + Game::y;
+  if (px >= -Game::J && px < 176 && py >= -Game::K && py < 220) {
+    if ((visibilityFlags & 1) > 0 && py + Game::K > hudHeight && py < 220) {
+      game_->b_(g, px, py, Game::J, Game::K);
+      if (ap == 0 && facingRight) {
+        int flip = wallCrawlFlipped ? (Game::K << 1) : 0;
+        g->drawImage(Game::aG[kind], px, py - ANIM_FRAMES[kind][animState][animFrame] * Game::K - flip, 20);
+        return;
+      }
+      game_->c_(g, enemyIndex, px, py, 0);
     }
   }
 }

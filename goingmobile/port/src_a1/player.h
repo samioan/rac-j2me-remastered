@@ -76,6 +76,9 @@ class Player : public Entity {
   explicit Player(Game* game);
 
   void loadAssets();
+  void updateAnimation();
+  void resetAttackAnim();
+  void render(Graphics* g, int renderVariant, int cameraX, int cameraY);
 
  private:
   void loadAnimFile(const String& path);

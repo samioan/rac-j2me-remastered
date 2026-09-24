@@ -50,6 +50,9 @@ class Game {
   static jbyte hudHeight;
   static jbyte J;
   static jbyte K;
+  static jbyte L;   // -16, sprite y bias
+  static jint x;    // camera x offset
+  static jint y;    // camera y offset
   static jbyte enemyPoolSize;
   static jbyte bb;
   static const String aR[4];  // background image paths, indexed by aQ
@@ -71,6 +74,11 @@ class Game {
 
   // --- boot-chain instance state -------------------------------------------
   bool r = false;
+  jint dX = -1;     // tentative, set by IntroManager::a_(jbyte) on entering the main menu
+  bool d = false;   // dirty/redraw flag set by Player::updateAnimation
+  jbyte M = 0;
+  jbyte aS = 0, aT = 0, aV = 0, aW = 0;
+  jint aU = 0;
   jint I = 0;
   jbyte aQ = 0;
   JRandom* random = nullptr;
@@ -128,6 +136,12 @@ class Game {
   static String a_(const String& fmt, std::initializer_list<String> args);      // exact: %0/%1 substitution
   int k_();  // approx: content-area top y (only game.g() call site is on the
              // unlock-code screen, out of scope -- see intromanager.cpp)
+
+  // --- sprite-render helpers (transcribed from Game.java b/p/a(g,x,y,int)) ---
+  void b_(Graphics* g, int x, int y, int w, int h);  // HUD/screen-clamped setClip
+  void p_(int idx);                                   // cache sprite lookup for player(bb)/enemy idx
+  void c_(Graphics* g, int enemyIndex, int x, int y, int yOffset);  // rotated/flipped enemy draw
+  void a_(Graphics* g, int x, int y, int yOffset);    // mirrored player-sprite draw
 
   // --- call surface CanvasShell.java/ratchetandclank.java exercise -------
   void pause();

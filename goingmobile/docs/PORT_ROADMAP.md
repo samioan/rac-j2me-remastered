@@ -239,13 +239,18 @@ re-basing onto a1 rather than finishing the legacy build's gameplay.
       shows only its trailing characters. Transcribed faithfully, not
       "fixed."
 
-      **Still stubbed** (needs `Player`/`Enemy` behavior methods --
-      `render()`/`updateAnimation()`/`fire()` -- which don't exist yet,
-      same milestone-3.2a boundary as `Game`'s own tick/render): the
-      main menu's decorative Player+4xEnemy walk-in animation, the
-      weapon store's decorative player pose/projectile render, and the
-      idle-tick cases that would drive both (`IntroManager::i_()`'s
-      screen-1/5 branches stay no-ops). Real `Command`/`Displayable`
+      **Sprite render slice** (fourth session): `Player::updateAnimation`/
+      `resetAttackAnim`/`render`, `Enemy::updateAnimation`/`render`, and
+      Game's `b`/`p`/`c`/`a(g,x,y,int)` sprite helpers are real, plus the
+      main-menu (state 1) and weapon-store (state 5) entry setup and idle
+      ticks. `Graphics::drawImageManip` now translates Nokia DirectGraphics
+      codes (90/180/270/8192/16384 and sums) and its MIRROR_ROT_90 case was
+      fixed. Verified: enemies render on the main menu, the store shows the
+      player with a held weapon. Not yet: `Player::fire()` and
+      `Projectile` update/render (weapon demo shots), and the main-menu
+      walk-in was not caught mid-pass in screenshots.
+
+      **Still stubbed**: Real `Command`/`Displayable`
       construction (the soft-key `Command` objects `CanvasShell`'s
       `commandAction` would receive) is also not started -- the port
       drives everything through raw key codes instead, which is

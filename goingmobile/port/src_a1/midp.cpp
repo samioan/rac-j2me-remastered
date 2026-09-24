@@ -259,6 +259,15 @@ void Graphics::drawImage(Image* img, int x, int y, int anchor) {
 
 void Graphics::drawImageManip(Image* img, int x, int y, int anchor, int manipulation) {
   if (!img || img->isNull()) return;
+  if (manipulation >= 90) {  // Nokia DirectGraphics codes: rotation + FLIP_H(8192)/FLIP_V(16384)
+    int rotDeg = manipulation & 0x1FFF;
+    bool fh = (manipulation & 8192) != 0, fv = (manipulation & 16384) != 0;
+    int m = rotDeg == 90 ? 1 : rotDeg == 180 ? 2 : rotDeg == 270 ? 3 : 0;
+    if (fh && fv) m = (m + 2) & 3;                                // both flips == extra 180
+    else if (fh) m = (m == 0) ? MANIP_MIRROR : (m == 1) ? MANIP_MIRROR_ROT_90 : (m == 2) ? MANIP_MIRROR_ROT_180 : MANIP_MIRROR_ROT_270;
+    else if (fv) m = (m == 0) ? MANIP_MIRROR_ROT_180 : (m == 1) ? MANIP_MIRROR_ROT_270 : (m == 2) ? MANIP_MIRROR : MANIP_MIRROR_ROT_90;
+    manipulation = m;
+  }
   int w = img->w, h = img->h;
   bool rot = (manipulation >= 1 && manipulation <= 7 && manipulation != 4 && manipulation != 6);
   int dw = w, dh = h;
@@ -282,7 +291,7 @@ void Graphics::drawImageManip(Image* img, int x, int y, int anchor, int manipula
         case MANIP_ROT_180:      sx = w - 1 - dxx; sy = h - 1 - dyy; break;
         case MANIP_ROT_270:      sx = w - 1 - dyy; sy = dxx; break;
         case MANIP_MIRROR:       sx = w - 1 - dxx; break;
-        case MANIP_MIRROR_ROT_90:  sx = dyy; sy = h - 1 - dxx; break;
+        case MANIP_MIRROR_ROT_90:  sx = w - 1 - dyy; sy = h - 1 - dxx; break;
         case MANIP_MIRROR_ROT_180: sx = dxx; sy = h - 1 - dyy; break;
         case MANIP_MIRROR_ROT_270: sx = dyy; sy = dxx; break;
         default: break;

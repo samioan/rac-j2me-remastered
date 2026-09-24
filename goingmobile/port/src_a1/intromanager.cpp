@@ -152,10 +152,74 @@ void IntroManager::i_() {
     case 0:
       j_();
       return;
+    case 1: {
+      if (d <= 100) { d++; return; }
+      Game* gm = midlet_->game;
+      Player* p = gm->player;
+      Enemy** en = gm->enemies;
+      p->updateAnimation();
+      for (int i2 = 0; i2 < 4; i2++) en[i2]->updateAnimation();
+      f = (jbyte)(f | 1);
+      p->posX += p->velX;
+      for (int i2 = 0; i2 < 4; i2++) en[i2]->posX += en[i2]->velX;
+      if ((p->posX >> 8) > 7 * A && p->facingRight) {
+        p->facingRight = false;
+        p->velX = (jshort)(p->velX * -1);
+        en[0]->facingRight = false;
+        en[0]->velX = (jshort)(en[0]->velX * -1);
+        en[0]->posX = 12 * A << 8;
+        for (int i2 = 1; i2 < 4; i2++) en[i2]->velX = -1536;
+        return;
+      }
+      if ((en[0]->posX >> 8) < 0 && !en[0]->facingRight) {
+        d = 0;
+        p->facingRight = true;
+        p->velX = (jshort)(p->velX * -1);
+        p->posX = -30720;
+        en[0]->velX = (jshort)(en[0]->velX * -1);
+        en[0]->facingRight = true;
+        en[0]->posX = -10752;
+        for (int i2 = 1; i2 < 4; i2++) { en[i2]->posX = (8 + i2) * A << 8; en[i2]->velX = 0; }
+        return;
+      }
+      return;
+    }
+    case 5: {
+      Player* p = midlet_->game->player;
+      f = (jbyte)(f | 1);
+      p->updateAnimation();
+      if (G == 3) {
+        if (I > 70) {
+          p->setAnimState(0);
+          p->animRestart = 0;
+          I = 0;
+        } else if (I == 1 || I == 10 || I == 20) {
+          p->setAnimState(8);
+          p->animRestart = 1;
+        }
+        I++;
+        return;
+      }
+      // Player::fire() and the Projectile update/render loop (weapons
+      // 4..10's demo shots) are not transcribed yet -- only the counters
+      // and pose reset run here.
+      if (J < 3) {
+        if (G > 3 && G < 11 && I > 10) {
+          I = 0;
+          J++;
+          for (int i2 = 0; i2 < 8; i2++) if (p->ammo[i2] == 0) p->ammo[i2] = 30;
+        }
+      } else if (I > 50) {
+        J = 0;
+        I = 0;
+      } else if (I == 1) {
+        p->setAnimState(0);
+        p->animRestart = 0;
+      }
+      I++;
+      return;
+    }
     default:
-      // Screens 1 (decorative main-menu background) and 5 (weapon-select
-      // idle animation) drive live Player/Enemy update() calls -- next
-      // slice, once those behavior methods are transcribed (3.2a-adjacent).
       return;
   }
 }
@@ -248,6 +312,58 @@ void IntroManager::d_(int) {
 
 void IntroManager::a_(jbyte state) {
   f = 3;
+  if (state == 1) {
+    Game* gm = midlet_->game;
+    gm->dX = -1;
+    Player* p = gm->player;
+    p->facingRight = true;
+    d = 90;
+    p->currentWeapon = 1;
+    p->setAnimState(1);
+    p->animRestart = 0;
+    p->row = 6;
+    p->posX = -30720;
+    p->velY = 0;
+    p->velX = 1536;
+    p->invulnTimer = 0;
+    p->posInRow = -2048;
+    for (int i2 = 0; i2 < 4; i2++) {
+      Enemy* en = gm->enemies[i2];
+      en->kind = 1;
+      en->animKind = 0;
+      en->facingRight = (i2 == 0);
+      en->wallCrawlFlipped = false;
+      en->setAnimState(1);
+      en->animRestart = 0;
+      en->row = 6;
+      en->posX = (i2 == 0) ? -10752 : (8 + i2) * A << 8;
+      en->velY = 0;
+      en->velX = (i2 == 0) ? 1536 : 0;
+      en->health = 1;
+      en->activeFlag = 1;
+      en->ap = 0;
+      en->posInRow = -2048;
+    }
+    s = 3;
+  }
+  if (state == 5) {
+    Game* gm = midlet_->game;
+    for (int i2 = 0; i2 < Game::enemyPoolSize; i2++) gm->enemies[i2]->kind = -1;
+    Player* p = gm->player;
+    p->facingRight = true;
+    p->currentWeapon = 0;
+    p->setAnimState(8);
+    p->animRestart = 1;
+    p->activeFlag = 1;
+    p->posX = 22528;
+    p->velY = 0;
+    p->velX = 0;
+    p->invulnTimer = 0;
+    p->row = 2;
+    p->posInRow = -1280;
+    p->ownedWeapons = -1;
+    I = 0;
+  }
   if (state == 15) {
     // Unlock-code name-entry Form/TextField -- not modeled (unreachable on
     // a fresh/normal playthrough: only reached from the main menu when
@@ -515,8 +631,12 @@ bool IntroManager::checkCheatCode() {
 
 void IntroManager::d_(Graphics* g_gfx) {
   a_(g_gfx, (jbyte)0);
-  // Decorative main-menu Player/4x Enemy walk animation skipped --
-  // Player::render()/Enemy::render() don't exist yet (see header note).
+  {
+    Game* gm = midlet_->game;
+    gm->player->render(g_gfx, gm->player->activeFlag, 0, 11);
+    gm->enemies[0]->render(g_gfx, 0, gm->enemies[0]->activeFlag, 0, 11);
+    for (int i2 = 1; i2 < 4; i2++) gm->enemies[i2]->render(g_gfx, 1, gm->enemies[1]->activeFlag, 0, 11);
+  }
   g_gfx->setClip(0, 0, 176, 220);
   if (Game::as) g_gfx->drawImage(Game::as, 88, 4, 17);
   int y = 4 + (Game::as ? Game::as->getHeight() : 0) + 4;
@@ -710,8 +830,10 @@ void IntroManager::a_(Graphics* g_gfx, int weaponIndex) {
 
   b_(g_gfx, weaponIndex + 1, 14);
   a_(g_gfx, 9, 8, this);
-  // Decorative player pose/projectile render for weaponIndex 3..10 skipped
-  // -- Player::render()/Projectile::render() not transcribed yet.
+  // Projectile::render() (weapons 4..10's demo shots) not transcribed yet.
+  if (weaponIndex > 2 && weaponIndex < 11) {
+    midlet_->game->player->render(g_gfx, midlet_->game->player->activeFlag, 0, -4);
+  }
 }
 
 void IntroManager::h_(int key, int action) {
