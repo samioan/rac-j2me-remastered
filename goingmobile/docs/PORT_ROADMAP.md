@@ -262,18 +262,25 @@ re-basing onto a1 rather than finishing the legacy build's gameplay.
       transcription reference, not deleted.
 
 - [ ] **3.2a -- gameplay.** In progress. **Level-render slice** (fifth
-      session): New Game now starts level 0 and renders it. Real:
-      `LevelMap` load/enterRoom/render/isWalkable/solid masks, `Game`'s
-      spawn helpers (enemies, platforms, zip lines, pickups, projectiles),
-      `Game::f_(level)` (level-0 branch), `updateCamera`, the in-level
-      render pipeline + HUD, pause/resume, `Projectile` update/detonate/
-      homing/render. Screenshot-verified: level 0's first room with the
-      player and held weapon. Not yet: `Game::tick`'s gameplay body
-      (`Player::tick`, `Enemy::tick`, collisions, `T()`), cutscene
-      scripting (`b(byte)`/`c(byte)`/`d(byte)`), the hint/dialogue system
-      (`r()`/`H()`), the softkey hint row over cutscene bars, `Player::fire`/
-      `groundYAhead`, Game's own pause/store/results screens, save/load of
-      slots, levels 1+ (`f_` only implements level 0).
+      session): New Game starts level 0 and renders it (LevelMap load/
+      enterRoom/render, Game spawn helpers, camera, HUD, Projectile).
+      **Playable slice** (sixth session): `Player::tick`/physics/fire/
+      melee/zip-ride/pickups, `Enemy::tick`/AI/attacks, `Game::tick` (the
+      `b == 0` gameplay body, collisions, moving platforms, projectiles),
+      keyPressed/keyReleased, room-edge transitions, respawn, the hint/
+      dialogue panel (`cz`/`cA`/`cB` tables generated from Game.java), and
+      level 0's intro cutscene (`Game.d(byte)`; the decompiled tick shows
+      `this.abs(this.k)` at its call site -- a decompiler artifact, treated
+      as `d(k)`). Screenshot/keyboard-verified: dialogue paging with
+      portraits, Clank's drop, the zip-line ride, HUD, running left/right
+      and jumping. Two decompiled writes to a STATIC `tileWidth` through an
+      instance (`enemies[i].tileWidth = 0`, `player.tileWidth = ..`) would
+      zero the tile divisor and crash the original, so they are omitted.
+      Not yet: Game's pause menu (a placeholder resumes on any key), level-
+      exit/results screens (state 18/3/15) and level completion, levels 1+
+      (`f_(level)` only implements level 0; `a(level,room)` is not ported),
+      boss fight (Z==12, states 16/24), save/load of slots, challenge rooms
+      (cV), the store/weapon-select screens, sound.
       Original scope: Same scope as the legacy build's stubbed 3.2
       (`LevelMap`'s level parser and 22x14-equivalent tile renderer at
       a1's resolution, `Player`/`Enemy`/`Projectile` physics/AI/rendering,

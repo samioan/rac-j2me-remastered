@@ -233,6 +233,50 @@ class Game {
   void x_(Graphics* g);            // HUD
   void y_(Graphics* g);            // weapon-tray strip
 
+  // --- gameplay tick/input/collision (game_play.cpp) ----------------------
+  static const jbyte cz[40];
+  static const jshort cA[40];
+  static const jbyte cB[109];
+  static jbyte bR, bS;
+  jbyte ec = 0, ed = 0, ee = 0;
+  int  G_();                       // index of enemy overlapping the player, or -1
+  bool D_();                       // moving platform beside the player
+  bool E_();                       // platform directly ahead (facing) at player y
+  bool F_();                       // enemy directly ahead on the player's row
+  bool k_(int enemy);              // enemy hitbox overlaps player
+  short B_();                      // zip-line/platform floor scan
+  short C_();                      // pickup-platform floor scan
+  void j_(int edge);               // room-edge transition request
+  void V_();                       // finish room transition
+  void w_();                       // respawn after death
+  void g_(int bit);                // clear cJ/cK bit (hint/pickup consumed)
+  void g_(int level, int room);    // collect a secret: clear bT/bU bit + message
+  int  v_();                       // count of collected secrets
+  void e_(int level, int room);    // clear bx/by room bit
+  void r_(int msgIdx);             // start hint/dialogue message
+  void S_();                       // advance/close hint message
+  void H_(Graphics* g);            // hint panel background
+  int  a_(Graphics* g, int offset);
+  int  a_(Graphics* g, int offset, const String& text, int x, int y, int anchor, int width);
+  void a_(int col, int row, int tile);      // swing-target setup
+  void A_(int key, int action);    // in-level key press
+  void B_(int key, int action);    // in-level key release
+  void n_(int slot);               // remove moving platform slot
+  void l_(int idx);                // enemy projectile vs platforms
+  void m_(int idx);                // player projectile/melee vs platforms
+  void H_();
+  void I_();
+  void J_();
+  void K_();
+  void b_();
+  void c_();
+  void l_();
+  void a_();                       // zip-hook grab
+  void q_(int enemy);              // player projectiles vs enemy
+  void R_();                       // enemy projectiles vs player
+  void T_();                       // charge/ambient per-tick counters
+  void d_(jbyte step);             // level-0 intro cutscene step (Game.d(byte))
+
   // --- call surface CanvasShell.java/ratchetandclank.java exercise -------
   void pause();
   void resume();

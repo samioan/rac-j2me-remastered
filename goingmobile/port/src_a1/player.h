@@ -79,10 +79,28 @@ class Player : public Entity {
   short x() const { return (short)(posX >> 8); }
   short y() const { return (short)(row * tileHeight + (posInRow >> 8)); }
   void updateAnimation();
+  void tick();
+  void handleTileInteractions();
+  void zipRide();
+  void swingUpdate();
+  void startFall();
+  void hyperShotSearch();
+  void fire();
+  void meleeHit();
+  void updateHyperCastTimer();
+  void updatePickupMagnet();
+  short groundYAhead(bool tall);
+  bool onLadderTop();
+  bool wallOnLeft();
+  bool wallOnRight();
+  jbyte columnRight() const { return (jbyte)(((posX >> 8) + 8) / tileWidth); }
+  jbyte columnLeft() const { return (jbyte)(((posX >> 8) - 8) / tileWidth); }
+  int abs(int v) const { return v < 0 ? -v : v; }
   void resetAttackAnim();
   void render(Graphics* g, int renderVariant, int cameraX, int cameraY);
 
  private:
+  void refillAmmo(int units);
   void loadAnimFile(const String& path);
 
   Game* game_;

@@ -99,7 +99,9 @@ void Game::a_(int col, int row, jbyte anim, int slot) {
   en->bounceTimer = 0;
   en->spawnBitIndex = 0;
   en->patrolTargetX = en->posX;
-  if (en->kind == 1) Enemy::tileWidth = 0;
+  // Game.java also writes `enemies[i].tileWidth = 0` here for kind 1; tileWidth is
+  // Enemy's STATIC tile width (divisor in x()/column math), so zeroing it would
+  // crash the original too -- a field-name mix-up from decompilation, omitted.
   if (en->kind == 3) {
     en->facingRight = false;
     jshort t;
@@ -621,14 +623,9 @@ void Game::render(Graphics* g) {
     x_(g);
     e = false;
   }
-}
-
-void Game::tick() {
-  if (player->velY == 0) ea = 0;
-  if (dT != -1) {
-    f_(dT);
-    dT = -1;
-    d = true;
+  if (cD) {
+    H_(g);
+    cG = a_(g, cF);
   }
 }
 

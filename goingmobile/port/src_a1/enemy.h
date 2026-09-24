@@ -52,6 +52,16 @@ class Enemy : public Entity {
 
   void loadAssets();
   void updateAnimation();
+  void tick();
+  void updateWalk();
+  void startWalk();
+  void meleeAttack();
+  void rangedAttack();
+  int groundYAhead(bool sampleTile);
+  bool attackBlockedByPlatform();
+  short columnRight() const { return (short)(((posX >> 8) + 12) / tileWidth); }
+  short columnLeft() const { return (short)(((posX >> 8) - 12) / tileWidth); }
+  int abs(int v) const { return v < 0 ? -v : v; }
   void render(Graphics* g, int enemyIndex, int visibilityFlags, int cameraX, int cameraY);
   short x() const { return (short)(posX >> 8); }
   short y() const { return (short)(row * tileHeight + (posInRow >> 8) + tileHeight - hudHeight); }

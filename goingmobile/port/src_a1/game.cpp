@@ -7,6 +7,7 @@
 #include "midlet.h"
 #include "intromanager.h"
 #include "font.h"
+#include <algorithm>
 #include <cstddef>
 #include <cstdlib>
 #include <cctype>
@@ -366,7 +367,5 @@ String Game::a_(const String& fmt, std::initializer_list<String> args) {
 
 int Game::k_() { return hudHeight + 20; }
 
-void Game::keyPressed(int) {}
-void Game::keyReleased(int) {}
 void Game::writeSaveData(jbyte*) {}
 void Game::readSaveData(const jbyte*) {}
