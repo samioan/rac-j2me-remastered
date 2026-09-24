@@ -50,6 +50,7 @@
 #include "midp.h"
 
 class ratchetandclank;
+class Game;
 
 class IntroManager {
  public:
@@ -159,4 +160,6 @@ class IntroManager {
   jint M = 4;
 
   ratchetandclank* midlet_;
+
+  friend class Game;  // Game::render calls the softkey-hint row directly
 };

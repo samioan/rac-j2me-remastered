@@ -199,8 +199,6 @@ void Game::runBootStep(int step) {
 
 void Game::a_(Graphics* g, int x, int y, int w, int h) {
   g->setClip(x, y, w, h);
-  g->setColor(0);
-  g->fillRect(x, y, w, h);
 }
 
 void Game::e_(Graphics* g) {
@@ -210,6 +208,35 @@ void Game::e_(Graphics* g) {
   if (iw <= 0 || ih <= 0) return;
   for (int yy = 0; yy < 220; yy += ih)
     for (int xx = 0; xx < 176; xx += iw) g->drawImage(aF, xx, yy, 0);
+}
+
+bool Game::h_(int bit) {
+  if (bit >= 0 && bit <= 19) return (cJ & (1 << bit)) != 0;
+  return (bit < 20 || bit > 39) ? false : (cK & (1 << (bit - 20))) != 0;
+}
+
+bool Game::f_(int level, int room) {
+  int idx, set;
+  if (level > 0 && level <= 5) { idx = (level - 1) * 6 + room; set = bT; }
+  else if (level >= 6 && level <= 10) { idx = (level - 6) * 6 + room; set = bU; }
+  else return false;
+  return (set & (1 << idx)) != 0;
+}
+
+void Game::d_(int level, int room) {
+  int idx, set;
+  if (level > 0 && level <= 5) { idx = (level - 1) * 6 + room; set = bx; }
+  else if (level >= 6 && level <= 10) { idx = (level - 5) * 6 + room; set = by; }
+  else { bw = (jbyte)(bw | 1); return; }
+  if ((set & (1 << idx)) == 0) bw = (jbyte)(bw & 254);
+  else bw = (jbyte)(bw | 1);
+}
+
+void Game::x_() {
+  if (aQ != LevelMap::startSubGrid) {
+    aQ = LevelMap::startSubGrid;
+    aF = Image::createImage(aR[aQ]);
+  }
 }
 
 void Game::b_(Graphics* g, int x, int y, int w, int h) {
@@ -339,13 +366,7 @@ String Game::a_(const String& fmt, std::initializer_list<String> args) {
 
 int Game::k_() { return hudHeight + 20; }
 
-void Game::pause() {}
-void Game::resume() {}
-void Game::render(Graphics*) {}
-void Game::tick() {}
 void Game::keyPressed(int) {}
 void Game::keyReleased(int) {}
 void Game::writeSaveData(jbyte*) {}
 void Game::readSaveData(const jbyte*) {}
-void Game::c_(int, int) {}
-void Game::m_() {}

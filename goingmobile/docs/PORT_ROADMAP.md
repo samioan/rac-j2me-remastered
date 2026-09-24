@@ -261,7 +261,20 @@ re-basing onto a1 rather than finishing the legacy build's gameplay.
       Legacy build's `game.h`/`.cpp` etc. stay in `port/src/` as a
       transcription reference, not deleted.
 
-- [ ] **3.2a -- gameplay.** Same scope as the legacy build's stubbed 3.2
+- [ ] **3.2a -- gameplay.** In progress. **Level-render slice** (fifth
+      session): New Game now starts level 0 and renders it. Real:
+      `LevelMap` load/enterRoom/render/isWalkable/solid masks, `Game`'s
+      spawn helpers (enemies, platforms, zip lines, pickups, projectiles),
+      `Game::f_(level)` (level-0 branch), `updateCamera`, the in-level
+      render pipeline + HUD, pause/resume, `Projectile` update/detonate/
+      homing/render. Screenshot-verified: level 0's first room with the
+      player and held weapon. Not yet: `Game::tick`'s gameplay body
+      (`Player::tick`, `Enemy::tick`, collisions, `T()`), cutscene
+      scripting (`b(byte)`/`c(byte)`/`d(byte)`), the hint/dialogue system
+      (`r()`/`H()`), the softkey hint row over cutscene bars, `Player::fire`/
+      `groundYAhead`, Game's own pause/store/results screens, save/load of
+      slots, levels 1+ (`f_` only implements level 0).
+      Original scope: Same scope as the legacy build's stubbed 3.2
       (`LevelMap`'s level parser and 22x14-equivalent tile renderer at
       a1's resolution, `Player`/`Enemy`/`Projectile` physics/AI/rendering,
       `Game`'s tick-loop internals, boss fight, HUD), transcribed from

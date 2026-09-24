@@ -35,6 +35,16 @@ class LevelMap {
 
   explicit LevelMap(Game* game);
 
+  jshort getTile(int col, int row) const;
+  void loadRoomTable(int level);
+  void loadLevelFile(int level);
+  void computeColumnSolidMasks();
+  void enterRoom(int room, bool placePlayer);
+  void render(Graphics* g);
+  bool isWalkable(int col, int row) const;
+  // enterRoom() spawns enemies/platforms/pickups through Game's still-
+  // undeciphered spawn helpers -- lands with Game's phase-1 (3.2a).
+
  private:
   Game* game_;
 };

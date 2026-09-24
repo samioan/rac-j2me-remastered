@@ -36,6 +36,12 @@ class Projectile {
   explicit Projectile(Game* game);
 
   void reset();
+  bool isActive() const { return !detonated_; }
+  void detonate(bool enemyShot);
+  jbyte weaponIndex() const;
+  void update(bool enemyShot);
+  void homingSeek(int unused);
+  void render(Graphics* g);
 
  private:
   bool detonated_ = false;

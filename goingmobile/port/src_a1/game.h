@@ -31,6 +31,7 @@ struct JRandom {
   uint64_t seed = 0;
   JRandom() { setSeed((uint64_t)currentTimeMillis()); }
   void setSeed(uint64_t s) { seed = (s ^ 0x5DEECE66DULL) & ((1ULL << 48) - 1); }
+  int nextInt() { return next(32); }
   int next(int bits) {
     seed = (seed * 0x5DEECE66DULL + 0xB) & ((1ULL << 48) - 1);
     return (int)(seed >> (48 - bits));
@@ -74,6 +75,46 @@ class Game {
 
   // --- boot-chain instance state -------------------------------------------
   bool r = false;
+
+  // --- gameplay-state fields (obfuscated names kept, semantics per Game.java) ---
+  jbyte b = 0, c = 0;        // b: UI/gameplay state (0 playing, 17 intro cutscene, ...)
+  bool e = false, g = false, m = false;
+  jbyte h = 0, i = 0, j = 0, k = 0, n = 0, o = 0, p = 0, q = 0, s = 0;
+  jint l = 176, u = 0, U = 0;
+  jshort Y = -1;
+  bool aa = false;
+  jbyte ab = 1, ac = -1, ad = 0, ae = 0;
+  jshort af = 0, ag = 0, ah = 0;
+  jint aX = 0, aY = 0;
+  jbyte bK = 0, bL = 0, bM = 0, bP = 0, bQ = 0, bX = 0, bY = 0;
+  jint bV = 0, bW = 0;
+  bool bZ = true;
+  jbyte ca = 0, cb = 0, cc = 0, cd = 0, ce = 0, cf = 0;
+  jint cr = 0;
+  jlong cs = 0, ct = 0, cy = 0;
+  jint cv = 0, cw = 0, cx = 0;
+  bool cC = false, cD = false;
+  String cE;
+  jint cF = -1, cG = -1, cH = 0;
+  jbyte cI = 0;
+  jint cL = 0, cM = 0, cN = 0, cO = 0;
+  jshort cP = 0;
+  bool cS = false, cT = false, cV = false, cW = false, cX = false, cZ = false;
+  jbyte cU = 0, cY = 0, da = 0, db = 0, dj = 0;
+  jint di = 0, dl = 0, dC = 0;
+  jint dT = -1, dU = -1;
+  bool dV = false;
+  jlong dW = 0;
+  jint dY = 0, ea = 0;
+  bool dZ = false, eb = false;
+  static bool f, z, A, B, dF, dG, dH, dI;
+  static jbyte C, dy, dB;
+  static jint D, E, dm, dn, do_, dp, dq, dr, ds, dt, du, dv, dz, dD, dE;
+  static jlong dw;
+  jshort X = -1;    // current room index
+  jbyte Z = 1;      // current level number (1..10; 6..10 are the second half)
+  jbyte bw = 0;     // gate bitmask consulted by LevelMap::isWalkable
+  jint bx = 0, by = 0, bT = 0, bU = 0, cJ = 0, cK = 0;  // per-room/item bitsets
   jint dX = -1;     // tentative, set by IntroManager::a_(jbyte) on entering the main menu
   bool d = false;   // dirty/redraw flag set by Player::updateAnimation
   jbyte M = 0;
@@ -113,6 +154,10 @@ class Game {
   jbyte de[43][2] = {};       // mapData.txt second table (t())
   jint* aZ = nullptr;         // [8]
 
+  bool h_(int bit);              // cJ/cK unlock bitset test (0..39)
+  bool f_(int level, int room);  // bT/bU per-room flag test
+  void d_(int level, int room);  // sets bw bit 0 from bx/by room bitset
+  void x_();                     // swap tile sheet aF to the background for LevelMap::startSubGrid
   void runBootStep(int step);
   void t();  // parses mapData.txt into dd/de
   static void sleep(int ms);
@@ -142,6 +187,51 @@ class Game {
   void p_(int idx);                                   // cache sprite lookup for player(bb)/enemy idx
   void c_(Graphics* g, int enemyIndex, int x, int y, int yOffset);  // rotated/flipped enemy draw
   void a_(Graphics* g, int x, int y, int yOffset);    // mirrored player-sprite draw
+
+
+  // --- level entry / spawn helpers (Game.java a/c/d/e/f/P/Q/u ...), see game_level.cpp ---
+  void a_(int col, int row);                                   // bj[] zip-hook anchor
+  void a_(int col, int row, bool isStart, int idx);            // zip-line endpoint
+  void a_(int col, int row, int spriteRow, int rowKind, int idx);  // moving-platform slot
+  void a_(int col, int row, jbyte enemyAnim, int slot);        // enemy spawn (slot -1 = first free)
+  void a_(jbyte col, jbyte row);                               // bF[] switch anchor
+  void a_(jbyte col, jbyte row, int tile);                     // bC[] gated-wall anchor
+  void a_(int x, int y, int type, bool up, bool horiz, int dir, jbyte srcAnim);  // enemy projectile
+  void c_(int x, int y, int kind);                             // bolt drop
+  void d_(int col, int row, int kind);                         // moving-platform spawn (cq[])
+  void e_(int x, int y, int type);                             // player projectile spawn
+  void P_();
+  void Q_();
+  void u_();                                                    // new-game state reset
+  void d_();                                                    // stats reset
+  void f_();                                                    // stats arrays reset
+  int  e_();                                                    // live enemy count
+  void b_(int slot, int unused);                                // dJ[slot] = e_()
+  void f_(int level);                                           // start a level
+  int  b_(int x, int y, int unused);                            // ground y under (x,y)
+  bool a_(int x1, int y1, int w1, int h1, int x2, int y2, int w2, int h2);  // rect overlap
+  int  D_(int a, int b) { return a < b ? a : b; }
+  int  abs_(int v) { return v < 0 ? -v : v; }
+  void n_();  // pause path (Game.n)
+  void o_();  // resume path (Game.o)
+  void y_();  // reload menu backdrop into aF
+  void z_();  // reload current level tile sheet into aF
+  void C_(int x, int y);                                        // boss-marker landing
+  void updateCamera();
+
+  // --- in-level render (Game.render's default branch) ---------------------
+  void a_(Graphics* g);            // zip hooks
+  void b_(Graphics* g);            // bX pickup
+  void c_(Graphics* g);            // cc save-point
+  void D_(Graphics* g);            // ca pickup
+  void z_(Graphics* g);            // zip lines
+  void A_(Graphics* g);            // moving platforms
+  void B_(Graphics* g);            // breakable/pickup platforms
+  void C_(Graphics* g);            // bolts
+  void E_(Graphics* g);            // enemies, player, projectiles
+  void G_(Graphics* g);            // gated walls / switches
+  void x_(Graphics* g);            // HUD
+  void y_(Graphics* g);            // weapon-tray strip
 
   // --- call surface CanvasShell.java/ratchetandclank.java exercise -------
   void pause();

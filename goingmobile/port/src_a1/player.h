@@ -76,6 +76,8 @@ class Player : public Entity {
   explicit Player(Game* game);
 
   void loadAssets();
+  short x() const { return (short)(posX >> 8); }
+  short y() const { return (short)(row * tileHeight + (posInRow >> 8)); }
   void updateAnimation();
   void resetAttackAnim();
   void render(Graphics* g, int renderVariant, int cameraX, int cameraY);
