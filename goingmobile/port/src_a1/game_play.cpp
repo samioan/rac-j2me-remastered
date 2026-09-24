@@ -430,13 +430,10 @@ void Game::keyPressed(int key) {
     case 0: case 16: case 17: case 24:
       A_(key, action);
       return;
-    case 4:
-      // Placeholder for the pause menu (Game.h(int,int), not ported yet):
-      // any key resumes play so the player is never trapped in state 4.
-      b = c;
-      z_();
-      e = true;
-      return;
+    case 4: h_(key, action); return;
+    case 5: i_(key, action); return;
+    case 7: confirmKey(key, action, true); return;
+    case 8: confirmKey(key, action, false); return;
     default:
       return;  // other UI states (store/results/game-over/...) not ported yet
   }

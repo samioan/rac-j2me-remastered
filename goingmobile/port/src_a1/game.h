@@ -176,7 +176,7 @@ class Game {
   // content width). Revisit for pixel fidelity once Game's own phase-1
   // lands.
   void a_(Graphics* g, int x, int y, int w, int h);  // approx: clear-rect
-  void e_(Graphics* g);                              // approx: tiled backdrop
+  void e_(Graphics* g);                              // wpnhud frame at (j(),75)
   int a_(Graphics* g, const String& text, int x, int y, int anchor, int width);  // exact: word-wrap draw, returns new y
   static String a_(const String& fmt, std::initializer_list<String> args);      // exact: %0/%1 substitution
   int k_();  // approx: content-area top y (only game.g() call site is on the
@@ -214,6 +214,15 @@ class Game {
   int  abs_(int v) { return v < 0 ? -v : v; }
   void n_();  // pause path (Game.n)
   void o_();  // resume path (Game.o)
+  void d_(Graphics* g);            // pause menu (b==4)
+  void f_(Graphics* g);            // sound toggle (b==5)
+  void v_(Graphics* g);            // quit-to-desktop confirm (b==7)
+  void u_(Graphics* g);            // quit-to-menu confirm (b==8)
+  void h_(int key, int action);    // b==4 input
+  void i_(int key, int action);    // b==5 input
+  void confirmScreen(Graphics* g, int titleIdx);
+  int a_(Graphics* g, const String& text, int y, int left, int right);  // scrolling ticker
+  void confirmKey(int key, int action, bool toDesktop);  // b==7 / b==8 input
   void y_();  // reload menu backdrop into aF
   void z_();  // reload current level tile sheet into aF
   void C_(int x, int y);                                        // boss-marker landing

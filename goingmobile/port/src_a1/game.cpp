@@ -202,15 +202,6 @@ void Game::a_(Graphics* g, int x, int y, int w, int h) {
   g->setClip(x, y, w, h);
 }
 
-void Game::e_(Graphics* g) {
-  g->setClip(0, 0, 176, 220);
-  if (!aF) return;
-  int iw = aF->getWidth(), ih = aF->getHeight();
-  if (iw <= 0 || ih <= 0) return;
-  for (int yy = 0; yy < 220; yy += ih)
-    for (int xx = 0; xx < 176; xx += iw) g->drawImage(aF, xx, yy, 0);
-}
-
 bool Game::h_(int bit) {
   if (bit >= 0 && bit <= 19) return (cJ & (1 << bit)) != 0;
   return (bit < 20 || bit > 39) ? false : (cK & (1 << (bit - 20))) != 0;

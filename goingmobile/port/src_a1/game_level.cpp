@@ -590,7 +590,11 @@ void Game::render(Graphics* g) {
   }
   if (aF == nullptr) return;
   switch (b) {
-    case 1: case 2: case 3: case 4: case 5: case 6: case 7: case 8: case 9: case 10:
+    case 4: d_(g); return;
+    case 5: f_(g); return;
+    case 7: v_(g); return;
+    case 8: u_(g); return;
+    case 1: case 2: case 3: case 6: case 9: case 10:
     case 11: case 12: case 13: case 14: case 15: case 18: case 19: case 21: case 22: case 23:
       return;  // Game's own pause/store/results/game-over screens: later 3.2a slice
     default:

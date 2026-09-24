@@ -276,7 +276,12 @@ re-basing onto a1 rather than finishing the legacy build's gameplay.
       and jumping. Two decompiled writes to a STATIC `tileWidth` through an
       instance (`enemies[i].tileWidth = 0`, `player.tileWidth = ..`) would
       zero the tile divisor and crash the original, so they are omitted.
-      Not yet: Game's pause menu (a placeholder resumes on any key), level-
+      Pause menu (game_menus.cpp, verified by screenshot): Esc/Backspace
+      opens `Game.d(g)` (Continue / Settings / Main Menu / Exit Game, with the
+      scrolling mission-objective ticker), sound toggle (b==5), quit-to-menu
+      (b==8, -> returnToIntro) and quit-to-desktop (b==7) confirms. Game.e(g)
+      is now exact (wpnhud frame at y=75) instead of the old tiled backdrop.
+      Not yet: level-
       exit/results screens (state 18/3/15) and level completion, levels 1+
       (`f_(level)` only implements level 0; `a(level,room)` is not ported),
       boss fight (Z==12, states 16/24), save/load of slots, challenge rooms
