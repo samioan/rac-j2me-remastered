@@ -157,18 +157,47 @@ buildable/runnable slice.
 proved the boot/menu/save architecture works, so the next real work is
 re-basing onto a1 rather than finishing the legacy build's gameplay.
 
-- [ ] **3.1a -- re-base boot/splash/menu/save onto a1.** Prerequisite now
-      met: `src_a1/` is a compile-checked, renamed tree (zero errors,
-      `ROADMAP.md`'s "Status", `src_a1/README.md`) covering the boot chain
-      and menus (`ratchetandclank`, `Font`, `SoundPlayer`, `CanvasShell`,
-      and the boot/menu-relevant slice of `Game`/`IntroManager`). Not
-      started: re-transcribe the 3.1 C++ slice against a1's classes,
-      176x220 backbuffer, and MIDP `Canvas`+`CommandListener` input model
-      (replacing the legacy build's raw `FullCanvas` `keyPressed` menu
-      state machine) and RMS save format (confirm byte-for-byte against
-      `ratchetandclank`'s a1 save code -- may differ from the legacy
-      build's 220-byte/3-slot layout). Legacy build's `game.h`/`.cpp` etc.
-      stay in `port/` as a transcription reference, not deleted.
+- [ ] **3.1a -- re-base boot/splash/menu/save onto a1.** In progress.
+      Scaffold slice done (this session, mirrors milestone 3.0's original
+      scope applied to a1): a new `port/src_a1/` tree, built as a separate
+      `goingmobile_port_a1` CMake target alongside the legacy build's
+      (untouched, still `port/src/`). Real and building clean (`/W4`,
+      zero errors) as of this slice: the MIDP/Nokia shim (`midp.h`/`.cpp`
+      -- Graphics/Image/RecordStore/resource-loading carried over verbatim
+      from milestone 3.1's, since that layer isn't build-specific; a1's
+      own `SoundPlayer` re-modeled for 6 cues + a .wav/.mid mix instead of
+      the legacy build's 7 all-.mid cues; screen resized to 176x220; new
+      `Command`/`Displayable` placeholders for the `CommandListener` input
+      model), `Font` (new standalone class, `font.h`/`.cpp`, transcribed
+      from `Font.java`), `ratchetandclank`'s MIDlet lifecycle and RMS
+      saves (`midlet.h`/`.cpp` -- **confirmed 214-byte game-slot records**,
+      not the legacy build's 220-byte layout, verified by a real
+      verify/rebuild/write/read round trip against the real Win32
+      RecordStore shim), and `CanvasShell`'s input/paint dispatch
+      (`canvasshell.h`/`.cpp`, the actual `Canvas`+`CommandListener`
+      re-base point). Verified by building clean and launching
+      `goingmobile_port_a1.exe`: the 176x220 window opens, the MIDlet
+      boots (RMS store verify/rebuild, save-slot summaries, font/sound
+      init), and it stays up with no crash.
+
+      Declared and stubbed (real bodies still to come, matching the
+      "declared and stubbed until built" pattern milestone 3.1 itself used
+      for `Player`/`Enemy`/`LevelMap`/`Projectile`): `Game` and
+      `IntroManager`, to just the call surface `CanvasShell`/
+      `ratchetandclank` exercise (pause/resume/render/tick/keyPressed/
+      keyReleased/writeSaveData/readSaveData on `Game`; paint/keyPressed/
+      tick/hideNotify/activate/commandAction on `IntroManager`). Not
+      started: the real boot-chain/splash/menu transcription from
+      `Game.java`/`IntroManager.java` (a1 moved the legacy build's
+      in-`Game` menu system entirely into `IntroManager` -- see
+      `src_a1/README.md` -- so this is comparable in scope to milestone
+      3.1's own ~1,500-line slice, maybe larger given `IntroManager.java`
+      alone is 1,800 lines), the MIDP `Canvas` key-code mapping (kept the
+      legacy build's Nokia values as a documented, not yet independently
+      verified, assumption -- see `src_a1/midp.h`'s `KeyCode` comment), and
+      real `Command`/`Displayable` construction for the menu screens.
+      Legacy build's `game.h`/`.cpp` etc. stay in `port/src/` as a
+      transcription reference, not deleted.
 
 - [ ] **3.2a -- gameplay.** Same scope as the legacy build's stubbed 3.2
       (`LevelMap`'s level parser and 22x14-equivalent tile renderer at

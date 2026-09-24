@@ -146,12 +146,13 @@ documented "n11 doesn't exist" finding), folded into `ASSET_FORMATS.md`.
 [`PORT_ROADMAP.md`](PORT_ROADMAP.md), separately from this file. Milestone
 3.1 (boot/splash/menu/save surface -- MIDlet lifecycle, RMS saves, the
 string/font pipeline, every menu screen, the whole `game.h`/`.cpp` boot
-chain) is done and builds clean against the legacy build's data; gameplay
-itself (milestone 3.2) is stubbed and was not started. Port strategy
-(behavioral reimplementation in C++, not byte-exact recompilation; a
-software-rendered Win32 window, no engine dependency) carries over
-unchanged to a1 -- only the screen size (176x220, not 128x128), input
-model (MIDP Commands, not raw `FullCanvas` key codes), and asset loaders
-need to be re-based once a1's phase 1/2 are far enough along. See
-`PORT_ROADMAP.md`'s own target-change note for how the milestone numbering
-is being handled.
+chain) is done and builds clean against the legacy build's data.
+Milestone **3.1a** (re-basing that slice onto a1, now that phase 1/2 are
+both done for a1) is in progress: a scaffold slice lands a new
+`port/src_a1/` tree/CMake target building clean at a1's real screen size
+(176x220) with a real MIDlet boot (RMS saves confirmed 214 bytes/slot, not
+the legacy build's 220), `Font`, and `CanvasShell`'s `Canvas`+
+`CommandListener` input dispatch; `Game`/`IntroManager` (the engine and,
+new in a1, the menu/splash controller the legacy build didn't split out)
+are declared and stubbed, with the real boot-chain/menu transcription
+still to come -- see `PORT_ROADMAP.md`'s 3.1a entry for the current state.

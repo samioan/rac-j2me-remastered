@@ -29,3 +29,30 @@ add_executable(goingmobile_port WIN32
 if(MSVC)
   target_compile_options(goingmobile_port PRIVATE /W4)
 endif()
+
+# Milestone 3.1a: a1's boot/splash/menu/save surface, re-based from
+# goingmobile/src_a1/ (the target build's compile-checked phase-1 tree,
+# ROADMAP.md's "Status") onto the same raw Win32 software-rendered window
+# as milestone 3.1, resized to a1's own screen (176x220, not 128x128) and
+# using a plain MIDP Canvas + CommandListener input model instead of the
+# legacy build's FullCanvas keyPressed state machine. This first slice is
+# scaffold-scoped (mirrors milestone 3.0's original scope, applied to a1):
+# the shim (midp), font, MIDlet lifecycle + 214-byte RMS saves (midlet),
+# and canvas shell/input dispatch (canvasshell) are real; Game and
+# IntroManager (a1's engine + menu/splash controller -- IntroManager
+# absorbed the legacy build's in-Game menu system) are declared and
+# stubbed to the call surface CanvasShell/ratchetandclank exercise. The
+# real boot-chain/menu transcription (comparable in scope to milestone
+# 3.1's ~1500 lines) is still to come.
+add_executable(goingmobile_port_a1 WIN32
+  src_a1/main.cpp
+  src_a1/midp.cpp
+  src_a1/font.cpp
+  src_a1/midlet.cpp
+  src_a1/canvasshell.cpp
+  src_a1/game.cpp
+  src_a1/intromanager.cpp
+)
+if(MSVC)
+  target_compile_options(goingmobile_port_a1 PRIVATE /W4)
+endif()
