@@ -313,7 +313,12 @@ re-basing onto a1 rather than finishing the legacy build's gameplay.
       loaded to the level-select map). The phase-1 IntroManager Load Game
       handler calls `writeSaveSlot(G)` where only `continueGame(G)` makes
       sense (nothing else calls continueGame), so the port calls continueGame.
-      Not yet: a full playthrough of levels 1-11, sound, the
+      Sound: already real since the boot slice (MCI-backed `SoundPlayer`,
+      menu.mid looped, five .wav cues). Verified this slice: menu.mid opens
+      and plays (MCI rc=0), all five .wav cues open. Every Game/Player
+      `playSoundIfEnabled` call site in the Java tree is ported except the one
+      in Game's unused own slot picker (b==9). Not audibly compared.
+      Not yet: a full playthrough of levels 1-11, the
       other levels' level-specific scripting beyond what level 0 exercised,
       boss fight (Z==12, states 16/24), save/load of slots, challenge rooms
       (cV), the store/weapon-select screens, sound.
