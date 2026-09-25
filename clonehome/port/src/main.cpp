@@ -57,11 +57,12 @@ namespace ch {
 static const int kSpeeds[] = {15, 20, 25, 30, 40, 50, 60, 75, 100, 120};
 
 String Port::label(int row) {
+  auto wide = [](const std::wstring& w) { return String(std::u16string(w.begin(), w.end())); };
   switch (row) {
-    case 0: return String(u"Resolution: ") + String(std::u16string(display::aspectName(), display::aspectName() + wcslen(display::aspectName())));
+    case 0: return String(u"Resolution: ") + wide(display::aspectName());
     case 1: return String(display::isFullscreen() ? u"Fullscreen: ON" : u"Fullscreen: OFF");
-    case 2: return String(display::settings().scaling == display::Scaling::Fit ? u"Scaling: Fit" : u"Scaling: Integer");
-    default: return String(u"Speed: ") + String::valueOf(g_game ? g_game->targetFps : 25) + String(u" Hz");
+    case 2: return String(u"Speed: ") + String::valueOf(g_game ? g_game->targetFps : 25) + String(u" Hz");
+    default: return String(u"FPS: ") + wide(display::fpsName());
   }
 }
 
@@ -70,8 +71,7 @@ void Port::change(int row, int dir) {
   switch (row) {
     case 0: display::cycleAspect(g_hwnd, dir); break;
     case 1: display::toggleFullscreen(g_hwnd); break;
-    case 2: display::cycleScaling(g_hwnd); break;
-    default: {
+    case 2: {
       if (!g_game) break;
       int idx = 0, n = (int)(sizeof kSpeeds / sizeof *kSpeeds);
       for (int i = 0; i < n; i++)
@@ -82,6 +82,7 @@ void Port::change(int row, int dir) {
       display::save();
       break;
     }
+    default: display::cycleFps(g_hwnd, dir); break;
   }
   updateTitle(g_hwnd);
 }
@@ -106,8 +107,8 @@ static unsigned resolveKey(WPARAM vk, LPARAM lParam) {
 
 static void updateTitle(HWND hwnd) {
   wchar_t title[128];
-  swprintf(title, 128, L"Ratchet and Clank: Clone Home Port  [%d Hz | %s | %s scaling]", g_game ? g_game->targetFps : 0,
-           display::aspectName(), display::scalingName());
+  swprintf(title, 128, L"Ratchet and Clank: Clone Home Port  [%d Hz logic | %s fps | %s | %s scaling]",
+           g_game ? g_game->targetFps : 0, display::fpsName().c_str(), display::aspectName(), display::scalingName());
   SetWindowTextW(hwnd, title);
 }
 
@@ -142,6 +143,13 @@ static LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lP
       if (wParam == VK_F8) {  // resolution: cycle the canvas aspect (Shift+F8 goes back)
         if (!(lParam & (1 << 30))) {
           display::cycleAspect(hwnd, GetKeyState(VK_SHIFT) < 0 ? -1 : 1);
+          updateTitle(hwnd);
+        }
+        return 0;
+      }
+      if (wParam == VK_F9) {  // display frame rate (Shift+F9 back)
+        if (!(lParam & (1 << 30))) {
+          display::cycleFps(hwnd, GetKeyState(VK_SHIFT) < 0 ? -1 : 1);
           updateTitle(hwnd);
         }
         return 0;
@@ -291,10 +299,32 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int) {
   timeBeginPeriod(1);  // 1 ms timer/Sleep resolution for steady frame pacing
   g_game->realTime = true;
   g_game->targetFps = startHz < 5 ? 5 : startHz > 120 ? 120 : startHz;
+  updateTitle(hwnd);
+
+  LARGE_INTEGER qpf;
+  QueryPerformanceFrequency(&qpf);
+  auto nowMs = [&]() {
+    LARGE_INTEGER c;
+    QueryPerformanceCounter(&c);
+    return (double)c.QuadPart * 1000.0 / (double)qpf.QuadPart;
+  };
+  // Sleep until `target` (ms on the nowMs clock), waking early for window messages, spinning the last stretch.
+  auto waitUntil = [&](double target) {
+    for (;;) {
+      double rem = target - nowMs();
+      if (rem <= 0) return;
+      if (rem > 2.0) MsgWaitForMultipleObjects(0, nullptr, FALSE, (DWORD)(rem - 1.0), QS_ALLINPUT);
+      else SwitchToThread();
+      MSG m;
+      if (PeekMessageW(&m, nullptr, 0, 0, PM_NOREMOVE)) return;  // let the loop handle input promptly
+    }
+  };
+
   MSG msg = {};
   long statFrames = 0;
   bool jumped = false;
   DWORD statStart = timeGetTime();
+  double nextRender = nowMs();
   while (!g_game->quit) {
     while (PeekMessageW(&msg, nullptr, 0, 0, PM_REMOVE)) {
       if (msg.message == WM_QUIT) {
@@ -302,7 +332,9 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int) {
           FILE* f = std::fopen("perf.log", "w");
           if (f) {
             DWORD ms = timeGetTime() - statStart;
-            std::fprintf(f, "%ld frames in %lu ms = %.2f fps (target %d)\n", statFrames, ms, statFrames * 1000.0 / ms, g_game->targetFps);
+            std::fprintf(f, "%ld frames in %lu ms = %.2f fps (logic %d Hz, fps setting %d); %ld ticks = %.2f Hz\n",
+                         statFrames, ms, statFrames * 1000.0 / ms, g_game->targetFps, display::settings().fps,
+                         g_game->tickCount, g_game->tickCount * 1000.0 / ms);
             std::fclose(f);
           }
         }
@@ -325,10 +357,35 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int) {
       Game::viewW = g_screen.w;
     }
     input::poll();
-    int sleepMs = g_game->runFrame((long)timeGetTime(), g_screen);
+
+    // Extra frames between logic ticks are only drawn in live gameplay; menus render once per tick.
+    int st = Game::state;
+    bool world = st == 0 || st == 16 || st == 17 || st == 24;
+    int fps = display::settings().fps;
+    g_game->interpolate = fps != 0 && world;
+
+    int idle = g_game->runFrame(nowMs(), g_screen);
     statFrames++;
     display::present(hwnd, g_screen);
-    Sleep(sleepMs > 0 ? sleepMs : 1);
+    if (idle > 0) {  // paused (window unfocused)
+      Sleep((DWORD)idle);
+      nextRender = nowMs();
+      continue;
+    }
+
+    double t = nowMs();
+    if (g_game->interpolate) {
+      if (fps > 0) {
+        nextRender += 1000.0 / fps;
+        if (nextRender < t - 100.0) nextRender = t;  // stalled: do not try to catch up
+        waitUntil(nextRender);
+      } else {
+        SwitchToThread();  // unlimited
+      }
+    } else {
+      waitUntil(t + g_game->msUntilNextTick(t));
+      nextRender = nowMs();
+    }
   }
   return 0;
 }

@@ -25,6 +25,7 @@ import javalang
 from javalang import tree as T
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+import ch_interp  # noqa: E402
 import ch_settings  # noqa: E402
 import ch_widescreen  # noqa: E402
 
@@ -155,7 +156,7 @@ SYMS = {}
 
 def load_symbols():
     for name in ALL_CLASSES:
-        tr = javalang.parse.parse(ch_settings.apply(name + ".java", ch_widescreen.apply(name + ".java", (SRC / (name + ".java")).read_text(encoding="utf-8"))))
+        tr = javalang.parse.parse(ch_interp.apply(name + ".java", ch_settings.apply(name + ".java", ch_widescreen.apply(name + ".java", (SRC / (name + ".java")).read_text(encoding="utf-8")))))
         cls = tr.types[0]
         s = Sym()
         s.super = cls.extends.name if cls.extends else None

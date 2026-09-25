@@ -1,6 +1,6 @@
 """Port options in the game's own Settings screens (applied by java2cpp.py, like ch_widescreen.py).
 
-Both settings screens get four extra rows -- Resolution, Fullscreen, Scaling, Speed -- drawn in the
+Both settings screens get four extra rows -- Resolution, Fullscreen, Speed, FPS -- drawn in the
 game's menu style, above the existing entries. Left/right (or Select) changes a row. The values live
 in C++: `Port.label(row)` returns the row's text and `Port.change(row, dir)` changes it
 (see port/src/main.cpp). The screens are:

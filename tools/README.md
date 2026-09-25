@@ -50,6 +50,7 @@ tracked (see `.gitignore`).
 - **`ch_widescreen.py`** -- data module for `java2cpp.py`: the textual patches that make the
   Clone Home port's canvas width variable (widescreen), kept out of `clonehome/src`.
 - **`ch_settings.py`** -- data module for `java2cpp.py`: adds the port's options rows to the game's Settings screens.
+- **`ch_interp.py`** -- data module for `java2cpp.py`: render-time interpolation (snapshot per logic tick, blended extra frames).
 - **`parse_gm.py`** -- goingmobile phase 2: parsers/validators for every
   custom asset format of the canonical build (tilemaps, menu table,
   bitmap font with ASCII rendering, animation/geometry tables). Each one

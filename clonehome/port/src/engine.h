@@ -44,6 +44,14 @@ class Engine {
 
   bool ok() const { return ok_; }
   bool quit = false;
+  // Interpolated rendering (see tools/ch_interp.py): with `interpolate` on, runFrame() is called at the
+  // display rate; logic still ticks every 1000/targetFps ms and the frames in between are drawn with
+  // interpAlpha (0..255 = how far to the next tick) so the game can blend positions. 256 = no blending.
+  bool interpolate = false;
+  long tickCount = 0;  // logic steps run (for --stats)
+  static inline int interpAlpha = 256;
+  static inline bool tickFrame = true;
+  double msUntilNextTick(double nowMs) const;
   int targetFps = 25;     // real-time logic steps per second (the game does one step per frame)
   bool realTime = false;  // sleep to hold the minimum frame time (set by the window loop)
   MIDlet* midlet;
@@ -53,7 +61,7 @@ class Engine {
 
   // One iteration of Engine.run's loop body. `nowMs` is a monotonic clock;
   // returns milliseconds the caller should sleep before the next call.
-  int runFrame(long nowMs, Surface& screen);
+  int runFrame(double nowMs, Surface& screen);
   void hideNotify() { pause(); }
   void showNotify() { resume(); }
   void postLifecycle(int s) { if (s == 3) onLifecycle(3); }
@@ -131,6 +139,7 @@ class Engine {
  private:
   bool ok_ = false;
   long lastFrameStart_ = 0;
+  double lastTick_ = 0;
   bool resetFrameTiming_ = true, clearBorders_ = true, paused_ = false, started_ = false;
   bool settingsLoaded_ = false, optM_ = false, optN_ = false;
   int keysHeld_ = 0, pendingPressed_ = 0, pendingHeld_ = 0, pendingReleased_ = 0;

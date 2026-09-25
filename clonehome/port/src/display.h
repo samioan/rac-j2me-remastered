@@ -3,6 +3,8 @@
 #pragma once
 #include <windows.h>
 
+#include <string>
+
 #include "gfx.h"
 
 namespace display {
@@ -18,6 +20,7 @@ struct Settings {
   Scaling scaling = Scaling::Fit;
   int hz = 25;
   Aspect aspect = Aspect::Auto;
+  int fps = 0;  // display frame rate: 0 = same as the logic rate (no interpolation), -1 = unlimited, else fps
 };
 
 Settings& settings();
@@ -32,6 +35,8 @@ void cycleScaling(HWND hwnd);
 const wchar_t* scalingName();
 void cycleAspect(HWND hwnd, int dir);
 const wchar_t* aspectName();
+void cycleFps(HWND hwnd, int dir);
+std::wstring fpsName();
 // Logical canvas width for the current mode and window client size.
 int logicalWidth(int clientW, int clientH);
 

@@ -48,8 +48,9 @@ void load() {
   if (path.empty()) return;
   FILE* f = std::fopen(path.c_str(), "r");
   if (!f) return;
-  int fs = 0, sc = 0, hz = 25, asp = (int)Aspect::Auto;
-  if (std::fscanf(f, "%d %d %d %d", &fs, &sc, &hz, &asp) >= 3) {
+  int fs = 0, sc = 0, hz = 25, asp = (int)Aspect::Auto, fps = 0;
+  if (std::fscanf(f, "%d %d %d %d %d", &fs, &sc, &hz, &asp, &fps) >= 3) {
+    g_settings.fps = fps;
     if (asp >= 0 && asp < (int)Aspect::Count) g_settings.aspect = (Aspect)asp;
     g_settings.fullscreen = fs != 0;
     g_settings.scaling = sc == 1 ? Scaling::Integer : Scaling::Fit;
@@ -65,8 +66,8 @@ void save() {
   CreateDirectoryA(dir.c_str(), nullptr);
   FILE* f = std::fopen(path.c_str(), "w");
   if (!f) return;
-  std::fprintf(f, "%d %d %d %d\n", g_fullscreen ? 1 : 0, g_settings.scaling == Scaling::Integer ? 1 : 0, g_settings.hz,
-               (int)g_settings.aspect);
+  std::fprintf(f, "%d %d %d %d %d\n", g_fullscreen ? 1 : 0, g_settings.scaling == Scaling::Integer ? 1 : 0,
+               g_settings.hz, (int)g_settings.aspect, g_settings.fps);
   std::fclose(f);
 }
 
@@ -106,6 +107,24 @@ void cycleAspect(HWND hwnd, int dir) {
   g_settings.aspect = (Aspect)(((int)g_settings.aspect + dir + n) % n);
   save();
   InvalidateRect(hwnd, nullptr, TRUE);
+}
+
+static const int kFpsChoices[] = {0, 60, 90, 120, 144, 165, 240, -1};
+
+void cycleFps(HWND hwnd, int dir) {
+  const int n = (int)(sizeof kFpsChoices / sizeof *kFpsChoices);
+  int idx = 0;
+  for (int i = 0; i < n; i++)
+    if (kFpsChoices[i] == g_settings.fps) idx = i;
+  g_settings.fps = kFpsChoices[(idx + dir + n) % n];
+  save();
+  if (hwnd) InvalidateRect(hwnd, nullptr, TRUE);
+}
+
+std::wstring fpsName() {
+  if (g_settings.fps == 0) return L"Original";
+  if (g_settings.fps < 0) return L"Unlimited";
+  return std::to_wstring(g_settings.fps);
 }
 
 const wchar_t* aspectName() {

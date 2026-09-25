@@ -398,6 +398,10 @@ class Game : public Engine {
   inline static int gu = 0;
   inline static bool gv = false;
   inline static bool gw = false;
+  inline static Arr<int> iPrev = newArr<int>(292);
+  inline static Arr<int> iCur = newArr<int>(292);
+  inline static Arr<int> iBlend = newArr<int>(292);
+  inline static bool iValid = false;
   Game(RatchetMIDlet* var1);
   static int uiX();
   static Arr<int8_t> readByteArray();
@@ -415,6 +419,12 @@ class Game : public Engine {
   void onPause();
   void onStartApp();
   void fillBlack(Surface* var1);
+  bool collect(Arr<int> var1);
+  void putAll(Arr<int> var1);
+  static int lerp(int var0, int var1, int var2, int var3);
+  void interpSnapshot();
+  bool interpApply(int var1);
+  void interpRestore();
   void update() override;
   void translateKeys();
   void translateReleaseKeys();

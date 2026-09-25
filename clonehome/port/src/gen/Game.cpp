@@ -946,7 +946,132 @@ void Game::fillBlack(Surface* var1) {
   var1->fillRect(0, 0, 240, 320);
 }
 
+bool Game::collect(Arr<int> var1) {
+  if ((((((((this->enemies == nullptr) || (this->playerShots == nullptr)) || (this->enemyShots == nullptr)) || (platformDir == nullptr)) || (pickupX == nullptr)) || (crateType == nullptr)) || (this->crateFallOffset == nullptr))) {
+    return false;
+  }
+  var1[0] = cameraX;
+  var1[1] = cameraY;
+  var1[2] = playerX;
+  var1[3] = playerY;
+  int var2 = 4;
+  for (int var3 = 0; (var3 < 10); (var3++)) {
+    var1[var2] = this->enemies[var3]->type;
+    var1[(var2 + 1)] = this->enemies[var3]->worldX;
+    var1[(var2 + 2)] = this->enemies[var3]->worldY;
+    var2 += 3;
+  }
+  for (int var4 = 0; (var4 < 10); (var4++)) {
+    var1[var2] = this->playerShots[var4]->type;
+    var1[(var2 + 1)] = this->playerShots[var4]->worldX;
+    var1[(var2 + 2)] = this->playerShots[var4]->worldY;
+    var2 += 3;
+  }
+  for (int var5 = 0; (var5 < 10); (var5++)) {
+    var1[var2] = this->enemyShots[var5]->type;
+    var1[(var2 + 1)] = this->enemyShots[var5]->worldX;
+    var1[(var2 + 2)] = this->enemyShots[var5]->worldY;
+    var2 += 3;
+  }
+  for (int var6 = 0; (var6 < 4); (var6++)) {
+    var1[var2] = platformDir[var6];
+    var1[(var2 + 1)] = platformOffsetX[var6];
+    var1[(var2 + 2)] = platformOffsetY[var6];
+    var2 += 3;
+  }
+  for (int var7 = 0; (var7 < 12); (var7++)) {
+    var1[var2] = pickupKind[var7];
+    var1[(var2 + 1)] = pickupX[var7];
+    var1[(var2 + 2)] = pickupY[var7];
+    var2 += 3;
+  }
+  for (int var8 = 0; (var8 < 50); (var8++)) {
+    var1[var2] = crateType[var8];
+    var1[(var2 + 1)] = this->crateFallOffset[var8];
+    var1[(var2 + 2)] = 0;
+    var2 += 3;
+  }
+  return true;
+}
+
+void Game::putAll(Arr<int> var1) {
+  cameraX = var1[0];
+  cameraY = var1[1];
+  playerX = var1[2];
+  playerY = var1[3];
+  this->setScroll(cameraX, (cameraY - 21));
+  int var2 = 4;
+  for (int var3 = 0; (var3 < 10); (var3++)) {
+    this->enemies[var3]->worldX = var1[(var2 + 1)];
+    this->enemies[var3]->worldY = var1[(var2 + 2)];
+    var2 += 3;
+  }
+  for (int var4 = 0; (var4 < 10); (var4++)) {
+    this->playerShots[var4]->worldX = var1[(var2 + 1)];
+    this->playerShots[var4]->worldY = var1[(var2 + 2)];
+    var2 += 3;
+  }
+  for (int var5 = 0; (var5 < 10); (var5++)) {
+    this->enemyShots[var5]->worldX = var1[(var2 + 1)];
+    this->enemyShots[var5]->worldY = var1[(var2 + 2)];
+    var2 += 3;
+  }
+  for (int var6 = 0; (var6 < 4); (var6++)) {
+    platformOffsetX[var6] = ((int16_t)(var1[(var2 + 1)]));
+    platformOffsetY[var6] = ((int16_t)(var1[(var2 + 2)]));
+    var2 += 3;
+  }
+  for (int var7 = 0; (var7 < 12); (var7++)) {
+    pickupX[var7] = var1[(var2 + 1)];
+    pickupY[var7] = var1[(var2 + 2)];
+    var2 += 3;
+  }
+  for (int var8 = 0; (var8 < 50); (var8++)) {
+    this->crateFallOffset[var8] = ((int16_t)(var1[(var2 + 1)]));
+    var2 += 3;
+  }
+}
+
+int Game::lerp(int var0, int var1, int var2, int var3) {
+  int var4 = (var1 - var0);
+  return (((var4 > var3) || (var4 < (-var3))) ? var1 : (var0 + ((var4 * var2) >> 8)));
+}
+
+void Game::interpSnapshot() {
+  iValid = this->collect(iPrev);
+}
+
+bool Game::interpApply(int var1) {
+  if (((!iValid) || (!this->collect(iCur)))) {
+    return false;
+  }
+  iBlend[0] = lerp(iPrev[0], iCur[0], var1, 48);
+  iBlend[1] = lerp(iPrev[1], iCur[1], var1, 48);
+  iBlend[2] = lerp(iPrev[2], iCur[2], var1, 12288);
+  iBlend[3] = lerp(iPrev[3], iCur[3], var1, 12288);
+  int var2 = 4;
+  for (int var3 = 0; (var3 < 96); (var3++)) {
+    int var4 = ((((var3 >= 30) && (var3 < 34)) || (var3 >= 46)) ? 48 : 12288);
+    iBlend[var2] = iCur[var2];
+    if ((iPrev[var2] == iCur[var2])) {
+      iBlend[(var2 + 1)] = lerp(iPrev[(var2 + 1)], iCur[(var2 + 1)], var1, var4);
+      iBlend[(var2 + 2)] = lerp(iPrev[(var2 + 2)], iCur[(var2 + 2)], var1, var4);
+    } else {
+      iBlend[(var2 + 1)] = iCur[(var2 + 1)];
+      iBlend[(var2 + 2)] = iCur[(var2 + 2)];
+    }
+    var2 += 3;
+  }
+  this->putAll(iBlend);
+  return true;
+}
+
+void Game::interpRestore() {
+  this->putAll(iCur);
+}
+
 void Game::update() {
+  this->interpSnapshot();
   deltaTime = Engine::frameTime;
   {
     int var3;
@@ -1235,7 +1360,17 @@ void Game::render(Surface* var1) {
   if ((var3 != 0)) {
     var1->translate(var3, 0);
   }
+  int var6 = deltaTime;
+  bool var7 = (var4 && (Engine::interpAlpha < 256));
+  if ((var7 && (!Engine::tickFrame))) {
+    deltaTime = 0;
+  }
+  bool var5 = (var7 && this->interpApply(Engine::interpAlpha));
   this->renderInner(var1);
+  deltaTime = var6;
+  if (var5) {
+    this->interpRestore();
+  }
   if ((var3 != 0)) {
     var1->translate((-var3), 0);
   }

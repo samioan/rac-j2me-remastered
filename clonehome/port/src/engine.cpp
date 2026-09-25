@@ -117,7 +117,13 @@ static void logJavaException(const char* where, const JavaException& e) {
   std::fclose(f);
 }
 
-int Engine::runFrame(long nowMs, Surface& screen) {
+double Engine::msUntilNextTick(double nowMs) const {
+  double period = 1000.0 / (targetFps < 1 ? 1 : targetFps);
+  double d = lastTick_ + period - nowMs;
+  return d > 0 ? d : 0;
+}
+
+int Engine::runFrame(double nowMs, Surface& screen) {
   if (!started_) {
     started_ = true;
     onLifecycle(0);
@@ -127,23 +133,29 @@ int Engine::runFrame(long nowMs, Surface& screen) {
     return 100;
   }
   int sleepMs = 0;
+  bool tick = true;
   if (realTime) {
-    // Fixed-rate pacing. The game runs one logic step per frame, and only when the frame time is
+    // Fixed-rate logic. The game runs one logic step per frame, and only when the frame time is
     // over 40 ms (tickAccum > 40), so it is always told at least 41 ms whatever the real rate.
-    long period = 1000 / (targetFps < 1 ? 1 : targetFps);
+    double period = 1000.0 / (targetFps < 1 ? 1 : targetFps);
     if (resetFrameTiming_) {
       resetFrameTiming_ = false;
-      lastFrameStart_ = nowMs - period;
+      lastTick_ = nowMs - period;
     }
-    long due = lastFrameStart_ + period;
-    if (nowMs < due) {
-      Sleep((DWORD)(due - nowMs));
-    } else if (nowMs - due > period * 3) {
-      due = nowMs;  // fell far behind (window drag, breakpoint): resync instead of catching up
+    tick = nowMs - lastTick_ >= period - 1.0;
+    if (tick) {
+      lastTick_ += period;
+      if (nowMs - lastTick_ > period * 3) lastTick_ = nowMs;  // fell far behind: resync instead of catching up
+      frameTime = (int)std::max(period, 41.0);
     }
-    lastFrameStart_ = due;
-    frameTime = (int)std::max(period, 41L);
+    if (interpolate) {
+      double a = (nowMs - lastTick_) / period * 256.0;
+      interpAlpha = a < 0 ? 0 : a > 255 ? 255 : (int)a;
+    } else {
+      interpAlpha = 256;
+    }
   } else {
+    interpAlpha = 256;
     if (resetFrameTiming_) {
       resetFrameTiming_ = false;
       frameTime = minFrameTime;
@@ -156,16 +168,20 @@ int Engine::runFrame(long nowMs, Surface& screen) {
         frameTime = minFrameTime;
       }
     }
-    lastFrameStart_ = nowMs;
+    lastFrameStart_ = (long)nowMs;
   }
-  try {
-    update();
-  } catch (const JavaException& e) {
-    logJavaException("update", e);
+  tickFrame = tick;
+  if (tick) {
+    tickCount++;
+    try {
+      update();
+    } catch (const JavaException& e) {
+      logJavaException("update", e);
+    }
+    if (soundPlayer) soundPlayer->run();
+    Player::pumpLoops();
+    if (quit) return 0;
   }
-  if (soundPlayer) soundPlayer->run();
-  Player::pumpLoops();
-  if (quit) return 0;
 
   screen.resetTransform();
   bordersCleared = clearBorders_;

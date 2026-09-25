@@ -107,7 +107,18 @@ ac-ch-port\display.cfg`):
 ### In-game Settings
 
 Both "Game Settings" screens (title menu > Settings, and pause menu > Settings) have four extra rows in the game's own menu
-style: **Resolution**, **Fullscreen**, **Scaling** and **Speed** (game-logic rate in Hz: 15/20/25/30/40/50/60/75/100/120).
-Left/right or Select changes the highlighted row; the function keys F5-F8/F11 still work too. Implemented by
+style: **Resolution**, **Fullscreen**, **Speed** (game-logic rate in Hz: 15/20/25/30/40/50/60/75/100/120) and **FPS** (see below). Scaling (Fit/Integer) stays on F7.
+Left/right or Select changes the highlighted row; the function keys F5-F9/F11 still work too. Implemented by
 `tools/ch_settings.py` (Java patches applied by `java2cpp.py`) calling `Port.label(row)` / `Port.change(row, dir)`,
 which live in `port/src/main.cpp`.
+
+### Higher frame rates (interpolation)
+
+The game does one logic step per frame, so it is locked to its logic rate (Speed, 25 Hz by default). The **FPS** setting
+(F9, Shift+F9 back, or the Settings row) lets the picture be drawn faster than that: Original (= logic rate), 60, 90, 120, 144, 165, 240
+or Unlimited. As in the Going Mobile port, logic never speeds up: each tick records the positions of everything that moves (camera,
+player, enemies, both projectile pools, moving platforms, pickups, falling crates) and the frames in between draw blended positions
+(`tools/ch_interp.py`; the picture lags one tick behind). Big jumps (respawns, room changes) and entities that changed type are not
+blended. Extra frames only happen in live gameplay (menus draw once per tick), and they freeze `deltaTime` because two decorative
+animations step inside the game's render code. `--stats` writes the measured frame and logic rates to `perf.log`: at 25 Hz logic the
+logic stays at 25.0 Hz at every FPS setting.
