@@ -38,20 +38,26 @@ decompiled to readable-but-unrenamed Java (`decompiled/`, 7 files) via
 despite the obfuscation; only `b.java`'s sheer size (238KB, thousands of
 single-letter fields) makes the read-through daunting.
 
-**Phase 1 (not started): read through and rename**, starting from
-`RatchetMIDlet.java` (small, already readable) -> `a.java` (the engine
-base + resource loader) -> `b.java`. The save-game format is already
-fully recoverable from `RatchetMIDlet`'s serializer without touching `b`.
+**Phase 1 (done, with a tail): read through and rename.** All seven classes
+are read and renamed into [`../src/`](../src/) -- `a`=`Engine`, `b`=`Game`,
+`c`=`Enemy`, `d`=`Projectile`, `e`=`SoundPlayer`, `f`=`Sprite` -- with 644
+members named from confirmed call sites (`RatchetMIDlet` and the five small
+classes are fully renamed; `Game` has 135 of its 155 methods and 243 fields named).
+Unlike Going Mobile's regex renamer, this one works on the class files
+(`tools/rename_ch.py` + `tools/ch_rename/ChRenamer.java`, driven by
+[`names.map`](names.map)), so it is exact, and `src/` compiles against the
+MIDP stubs with 0 errors. [`CLASS_MAP.md`](CLASS_MAP.md) has the evidence: the
+tile-code semantics, the game-state machine, the save format, the enemy and
+projectile classes, the data tables. The tail is listed under "Not yet mapped"
+there: mainly the title-menu screen machine (`screen`), the credits scroller,
+the name/code entry, and a handful of sprite arrays.
 
-**Phase 2 (partially done from phase-0 read-through, see
-[`ASSET_FORMATS.md`](ASSET_FORMATS.md)):** the `RP*` container format is
-confirmed from `a`'s own parser (header, length table, flag table,
-payload, `bank<<10|index` addressing); the per-resource payload formats
-(embedded PNGs with a byte-swap decode, string tables, level streams) are
-partially confirmed -- the PNG chunk walker (`IEND`-terminated, custom
-`PAGG` chunk type constant) and UTF-8 string-table parser in `a.java`
-are read; what each resource id *contains* still needs mapping from
-`b`/`c`'s call sites.
+**Phase 2 (mostly done, see [`ASSET_FORMATS.md`](ASSET_FORMATS.md)):** the
+`RP*` container, every resource's *type byte* (images, atlases, anim sets, data,
+strings, audio), the level tile/info format, the 28 game tables, the string table
+(449 strings) and the sound cues are confirmed and verified against the real
+banks by independent parsing. The sprite-atlas format is parsed and verified (`tools/parse_ch.py`, all 30 atlases). What remains: a parser for the animation-set format (type 247), and labelling which of the 68 image resources is which sprite (start from
+`Game.loadAssetsStep`).
 
 **Phase 3 (not started): PC port.** Scaffold is in `port/` (CMake + Ninja
 + MSVC, matching the `tes-travels-decomp` ports' toolchain) -- currently

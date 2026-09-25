@@ -29,6 +29,18 @@ tracked (see `.gitignore`).
   member renames, the mapping tables live in the script; see
   `goingmobile/docs/CLASS_MAP.md`). Regenerates `src/` except the three
   hand-written files (`Entity.java`, `MenuItem.java`, `SoundPlayer.java`).
+- **`rename_ch.py`** (+ **`ch_rename/ChRenamer.java`**) -- clonehome phase 1:
+  renames `clonehome/extracted/` into the compile-checked `clonehome/src/`
+  by running Vineflower with a custom `--user-renamer-class` that reads
+  `clonehome/docs/names.map`. Unlike `rename_gm.py` this rewrites the class
+  files' symbol tables, so single-letter names reused across classes cannot
+  collide and every reference (including inherited members) is correct.
+  Applies a few textual patches for decompiler artifacts, then compiles the
+  result against `midp-stubs/`. Regenerates `src/` entirely; edit `names.map`,
+  not `src/`.
+- **`parse_ch.py`** -- clonehome phase 2: parses the `RP*` banks and all 30 sprite
+  atlases, asserting exact byte consumption and in-bounds rectangles. Output to
+  stdout only (derived data, never commit).
 - **`parse_gm.py`** -- goingmobile phase 2: parsers/validators for every
   custom asset format of the canonical build (tilemaps, menu table,
   bitmap font with ASCII rendering, animation/geometry tables). Each one
