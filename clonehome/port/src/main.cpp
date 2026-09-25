@@ -110,7 +110,7 @@ static std::string narrow(const wchar_t* w) {
 }
 
 // --data <dir holding RP1..RP3> (default: exe folder), --saves <dir>,
-// --dump <file.bmp> [--frames N] [--press K@F[:HOLD] ...]: run N ticks headless and
+// --dump <file.bmp> [--frames N] [--press K@F[:HOLD] ...] [--level W:S] [--fuzz SEED]: run N ticks headless and
 // write a screenshot (K is a MIDP key code, F the frame it is pressed on).
 int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow) {
   std::string dump;
@@ -118,12 +118,14 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow) {
   struct Press { int key, frame, hold; };
   std::vector<Press> presses;
   unsigned fuzzSeed = 0;
+  int jumpWorld = -1, jumpSection = 0;
   wchar_t** argv = CommandLineToArgvW(GetCommandLineW(), &argc);
   for (int i = 1; i + 1 < argc; i++) {
     if (!wcscmp(argv[i], L"--data")) Platform::dataDir = narrow(argv[++i]);
     else if (!wcscmp(argv[i], L"--saves")) Platform::saveDir = narrow(argv[++i]);
     else if (!wcscmp(argv[i], L"--dump")) dump = narrow(argv[++i]);
     else if (!wcscmp(argv[i], L"--frames")) frames = _wtoi(argv[++i]);
+    else if (!wcscmp(argv[i], L"--level")) swscanf(argv[++i], L"%d:%d", &jumpWorld, &jumpSection);
     else if (!wcscmp(argv[i], L"--fuzz")) fuzzSeed = (unsigned)_wtoi(argv[++i]);
     else if (!wcscmp(argv[i], L"--press")) {
       int k = 0, f = 0, h = 3;
@@ -146,6 +148,11 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow) {
       for (auto& p : presses) {
         if (p.frame == i) g_game->platformKey(p.key, true);
         if (p.frame + p.hold == i) g_game->platformKey(p.key, false);
+      }
+      if (jumpWorld >= 0 && i == 350) {  // debug: skip the menus and start in the given world/section
+        Game::worldId = jumpWorld;
+        g_game->inArena = jumpWorld >= 15;
+        g_game->enterLevel(jumpWorld, jumpSection);
       }
       if (fuzzSeed) {  // random key toggles: finds crashes in the translated game logic
         static const int keys[] = {-1, -2, -3, -4, -4, -3, -5, -5, 49, 50, 51, 52, 53, 54, 55, 56, 57, 48, 42, 35};
