@@ -242,6 +242,8 @@ void setKeyCallback(void (*onKeyDown)(int), void (*onKeyUp)(int));
 void pumpEvents();
 void present();       // stretch-blit canvas to the window
 void requestQuit();
+void toggleFullscreen();   // F11 / Alt+Enter: borderless fullscreen, aspect ratio preserved
+bool isFullscreen();
 bool quitRequested();
 void screenshot(const char* tag);  // writes screenshot_<tag>.bmp next to cwd
 }  // namespace platform

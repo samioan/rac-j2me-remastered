@@ -609,6 +609,26 @@ static bool g_quit = false;
 static void (*g_onKeyDown)(int) = nullptr;
 static void (*g_onKeyUp)(int) = nullptr;
 
+// Fullscreen state: a borderless WS_POPUP window covering the current monitor.
+static bool g_fullscreen = false;
+static WINDOWPLACEMENT g_windowedPlacement = {sizeof(WINDOWPLACEMENT)};
+static DWORD g_windowedStyle = 0;
+
+// Where the canvas is drawn inside the client area. All scaling policy lives here: today it
+// is "fit, keep aspect ratio, centre". A widescreen mode would change canvas.w (the logical
+// width) and/or this function; present() and the window code don't assume 176x220.
+struct Viewport { int x, y, w, h; };
+static Viewport computeViewport(int clientW, int clientH, int canvasW, int canvasH) {
+  if (clientW <= 0 || clientH <= 0 || canvasW <= 0 || canvasH <= 0) return {0, 0, clientW, clientH};
+  // Compare clientW/clientH against canvasW/canvasH without floating point.
+  if ((long long)clientW * canvasH >= (long long)clientH * canvasW) {
+    int w = (int)((long long)clientH * canvasW / canvasH);  // pillarbox
+    return {(clientW - w) / 2, 0, w, clientH};
+  }
+  int h = (int)((long long)clientW * canvasH / canvasW);    // letterbox
+  return {0, (clientH - h) / 2, clientW, h};
+}
+
 // See midp.h's KeyCode note: arrows/fire/soft-keys map to the same Nokia
 // values the legacy build's shim used, '/' still stands in for the keypad
 // '*' (CanvasShell.java checks literal 42, MIDP's KEY_STAR). Provisional --
@@ -631,13 +651,53 @@ static int mapVirtualKey(WPARAM vk) {
   }
 }
 
+void toggleFullscreen() {
+  if (!g_hwnd) return;
+  if (!g_fullscreen) {
+    g_windowedStyle = (DWORD)GetWindowLongW(g_hwnd, GWL_STYLE);
+    GetWindowPlacement(g_hwnd, &g_windowedPlacement);
+    MONITORINFO mi = {sizeof(mi)};
+    if (!GetMonitorInfoW(MonitorFromWindow(g_hwnd, MONITOR_DEFAULTTONEAREST), &mi)) return;
+    SetWindowLongW(g_hwnd, GWL_STYLE, (LONG)(g_windowedStyle & ~WS_OVERLAPPEDWINDOW) | (LONG)WS_POPUP);
+    SetWindowPos(g_hwnd, HWND_TOP, mi.rcMonitor.left, mi.rcMonitor.top,
+                 mi.rcMonitor.right - mi.rcMonitor.left, mi.rcMonitor.bottom - mi.rcMonitor.top,
+                 SWP_FRAMECHANGED | SWP_NOOWNERZORDER | SWP_SHOWWINDOW);
+    g_fullscreen = true;
+  } else {
+    SetWindowLongW(g_hwnd, GWL_STYLE, (LONG)g_windowedStyle);
+    SetWindowPlacement(g_hwnd, &g_windowedPlacement);
+    SetWindowPos(g_hwnd, nullptr, 0, 0, 0, 0,
+                 SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_NOOWNERZORDER | SWP_FRAMECHANGED);
+    g_fullscreen = false;
+  }
+  present();
+}
+
+bool isFullscreen() { return g_fullscreen; }
+
 static LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
   switch (msg) {
     case WM_DESTROY:
       g_quit = true;
       PostQuitMessage(0);
       return 0;
+    case WM_ERASEBKGND:
+      return 1;  // present() paints the bars itself; avoids flicker on resize
+    case WM_PAINT: {
+      PAINTSTRUCT ps;
+      BeginPaint(hwnd, &ps);
+      EndPaint(hwnd, &ps);
+      present();
+      return 0;
+    }
+    case WM_SETCURSOR:
+      if (g_fullscreen && LOWORD(lParam) == HTCLIENT) { SetCursor(nullptr); return TRUE; }
+      return DefWindowProcW(hwnd, msg, wParam, lParam);
+    case WM_SYSKEYDOWN:
+      if (wParam == VK_RETURN && (lParam & (1 << 29))) { toggleFullscreen(); return 0; }  // Alt+Enter
+      return DefWindowProcW(hwnd, msg, wParam, lParam);
     case WM_KEYDOWN: {
+      if (wParam == VK_F11) { if (!(lParam & (1 << 30))) toggleFullscreen(); return 0; }
       int code = mapVirtualKey(wParam);
       if (code != 0 && g_onKeyDown) g_onKeyDown(code);
       return 0;
@@ -706,7 +766,19 @@ void present() {
   bmi.bmiHeader.biCompression = BI_RGB;
   RECT rc;
   GetClientRect(g_hwnd, &rc);
-  StretchDIBits(hdc, 0, 0, rc.right - rc.left, rc.bottom - rc.top, 0, 0,
+  int cw = rc.right - rc.left, ch = rc.bottom - rc.top;
+  Viewport vp = computeViewport(cw, ch, canvas.w, canvas.h);
+  HBRUSH black = (HBRUSH)GetStockObject(BLACK_BRUSH);
+  if (vp.x > 0) {
+    RECT l = {0, 0, vp.x, ch}, r = {vp.x + vp.w, 0, cw, ch};
+    FillRect(hdc, &l, black); FillRect(hdc, &r, black);
+  }
+  if (vp.y > 0) {
+    RECT t = {0, 0, cw, vp.y}, b = {0, vp.y + vp.h, cw, ch};
+    FillRect(hdc, &t, black); FillRect(hdc, &b, black);
+  }
+  SetStretchBltMode(hdc, COLORONCOLOR);  // nearest-neighbour: keeps pixel art crisp
+  StretchDIBits(hdc, vp.x, vp.y, vp.w, vp.h, 0, 0,
                 canvas.w, canvas.h, canvas.px.data(), &bmi, DIB_RGB_COLORS, SRCCOPY);
   ReleaseDC(g_hwnd, hdc);
 }

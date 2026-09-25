@@ -318,6 +318,10 @@ re-basing onto a1 rather than finishing the legacy build's gameplay.
       and plays (MCI rc=0), all five .wav cues open. Every Game/Player
       `playSoundIfEnabled` call site in the Java tree is ported except the one
       in Game's unused own slot picker (b==9). Not audibly compared.
+      Display: F11 / Alt+Enter toggles a borderless fullscreen window; the
+      176x220 canvas is fit with its aspect ratio kept (black bars) via
+      `computeViewport()` in `midp.cpp`, which only reads the canvas size --
+      the hook where a widescreen mode (wider logical canvas) plugs in later.
       Tutorial fixes (level 0 was not completable): (1) `Enemy.groundYAhead`
       scales the found row by tileHeight and then tests `r >= 18`, always
       true, so every enemy's ground was the map bottom and it fell through
