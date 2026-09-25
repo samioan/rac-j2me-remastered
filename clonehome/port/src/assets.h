@@ -7,6 +7,8 @@
 #include <string>
 #include <vector>
 
+#include "gfx.h"
+
 namespace ch {
 
 enum ResType : uint8_t {
@@ -17,11 +19,6 @@ enum ResType : uint8_t {
 struct Bytes {
   const uint8_t* p = nullptr;
   int n = 0;
-};
-
-struct Image {  // 0xAARRGGBB
-  int w = 0, h = 0;
-  std::vector<uint32_t> px;
 };
 
 struct SpriteRect {
@@ -47,6 +44,8 @@ class Assets {
   Bytes resource(int id);
   int type(int id);
   int count(int bank) const;
+  int currentBank() const { return current_; }
+  const std::vector<uint8_t>& bankTypes(int bank) const { return banks_[bank].types; }
 
   SpriteSet loadSprites(int id);
   // swap != null replaces the PNG's PLTE payload (font palette swaps).

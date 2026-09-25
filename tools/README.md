@@ -41,6 +41,12 @@ tracked (see `.gitignore`).
 - **`parse_ch.py`** -- clonehome phase 2: parses the `RP*` banks, all 30 sprite
   atlases and all 10 animation sets, asserting exact byte consumption and in-bounds rectangles. Output to
   stdout only (derived data, never commit).
+- **`java2cpp.py`** -- clonehome phase 3: translates `clonehome/src/*.java` (Game,
+  Enemy, Projectile, RatchetMIDlet, SoundPlayer) to C++ in `clonehome/port/src/gen/`,
+  targeting the runtime in `port/src/jrt.h` and the hand-written `Engine`. Needs
+  `pip install javalang` (patched at import for its dropped cast prefix). Prints
+  statements whose evaluation order might differ from Java (all reviewed benign so far:
+  `&&`/`||` chains and assign-after-read).
 - **`parse_gm.py`** -- goingmobile phase 2: parsers/validators for every
   custom asset format of the canonical build (tilemaps, menu table,
   bitmap font with ASCII rendering, animation/geometry tables). Each one

@@ -29,3 +29,7 @@ __pycache__/
 # goingmobile/src/README.md)
 /build_src/
 *.log
+
+# --- Clone Home port runtime output ---
+crash.txt
+/clonehome/port/saves/
