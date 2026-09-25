@@ -1,5 +1,6 @@
 #define _CRT_SECURE_NO_WARNINGS
 #include "engine.h"
+#include "gen/classes.h"
 
 #include <algorithm>
 #include <climits>
@@ -82,6 +83,18 @@ void Engine::resetFrameTimingNow() {
   resetFrameTiming_ = true;
 }
 
+// The Java game threw uncaught exceptions (killing its thread) in a few corner cases;
+// the port logs them and carries on with the next frame instead.
+static void logJavaException(const char* where, const char* what) {
+  static int count = 0;
+  if (++count > 200) return;
+  FILE* f = std::fopen("exceptions.log", "a");
+  if (f) {
+    std::fprintf(f, "%s: %s\n", where, what);
+    std::fclose(f);
+  }
+}
+
 int Engine::runFrame(long nowMs, Surface& screen) {
   if (!started_) {
     started_ = true;
@@ -105,7 +118,13 @@ int Engine::runFrame(long nowMs, Surface& screen) {
     }
   }
   lastFrameStart_ = nowMs;
-  update();
+  try {
+    update();
+  } catch (const JavaException& e) {
+    logJavaException("update", e.what);
+  }
+  if (soundPlayer) soundPlayer->run();
+  Player::pumpLoops();
   if (quit) return 0;
 
   screen.resetTransform();
@@ -128,7 +147,11 @@ int Engine::runFrame(long nowMs, Surface& screen) {
     screen.translate(offX, offY);
   }
   screen.setClip(0, 0, canvasW, canvasH);
-  render(&screen);
+  try {
+    render(&screen);
+  } catch (const JavaException& e) {
+    logJavaException("render", e.what);
+  }
   return sleepMs;
 }
 

@@ -33,3 +33,5 @@ __pycache__/
 # --- Clone Home port runtime output ---
 crash.txt
 /clonehome/port/saves/
+audio.log
+exceptions.log

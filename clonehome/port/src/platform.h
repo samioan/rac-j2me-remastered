@@ -74,12 +74,17 @@ class Player {
   void start();
   void stop();
   void close();
-  int getState() const { return state_; }
+  int getState();
+  static void pumpLoops();  // restarts a looping MIDI that has run out; call once per frame  // 300 prefetched, 400 started (a finished clip drops back to 300)
   Arr<int8_t> data;
   String mime;
 
  private:
+  bool isMidi() const { return mime.equals(String(u"audio/midi")); }
   int loops_ = 1, state_ = 300;
+  int64_t endTime_ = 0;  // wav: when playback finishes; 0 = never (looping)
+  int mciId_ = 0;
+  bool mciOpen_ = false;
 };
 
 struct Manager {
