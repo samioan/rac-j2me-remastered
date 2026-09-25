@@ -221,6 +221,7 @@ class SoundPlayer {
  private:
   String soundFiles_[6];
   bool   isWav_[6] = {};
+  std::vector<char> wavData_[6];  // preloaded so one-shot cues don't hit the disk mid-frame
   int  pendingSound_ = -1;
   int  pendingLoop_ = -1;
   bool playing_ = false;          // MCI player exists

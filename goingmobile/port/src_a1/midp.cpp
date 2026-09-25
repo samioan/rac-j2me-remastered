@@ -479,6 +479,19 @@ void SoundPlayer::loadAll() {
     String p = resourcePath(String("/") + kSoundFileNames[i] + ext);
     isWav_[i] = kSoundIsWav[i];
     soundFiles_[i] = fileExists(p) ? p : "";
+    if (kSoundIsWav[i] && !soundFiles_[i].empty()) {
+      FILE* f = nullptr;
+      if (fopen_s(&f, soundFiles_[i].c_str(), "rb") == 0 && f) {
+        fseek(f, 0, SEEK_END);
+        long n = ftell(f);
+        fseek(f, 0, SEEK_SET);
+        if (n > 0) {
+          wavData_[i].resize((size_t)n);
+          if (fread(wavData_[i].data(), 1, (size_t)n, f) != (size_t)n) wavData_[i].clear();
+        }
+        fclose(f);
+      }
+    }
   }
 }
 
@@ -505,6 +518,7 @@ void SoundPlayer::haltPlayer() {
 
 void SoundPlayer::stop() {
   pendingSound_ = -1;
+  PlaySoundA(nullptr, nullptr, 0);
   haltPlayer();
 }
 
@@ -516,6 +530,13 @@ void SoundPlayer::update() {
   }
   if (endOfMedia_ && pendingLoop_ != -1) pendingSound_ = -2;
   endOfMedia_ = false;
+
+  if (pendingSound_ >= 0 && pendingSound_ <= 5 && !wavData_[pendingSound_].empty()) {
+    if (playing_) haltPlayer();
+    PlaySoundA(wavData_[pendingSound_].data(), nullptr, SND_MEMORY | SND_ASYNC | SND_NODEFAULT);
+    pendingSound_ = -1;
+    return;
+  }
 
   if (pendingSound_ <= -1) {
     if (pendingSound_ == -2) {

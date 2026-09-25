@@ -112,7 +112,7 @@ short Game::C_() {
   return (short)(best - tileHeight);
 }
 
-void Game::a_(int col, int row, int) {
+void Game::a_(int col, int row, int tile) {
   player->swingTargetX = ((col * tileWidth + (tileWidth >> 1) + (player->facingRight ? -5 : 5))) << 8;
   player->swingTargetY = (row * tileHeight + (tileHeight >> 1) - 2) << 8;
   int ox = 4 * tileWidth / 44;
@@ -123,9 +123,7 @@ void Game::a_(int col, int row, int) {
   player->swingStepX = (player->swingTargetX - player->swingCurX) / 6;
   player->swingStepY = (player->swingTargetY - player->swingCurY) / 6;
   if (player->swingTargetY < player->swingCurY) {
-    // Game.java writes `player.tileWidth = (byte)var3`, which is Player's STATIC tile
-    // width (see the matching Enemy note in game_level.cpp) -- omitted; the tile id
-    // (var3) picks the grab type in the original's renamed field, grabTileType.
+    player->grabTileType = (jbyte)tile;
     player->swingPhase = 0;
     player->setAnimState(5);
     player->animRestart = 2;

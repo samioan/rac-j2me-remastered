@@ -158,8 +158,8 @@ void Player::swingUpdate() {
     if (swingPhase == 5) {
       animFrame = 1;
       short stepX = 0, stepY = 0;
-      int a = y() - (swingTargetX >> 8) + 6 * tileHeight / 44;
-      int b = facingRight ? (swingTargetY >> 8) - (x() + 9) : x() - 9 - (swingTargetY >> 8);
+      int a = y() - (swingTargetY >> 8) + 6 * tileHeight / 44;
+      int b = facingRight ? (swingTargetX >> 8) - (x() + 9) : x() - 9 - (swingTargetX >> 8);
       int slope;
       if (b == 0) slope = 2000;
       else slope = (a << 8) / b;
