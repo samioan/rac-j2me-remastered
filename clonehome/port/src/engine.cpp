@@ -105,22 +105,36 @@ int Engine::runFrame(long nowMs, Surface& screen) {
     return 100;
   }
   int sleepMs = 0;
-  if (resetFrameTiming_) {
-    resetFrameTiming_ = false;
-    frameTime = minFrameTime;
-  } else {
-    int dt = (int)(nowMs - lastFrameStart_);
-    if (dt > maxFrameTime || dt < 0) dt = maxFrameTime;
-    frameTime = dt;
-    if (frameTime < minFrameTime) {
-      sleepMs = std::max(minFrameTime - frameTime, 10);
-      frameTime = minFrameTime;
+  if (realTime) {
+    // Fixed-rate pacing. The game runs one logic step per frame, and only when the frame time is
+    // over 40 ms (tickAccum > 40), so it is always told at least 41 ms whatever the real rate.
+    long period = 1000 / (targetFps < 1 ? 1 : targetFps);
+    if (resetFrameTiming_) {
+      resetFrameTiming_ = false;
+      lastFrameStart_ = nowMs - period;
     }
-  }
-  lastFrameStart_ = nowMs;
-  if (realTime && sleepMs > 0) {  // Engine.run sleeps before the update, then runs a full minFrameTime tick
-    Sleep((DWORD)sleepMs);
-    sleepMs = 0;
+    long due = lastFrameStart_ + period;
+    if (nowMs < due) {
+      Sleep((DWORD)(due - nowMs));
+    } else if (nowMs - due > period * 3) {
+      due = nowMs;  // fell far behind (window drag, breakpoint): resync instead of catching up
+    }
+    lastFrameStart_ = due;
+    frameTime = (int)std::max(period, 41L);
+  } else {
+    if (resetFrameTiming_) {
+      resetFrameTiming_ = false;
+      frameTime = minFrameTime;
+    } else {
+      int dt = (int)(nowMs - lastFrameStart_);
+      if (dt > maxFrameTime || dt < 0) dt = maxFrameTime;
+      frameTime = dt;
+      if (frameTime < minFrameTime) {
+        sleepMs = std::max(minFrameTime - frameTime, 10);
+        frameTime = minFrameTime;
+      }
+    }
+    lastFrameStart_ = nowMs;
   }
   try {
     update();

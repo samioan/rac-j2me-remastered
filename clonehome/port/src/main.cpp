@@ -87,6 +87,16 @@ static LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lP
       return 0;
     }
     case WM_KEYDOWN:
+      if (wParam == VK_F5 || wParam == VK_F6) {  // game speed: F5 slower, F6 faster
+        if (g_game) {
+          int hz = g_game->targetFps + (wParam == VK_F6 ? 5 : -5);
+          g_game->targetFps = hz < 5 ? 5 : hz > 120 ? 120 : hz;
+          wchar_t title[96];
+          swprintf(title, 96, L"Ratchet and Clank: Clone Home Port  [%d Hz]", g_game->targetFps);
+          SetWindowTextW(hwnd, title);
+        }
+        return 0;
+      }
       if (!(lParam & (1 << 30)) && g_game) g_game->platformKey(midpKey(wParam), true);
       return 0;
     case WM_KEYUP:
@@ -120,6 +130,8 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow) {
   struct Press { int key, frame, hold; };
   std::vector<Press> presses;
   unsigned fuzzSeed = 0;
+  int startHz = 25;
+  bool stats = false;
   int jumpWorld = -1, jumpSection = 0;
   wchar_t** argv = CommandLineToArgvW(GetCommandLineW(), &argc);
   for (int i = 1; i + 1 < argc; i++) {
@@ -127,6 +139,8 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow) {
     else if (!wcscmp(argv[i], L"--saves")) Platform::saveDir = narrow(argv[++i]);
     else if (!wcscmp(argv[i], L"--dump")) dump = narrow(argv[++i]);
     else if (!wcscmp(argv[i], L"--frames")) frames = _wtoi(argv[++i]);
+    else if (!wcscmp(argv[i], L"--stats")) stats = true;
+    else if (!wcscmp(argv[i], L"--hz")) startHz = _wtoi(argv[++i]);
     else if (!wcscmp(argv[i], L"--level")) swscanf(argv[++i], L"%d:%d", &jumpWorld, &jumpSection);
     else if (!wcscmp(argv[i], L"--fuzz")) fuzzSeed = (unsigned)_wtoi(argv[++i]);
     else if (!wcscmp(argv[i], L"--press")) {
@@ -181,7 +195,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow) {
           g_game->platformKey(keys[(fuzzSeed >> 16) % (sizeof keys / sizeof *keys)], ((fuzzSeed >> 8) & 1) != 0);
         }
       }
-      g_game->runFrame(i * 40L, g_screen);
+      g_game->runFrame(i * 50L, g_screen);
     }
     return writeBmp(g_screen, dump.c_str()) ? 0 : 1;
   }
@@ -204,14 +218,28 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow) {
 
   timeBeginPeriod(1);  // 1 ms timer/Sleep resolution for steady frame pacing
   g_game->realTime = true;
+  g_game->targetFps = startHz < 5 ? 5 : startHz > 120 ? 120 : startHz;
   MSG msg = {};
+  long statFrames = 0;
+  DWORD statStart = timeGetTime();
   while (!g_game->quit) {
     while (PeekMessageW(&msg, nullptr, 0, 0, PM_REMOVE)) {
-      if (msg.message == WM_QUIT) return 0;
+      if (msg.message == WM_QUIT) {
+        if (stats) {
+          FILE* f = std::fopen("perf.log", "w");
+          if (f) {
+            DWORD ms = timeGetTime() - statStart;
+            std::fprintf(f, "%ld frames in %lu ms = %.2f fps (target %d)\n", statFrames, ms, statFrames * 1000.0 / ms, g_game->targetFps);
+            std::fclose(f);
+          }
+        }
+        return 0;
+      }
       TranslateMessage(&msg);
       DispatchMessageW(&msg);
     }
     int sleepMs = g_game->runFrame((long)timeGetTime(), g_screen);
+    statFrames++;
     HDC dc = GetDC(hwnd);
     present(dc);
     ReleaseDC(hwnd, dc);

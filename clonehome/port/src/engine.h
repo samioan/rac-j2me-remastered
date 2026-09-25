@@ -44,6 +44,7 @@ class Engine {
 
   bool ok() const { return ok_; }
   bool quit = false;
+  int targetFps = 25;     // real-time logic steps per second (the game does one step per frame)
   bool realTime = false;  // sleep to hold the minimum frame time (set by the window loop)
   MIDlet* midlet;
   SoundPlayer* soundPlayer = nullptr;

@@ -75,3 +75,8 @@ Run `clonehome/port/build/clonehome_port.exe` (it finds `clonehome/extracted` it
 the exe or pass `--data <dir>`). Keys map to the phone keypad: arrows move, Enter/Space = fire/select, F1/F2 (or Esc) = soft
 keys, digits/numpad = keypad digits, **Tab or Q = `#` (weapon wheel)**, **Ctrl, E or numpad `*` = `*` (melee)**.
 Saves live in `saves/` next to the exe.
+
+Speed: the game does one logic step per frame (and only when the frame time exceeds 40 ms), and the phone build had a 50 ms
+minimum frame time, i.e. about 20 steps/s. The port paces at a fixed rate instead, default **25 Hz** (matches the game's own 40 ms tick constant);
+change it with `--hz N` or **F5 (slower) / F6 (faster)** in the window (title bar shows the rate). `--stats` writes the
+measured frame rate to `perf.log` on exit.
