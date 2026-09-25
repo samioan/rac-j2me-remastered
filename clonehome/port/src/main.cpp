@@ -133,11 +133,28 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow) {
       presses.push_back({k, f, h});
     }
   }
+  // Default data folder: next to the exe, in ./data, or in the repo's clonehome/extracted.
+  {
+    wchar_t exe[MAX_PATH];
+    GetModuleFileNameW(nullptr, exe, MAX_PATH);
+    std::string dir = narrow(exe);
+    dir = dir.substr(0, dir.find_last_of("\\/"));
+    if (Platform::dataDir == ".") {
+      for (const char* rel : {"", "/data", "/../extracted", "/../../extracted", "/../../../clonehome/extracted"}) {
+        std::string cand = dir + rel;
+        if (GetFileAttributesA((cand + "/RP1").c_str()) != INVALID_FILE_ATTRIBUTES) {
+          Platform::dataDir = cand;
+          break;
+        }
+      }
+    }
+    if (Platform::saveDir == "saves") Platform::saveDir = dir + "/saves";
+  }
   SetUnhandledExceptionFilter(crashHandler);
   RatchetMIDlet* midlet = new RatchetMIDlet();
   g_game = RatchetMIDlet::game;
   if (!g_game->ok()) {
-    MessageBoxW(nullptr, L"Could not read RP1, RP2, RP3. Use --data <folder containing them>.", L"Clone Home",
+    MessageBoxW(nullptr, L"Could not find the game data (files RP1, RP2, RP3 from the original jar).\nPut them next to this exe, or run with --data <folder>.", L"Clone Home",
                 MB_ICONERROR);
     return 1;
   }
