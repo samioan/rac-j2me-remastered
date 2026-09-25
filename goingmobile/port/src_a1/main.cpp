@@ -6,11 +6,53 @@
 // legacy build's main.cpp makes (see ../src/main.cpp).
 #include "canvasshell.h"
 #include "midlet.h"
+#include "game.h"
 #include "midp.h"
 
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #include <string>
+#include <cstdio>
+#include <cstdlib>
+#ifdef _DEBUG
+#include <crtdbg.h>
+#include <dbghelp.h>
+#pragma comment(lib, "dbghelp.lib")
+
+// Debug-build aid: a failed CRT assertion (vector range checks etc.) writes a symbolised
+// stack to crash.txt next to the exe, then terminates, instead of only showing the dialog.
+static int crtReportHook(int reportType, char* message, int* returnValue) {
+  if (reportType != _CRT_ASSERT && reportType != _CRT_ERROR) return FALSE;
+  FILE* f = nullptr;
+  if (fopen_s(&f, "crash.txt", "w") == 0 && f) {
+    fprintf(f, "%s\n", message ? message : "");
+    HANDLE proc = GetCurrentProcess();
+    SymSetOptions(SYMOPT_LOAD_LINES | SYMOPT_UNDNAME);
+    SymInitialize(proc, nullptr, TRUE);
+    void* frames[48];
+    USHORT n = CaptureStackBackTrace(0, 48, frames, nullptr);
+    for (USHORT i = 0; i < n; i++) {
+      char buf[sizeof(SYMBOL_INFO) + 256] = {};
+      SYMBOL_INFO* sym = (SYMBOL_INFO*)buf;
+      sym->SizeOfStruct = sizeof(SYMBOL_INFO);
+      sym->MaxNameLen = 255;
+      DWORD64 addr = (DWORD64)frames[i];
+      DWORD64 disp = 0;
+      IMAGEHLP_LINE64 line = {sizeof(line)};
+      DWORD ld = 0;
+      const char* name = SymFromAddr(proc, addr, &disp, sym) ? sym->Name : "?";
+      if (SymGetLineFromAddr64(proc, addr, &ld, &line))
+        fprintf(f, "#%d %s (%s:%lu)\n", i, name, line.FileName, line.LineNumber);
+      else
+        fprintf(f, "#%d %s\n", i, name);
+    }
+    fclose(f);
+  }
+  if (returnValue) *returnValue = 0;
+  TerminateProcess(GetCurrentProcess(), 3);
+  return TRUE;
+}
+#endif
 
 static ratchetandclank* g_midlet = nullptr;
 
@@ -43,6 +85,9 @@ static void findDataDir() {
 }
 
 int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int) {
+#ifdef _DEBUG
+  _CrtSetReportHook2(_CRT_RPTHOOK_INSTALL, crtReportHook);
+#endif
   findDataDir();
 
   if (!platform::initWindow()) return 0;
@@ -52,7 +97,20 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int) {
   g_midlet->startApp();
 
   Graphics g(&platform::canvas);
+  const char* startLevel = getenv("RAC_LEVEL");  // debug aid: start straight in a level
+  int frame = 0;
   while (!platform::quitRequested()) {
+    if (startLevel && ++frame == 120) {
+      g_midlet->startNewGame(0);
+    }
+    if (startLevel && frame >= 200 && getenv("RAC_SWEEP") && (frame - 200) % 45 == 0) {
+      int room = (frame - 200) / 45;
+      if (room < 12) g_midlet->game->loadLevel(atoi(startLevel), (short)room);
+      else if (room == 12) { FILE* d = nullptr; if (fopen_s(&d, "sweep_done.txt", "w") == 0 && d) fclose(d); }
+    } else if (startLevel && frame == 200) {
+      const char* room = getenv("RAC_ROOM");
+      g_midlet->game->loadLevel(atoi(startLevel), (short)(room ? atoi(room) : 0));
+    }
     platform::pumpEvents();
     if (platform::quitRequested()) break;
 

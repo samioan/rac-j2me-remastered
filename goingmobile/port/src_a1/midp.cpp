@@ -258,6 +258,7 @@ void Graphics::drawImage(Image* img, int x, int y, int anchor) {
   int x1 = std::min(x + w, clipX_ + clipW_), y1 = std::min(y + h, clipY_ + clipH_);
   if (clipW_ == -1) { x0 = std::max(x, 0); y0 = std::max(y, 0);
                       x1 = std::min(x + w, target_->w); y1 = std::min(y + h, target_->h); }
+  if (x0 >= x1 || y0 >= y1) return;
   for (int yy = y0; yy < y1; yy++) {
     uint32_t* drow = &target_->px[(size_t)yy * target_->w];
     const uint32_t* srow = &img->px[(size_t)(yy - y) * w + (size_t)(x0 - x)];
