@@ -49,6 +49,44 @@ static LONG WINAPI crashHandler(EXCEPTION_POINTERS* ep) {
 }
 
 static Game* g_game;
+static HWND g_hwnd;
+static void updateTitle(HWND hwnd);
+
+// ---- options rows for the in-game Settings screens (see tools/ch_settings.py)
+namespace ch {
+static const int kSpeeds[] = {15, 20, 25, 30, 40, 50, 60, 75, 100, 120};
+
+String Port::label(int row) {
+  switch (row) {
+    case 0: return String(u"Resolution: ") + String(std::u16string(display::aspectName(), display::aspectName() + wcslen(display::aspectName())));
+    case 1: return String(display::isFullscreen() ? u"Fullscreen: ON" : u"Fullscreen: OFF");
+    case 2: return String(display::settings().scaling == display::Scaling::Fit ? u"Scaling: Fit" : u"Scaling: Integer");
+    default: return String(u"Speed: ") + String::valueOf(g_game ? g_game->targetFps : 25) + String(u" Hz");
+  }
+}
+
+void Port::change(int row, int dir) {
+  if (!g_hwnd) return;
+  switch (row) {
+    case 0: display::cycleAspect(g_hwnd, dir); break;
+    case 1: display::toggleFullscreen(g_hwnd); break;
+    case 2: display::cycleScaling(g_hwnd); break;
+    default: {
+      if (!g_game) break;
+      int idx = 0, n = (int)(sizeof kSpeeds / sizeof *kSpeeds);
+      for (int i = 0; i < n; i++)
+        if (kSpeeds[i] <= g_game->targetFps) idx = i;
+      idx = idx + dir < 0 ? 0 : idx + dir >= n ? n - 1 : idx + dir;
+      g_game->targetFps = kSpeeds[idx];
+      display::settings().hz = g_game->targetFps;
+      display::save();
+      break;
+    }
+  }
+  updateTitle(g_hwnd);
+}
+}  // namespace ch
+
 static Surface g_screen;
 
 static void gameKeyDown(int code) { if (g_game) g_game->platformKey(code, true); }
@@ -247,6 +285,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int) {
   bool wantFullscreen = fullscreenArg >= 0 ? fullscreenArg == 1 : display::settings().fullscreen;
   HWND hwnd = display::createWindow(hInstance, WindowProc, wantFullscreen);
   if (!hwnd) return 0;
+  g_hwnd = hwnd;
   if (startHz == 0) startHz = display::settings().hz;
 
   timeBeginPeriod(1);  // 1 ms timer/Sleep resolution for steady frame pacing

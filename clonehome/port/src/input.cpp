@@ -93,7 +93,8 @@ int translate(Action a, Context c) {
     case Action::Up: return kUp;
     case Action::Down: return kDown;
     case Action::Jump: case Action::Fire: case Action::Confirm: return kFire;
-    case Action::Melee: case Action::Pause: case Action::Back: case Action::Secondary: return kSoftRight;
+    case Action::Melee: case Action::Pause: case Action::Back: case Action::Secondary:
+    case Action::Wheel: return kSoftRight;  // triangle: back (also closes the weapon wheel)
     default: return 0;
   }
 }

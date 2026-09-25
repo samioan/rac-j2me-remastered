@@ -205,6 +205,11 @@ void Game::handleInput() {
         return;
       }
     } else if ((state == 5)) {
+      moveCursor(var1, 0, 4);
+      if ((((var1 == 2) || (var1 == 5)) && (menuCursor >= 1))) {
+        Port::change((menuCursor - 1), ((var1 == 5) ? 1 : (-1)));
+        return;
+      }
       if (((var1 != 8) && (var1 != 27))) {
         if ((var1 == 29)) {
           menuCursor = 0;
@@ -214,6 +219,9 @@ void Game::handleInput() {
         }
       } else if ((menuCursor == 0)) {
         this->audio->setEnabled((!this->audio->isEnabled()));
+        return;
+      } else {
+        Port::change((menuCursor - 1), 1);
         return;
       }
     } else if ((state == 6)) {
@@ -1243,6 +1251,7 @@ void Game::renderInner(Surface* var1) {
     int var10000;
     int var86;
     bool var85;
+    int var901;
     int var82;
     bool var106;
     int var80;
@@ -1357,8 +1366,13 @@ void Game::renderInner(Surface* var1) {
       } else if ((state == 5)) {
         var85 = false;
         this->e(var1, 32);
-        this->menuItemY[0] = 174;
-        this->a(var1, this->getString((this->audio->isEnabled() ? 33 : 34)), 174, (menuCursor == 0), 16777215);
+        var901 = 156;
+        this->menuItemY[0] = var901;
+        var901 = (6 + this->a(var1, this->getString((this->audio->isEnabled() ? 33 : 34)), var901, (menuCursor == 0), 16777215));
+        for (int var902 = 0; (var902 < 4); (var902++)) {
+          this->menuItemY[(1 + var902)] = var901;
+          var901 = (6 + this->a(var1, Port::label(var902), var901, (menuCursor == (1 + var902)), 16777215));
+        }
         this->drawSoftKey(var1, 8, true);
         this->drawSoftKey(var1, 9, false);
         this->d(var1, this->menuItemY[menuCursor]);
@@ -4605,7 +4619,12 @@ void Game::handleScreenInput() {
         }
         return;
       case 2:
-        if (this->b(var1, 0, 1, 1)) {
+        if (((((var1 == 2) || (var1 == 5)) && (menuCursor >= 1)) && (menuCursor <= 4))) {
+          Port::change((menuCursor - 1), ((var1 == 5) ? 1 : (-1)));
+          this->es |= 3;
+          return;
+        }
+        if (this->b(var1, 0, 5, 1)) {
           {
             switch (menuCursor) {
             case 0:
@@ -4616,6 +4635,13 @@ void Game::handleScreenInput() {
               this->es |= 3;
               return;
             case 1:
+            case 2:
+            case 3:
+            case 4:
+              Port::change((menuCursor - 1), 1);
+              this->es |= 3;
+              return;
+            case 5:
               this->setScreen(6);
             default:
               return;
@@ -4968,10 +4994,15 @@ void Game::renderMenuScreen(Surface* var1) {
       return;
     case 2:
       this->e(var1, 32);
-      this->menuItemY[0] = 176;
-      this->menuItemY[1] = (6 + this->a(var1, (this->audio->isEnabled() ? this->getString(33) : this->getString(34)), 176, (menuCursor == 0), 16777215));
-      var2 = this->menuItemY[1];
-      this->a(var1, this->getString(38), var2, (menuCursor == 1), 16777215);
+      var2 = 154;
+      this->menuItemY[0] = var2;
+      var2 = (6 + this->a(var1, (this->audio->isEnabled() ? this->getString(33) : this->getString(34)), var2, (menuCursor == 0), 16777215));
+      for ((var3 = 0); (var3 < 4); (var3++)) {
+        this->menuItemY[(1 + var3)] = var2;
+        var2 = (6 + this->a(var1, Port::label(var3), var2, (menuCursor == (1 + var3)), 16777215));
+      }
+      this->menuItemY[5] = var2;
+      this->a(var1, this->getString(38), var2, (menuCursor == 5), 16777215);
       this->drawSoftKeys(var1, 8, 9);
       this->d(var1, this->menuItemY[menuCursor]);
       return;

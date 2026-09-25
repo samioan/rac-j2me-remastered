@@ -65,7 +65,8 @@ void save() {
   CreateDirectoryA(dir.c_str(), nullptr);
   FILE* f = std::fopen(path.c_str(), "w");
   if (!f) return;
-  std::fprintf(f, "%d %d %d\n", g_fullscreen ? 1 : 0, g_settings.scaling == Scaling::Integer ? 1 : 0, g_settings.hz);
+  std::fprintf(f, "%d %d %d %d\n", g_fullscreen ? 1 : 0, g_settings.scaling == Scaling::Integer ? 1 : 0, g_settings.hz,
+               (int)g_settings.aspect);
   std::fclose(f);
 }
 

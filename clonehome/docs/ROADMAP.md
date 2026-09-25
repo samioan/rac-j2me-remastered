@@ -83,7 +83,7 @@ Going Mobile port; physical input -> action -> phone keypad code by context):
 | Wrench (melee only) | K, C, `/` | Square (X), left trigger |
 | Weapon wheel | Q, E, Tab, right mouse | Triangle (Y), either shoulder |
 | Pause | Esc, P | Start |
-| Back (menus) | Backspace | Select/Back |
+| Back (menus) | Backspace | Triangle (Y), Select/Back |
 
 In menus: Enter/Space/Fire confirm, and wrench/Pause/Back/right mouse go back; a held arrow repeats. The number row and numpad
 still send the raw handset digits (the game reads 1-9 directly, and the name/code entry screens are typed with them).
@@ -95,10 +95,19 @@ measured frame rate to `perf.log` on exit.
 
 ## Display options
 
-`port/src/display.cpp` (settings saved in `%LOCALAPPDATA%ac-ch-port\display.cfg`):
+`port/src/display.cpp` (settings saved in `%LOCALAPPDATA%
+ac-ch-port\display.cfg`):
 
 * **Borderless fullscreen:** F11 or Alt+Enter (or `--fullscreen` / `--windowed` at launch); a WS_POPUP window over the current monitor, cursor hidden.
 * **Scaling:** F7 toggles *Fit* (largest size keeping the aspect ratio, centred, black bars) and *Integer* (whole multiples only, for crisp pixels). The window is freely resizable.
 * **Resolution:** F8 (Shift+F8 back) cycles Original (240x320), Auto (follows the window shape), 4:3, 16:10, 16:9, 21:9. The canvas keeps its 320 px height and gets wider, so gameplay simply shows more of the level to either side.
   * How: `tools/ch_widescreen.py` patches the renamed Java before `java2cpp.py` translates it (`clonehome/src` stays a plain decompile). `Game.viewW` is the logical width; the tile layer, clips, culling ranges and camera limits use it; menus, the HUD bar and the dialogue box are 240-px designs drawn centred (a `translate`), on black. The weapon wheel is an overlay in design coordinates. The camera keeps Ratchet where the 240 design put him relative to the centre.
 * Headless: `--width N` renders at a given logical width (e.g. `--width 569 --level 1:0 --dump out.bmp`).
+
+### In-game Settings
+
+Both "Game Settings" screens (title menu > Settings, and pause menu > Settings) have four extra rows in the game's own menu
+style: **Resolution**, **Fullscreen**, **Scaling** and **Speed** (game-logic rate in Hz: 15/20/25/30/40/50/60/75/100/120).
+Left/right or Select changes the highlighted row; the function keys F5-F8/F11 still work too. Implemented by
+`tools/ch_settings.py` (Java patches applied by `java2cpp.py`) calling `Port.label(row)` / `Port.change(row, dir)`,
+which live in `port/src/main.cpp`.

@@ -33,6 +33,13 @@ class Display {
   void setCurrent(Engine*) {}
 };
 
+// The port's own options shown in the game's Settings screens (Resolution, Fullscreen, Scaling, Speed).
+// Rows 0..3; implemented in main.cpp next to the window code.
+struct Port {
+  static String label(int row);
+  static void change(int row, int dir);
+};
+
 // Nokia UI API: triangles with an ARGB colour.
 class DirectGraphics {
  public:
