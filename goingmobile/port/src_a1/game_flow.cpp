@@ -313,7 +313,8 @@ void Game::mapKey(int key, int action) {
   else if (action == -3 || key == 52) nav = P;
   if (nav) {
     cu = nav[cu];
-    while ((cL & (1 << cu)) == 0) cu = nav[cu];
+    for (int guard = 0; (cL & (1 << cu)) == 0 && guard < 32; guard++) cu = nav[cu];
+    if ((cL & (1 << cu)) == 0) cu = prev;
     if (cu == 19 && cL == 1572865) cu = prev;
     return;
   }

@@ -48,6 +48,7 @@ void ratchetandclank::startNewGame(int level) {
   refreshSaveSlotSummaries();
   if (introManager) introManager->a_(true);
   if (game) {
+    if (game->cu >= 0 && game->cu < 3) game->ac = (jbyte)game->cu;
     game->cu = 0;
     game->c_(level, -1);
   }
@@ -176,7 +177,7 @@ void ratchetandclank::rebuildSaveStore() {
 
 void ratchetandclank::writeSaveSlot(int slot) {
   RecordStore* rs = RecordStore::openRecordStore("RANDCSm", false);
-  if (!rs) return;
+  if (!rs || slot < 0 || slot > 2) { delete rs; return; }
   if (game) game->writeSaveData(saveBuffer);
   rs->setRecord(SAVE_RECORD_IDS[slot], saveBuffer, 0, 214);
   rs->closeRecordStore();
