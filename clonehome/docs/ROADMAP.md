@@ -72,9 +72,21 @@ size.
 ## Playing the port
 
 Run `clonehome/port/build/clonehome_port.exe` (it finds `clonehome/extracted` itself; elsewhere put `RP1`-`RP3` next to
-the exe or pass `--data <dir>`). Keys map to the phone keypad: arrows move, Enter/Space = fire/select, F1/F2 (or Esc) = soft
-keys, digits/numpad = keypad digits, **Tab or Q = `#` (weapon wheel)**, **Ctrl, E or numpad `*` = `*` (melee)**.
-Saves live in `saves/` next to the exe.
+the exe or pass `--data <dir>`). Saves live in `saves/` next to the exe. Controls (`port/src/input.cpp`, modelled on the
+Going Mobile port; physical input -> action -> phone keypad code by context):
+
+| Action | Keyboard / mouse | Gamepad (XInput, PlayStation layout) |
+|---|---|---|
+| Move | arrows, WASD | d-pad, left stick |
+| Jump | Space, Left Shift | Cross (A) |
+| Fire (also confirms in menus) | J, X, Left Ctrl, left mouse | Circle (B), right trigger |
+| Wrench (melee only) | K, C, `/` | Square (X), left trigger |
+| Weapon wheel | Q, E, Tab, right mouse | Triangle (Y), either shoulder |
+| Pause | Esc, P | Start |
+| Back (menus) | Backspace | Select/Back |
+
+In menus: Enter/Space/Fire confirm, and wrench/Pause/Back/right mouse go back; a held arrow repeats. The number row and numpad
+still send the raw handset digits (the game reads 1-9 directly, and the name/code entry screens are typed with them).
 
 Speed: the game does one logic step per frame (and only when the frame time exceeds 40 ms), and the phone build had a 50 ms
 minimum frame time, i.e. about 20 steps/s. The port paces at a fixed rate instead, default **25 Hz** (matches the game's own 40 ms tick constant);

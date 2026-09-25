@@ -8,6 +8,7 @@
 #include <string>
 
 #include "gen/classes.h"
+#include "input.h"
 
 using namespace ch;
 
@@ -50,21 +51,19 @@ static Game* g_game;
 static Surface g_screen;
 static int g_scale = 2;
 
-static int midpKey(WPARAM vk) {
-  switch (vk) {
-    case VK_UP: return -1;
-    case VK_DOWN: return -2;
-    case VK_LEFT: return -3;
-    case VK_RIGHT: return -4;
-    case VK_RETURN: case VK_SPACE: return -5;
-    case VK_F1: return -6;
-    case VK_F2: case VK_ESCAPE: return -7;
-    case VK_MULTIPLY: case VK_CONTROL: case 'E': return 42;  // melee
-    case VK_TAB: case 'Q': return 35;                        // weapon wheel
-  }
-  if (vk >= '0' && vk <= '9') return (int)vk;
-  if (vk >= VK_NUMPAD0 && vk <= VK_NUMPAD9) return (int)(48 + vk - VK_NUMPAD0);
-  return 0;
+static void gameKeyDown(int code) { if (g_game) g_game->platformKey(code, true); }
+static void gameKeyUp(int code) { if (g_game) g_game->platformKey(code, false); }
+// State 0 is live play (16/17/24 are the level-start transitions); every other state is a menu.
+static input::Context gameContext() {
+  int st = Game::state;
+  return (st == 0 || st == 16 || st == 17 || st == 24) ? input::Context::Gameplay : input::Context::Menu;
+}
+
+// WM_KEYDOWN reports VK_SHIFT/VK_CONTROL without a side; the bindings use the left ones.
+static unsigned resolveKey(WPARAM vk, LPARAM lParam) {
+  if (vk == VK_SHIFT || vk == VK_CONTROL || vk == VK_MENU)
+    return MapVirtualKeyW((UINT)((lParam >> 16) & 0xFF), MAPVK_VSC_TO_VK_EX);
+  return (unsigned)vk;
 }
 
 static void present(HDC dc) {
@@ -97,12 +96,17 @@ static LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lP
         }
         return 0;
       }
-      if (!(lParam & (1 << 30)) && g_game) g_game->platformKey(midpKey(wParam), true);
+      input::keyEvent(resolveKey(wParam, lParam), true, (lParam & (1 << 30)) != 0);
       return 0;
     case WM_KEYUP:
-      if (g_game) g_game->platformKey(midpKey(wParam), false);
+      input::keyEvent(resolveKey(wParam, lParam), false, false);
       return 0;
+    case WM_LBUTTONDOWN: input::keyEvent(VK_LBUTTON, true, false); return 0;
+    case WM_LBUTTONUP: input::keyEvent(VK_LBUTTON, false, false); return 0;
+    case WM_RBUTTONDOWN: input::keyEvent(VK_RBUTTON, true, false); return 0;
+    case WM_RBUTTONUP: input::keyEvent(VK_RBUTTON, false, false); return 0;
     case WM_KILLFOCUS:
+      input::releaseAll();
       if (g_game) g_game->hideNotify();
       return 0;
     case WM_SETFOCUS:
@@ -175,6 +179,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow) {
     return 1;
   }
   midlet->startApp();
+  input::init(gameKeyDown, gameKeyUp, gameContext);
 
   if (!dump.empty()) {
     for (int i = 0; i < frames; i++) {
@@ -221,6 +226,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow) {
   g_game->targetFps = startHz < 5 ? 5 : startHz > 120 ? 120 : startHz;
   MSG msg = {};
   long statFrames = 0;
+  bool jumped = false;
   DWORD statStart = timeGetTime();
   while (!g_game->quit) {
     while (PeekMessageW(&msg, nullptr, 0, 0, PM_REMOVE)) {
@@ -238,6 +244,13 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow) {
       TranslateMessage(&msg);
       DispatchMessageW(&msg);
     }
+    if (jumpWorld >= 0 && !jumped && Game::state == 105) {  // debug: --level skips the menus in the live window too
+      jumped = true;
+      Game::worldId = jumpWorld;
+      g_game->inArena = jumpWorld >= 15;
+      g_game->enterLevel(jumpWorld, jumpSection);
+    }
+    input::poll();
     int sleepMs = g_game->runFrame((long)timeGetTime(), g_screen);
     statFrames++;
     HDC dc = GetDC(hwnd);
