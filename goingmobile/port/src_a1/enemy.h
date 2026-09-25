@@ -64,7 +64,7 @@ class Enemy : public Entity {
   int abs(int v) const { return v < 0 ? -v : v; }
   void render(Graphics* g, int enemyIndex, int visibilityFlags, int cameraX, int cameraY);
   short x() const { return (short)(posX >> 8); }
-  short y() const { return (short)(row * tileHeight + (posInRow >> 8) + tileHeight - hudHeight); }
+  short y() const;
 
  private:
   void loadAnimTables(const String& path);

@@ -9,14 +9,13 @@ int Enemy::groundYAhead(bool sampleTile) {
   int platW = Game::aJ->getWidth();
   if (sampleTile) tileAhead = game_->levelMap->getTile(col, row);
 
+  // Java tests `r >= 18` after `r *= tileHeight`, which is always true and
+  // drops every enemy to the map bottom; the row test must precede the scale.
   int r;
   for (r = row + 1; r < 18; r++) {
-    if ((LevelMap::columnSolidMasks[col] & (1 << r)) > 0) {
-      r *= tileHeight;
-      break;
-    }
+    if ((LevelMap::columnSolidMasks[col] & (1 << r)) > 0) break;
   }
-  if (r >= 18) r = 18 * tileHeight;
+  r = (r >= 18) ? 18 * tileHeight : r * tileHeight;
 
   int px = posX >> 8;
   for (int i2 = 0; i2 < 50; i2++) {
@@ -33,7 +32,7 @@ bool Enemy::attackBlockedByPlatform() {
   int h2 = Game::aJ->getHeight() >> 3;
   int tw = tileWidth, th = tileHeight;
   int px = posX >> 8;
-  int py = y() + hudHeight - tileHeight;
+  int py = y() + Game::K - tileHeight;
   int hh = th - 1;
   for (int i2 = 49; i2 >= 0; i2--) {
     if (game_->bn[i2] >= 0 && abs(game_->bl[i2] - px) <= tw && game_->bm[i2] == py &&
@@ -174,7 +173,7 @@ void Enemy::tick() {
 
   flattenedRenderFlag = false;
   int dx = pl->x() - x();
-  int dy = pl->y() + tileHeight - hudHeight - y();
+  int dy = pl->y() + tileHeight - Game::K - y();
   int tw = tileWidth;
   int far3 = tileWidth * 3;
 

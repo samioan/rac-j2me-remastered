@@ -480,9 +480,9 @@ void Player::tick() {
           if (animState != 11 && velY < 0 && animState != 10) {
             for (int i2 = 0; i2 < Game::enemyPoolSize; i2++) {
               Enemy* en = gm->enemies[i2];
-              if (en->animState != 2 && gm->k_(i2) && en->y() > x()) {
+              if (en->animState != 2 && gm->k_(i2) && en->y() > y()) {
                 setAnimState(3);
-                if (y() > en->x()) {
+                if (x() > en->x()) {
                   en->bounceTimer = -10;
                   if (gm->levelMap->isWalkable((posX >> 8) / tileWidth + 1, row + 1) &&
                       gm->levelMap->isWalkable((posX >> 8) / tileWidth, row + 1)) {

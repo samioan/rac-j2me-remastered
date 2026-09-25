@@ -318,10 +318,25 @@ re-basing onto a1 rather than finishing the legacy build's gameplay.
       and plays (MCI rc=0), all five .wav cues open. Every Game/Player
       `playSoundIfEnabled` call site in the Java tree is ported except the one
       in Game's unused own slot picker (b==9). Not audibly compared.
+      Tutorial fixes (level 0 was not completable): (1) `Enemy.groundYAhead`
+      scales the found row by tileHeight and then tests `r >= 18`, always
+      true, so every enemy's ground was the map bottom and it fell through
+      the floor; the row test now precedes the scale. (2) `src_a1/Enemy.java`
+      names the static copy of `Game.H` "hudHeight" and uses it in `y()`,
+      `attackBlockedByPlatform` and the AI's dy, but the raw decompile
+      (`decompiled_a1/f.java`) uses `Game.K` (44) there; only the render
+      clip uses `H`. With hudHeight the enemy sprite/hitbox sat 24px below
+      the floor and Ratchet's melee rectangle missed it, so it could never
+      be killed and the post-kill cutscene never fired. Fixed in enemy.cpp/
+      enemy_behavior.cpp. (3) Player.java's enemy-stomp check
+      (`enemy.y() > this.x()`, `this.y() > enemy.x()`) is the same x/y swap
+      as the landing check; now `en->y() > y()` and `x() > en->x()`.
+      Verified by playing level 0 through: enemy on the floor, melee kill,
+      Clank cutscene, zip-line ride and landing.
       Remaining for 3.2a: an end-to-end playthrough of levels 1-11 (only
       levels 0, 1 and 12 have been exercised) to shake out further
-      transcription bugs like the Player x()/y() landing swap, the
-      still-literal x()/y() pairs in Player.java's enemy-stomp check, Game's
+      transcription bugs of this kind (src_a1's renamed fields can be wrong;
+      cross-check against decompiled_a1 when behaviour looks off), Game's
       own unused slot picker (b==6/9), and a pixel/behaviour comparison
       against the original.
       Original scope: Same scope as the legacy build's stubbed 3.2

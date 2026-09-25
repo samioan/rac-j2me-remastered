@@ -46,6 +46,9 @@ Enemy::Enemy(Game* game) : game_(game) {
   bounceTimer = 0;
 }
 
+// Java Enemy.y() subtracts Game.K (sprite cell height), not hudHeight.
+short Enemy::y() const { return (short)(row * tileHeight + (posInRow >> 8) + tileHeight - Game::K); }
+
 void Enemy::loadAssets() {
   loadAnimTables("/enemy.bin");
   loadHitboxTables("/enemy_spr_box.bin");
