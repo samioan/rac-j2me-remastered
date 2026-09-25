@@ -14,6 +14,7 @@
 
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
+#include <shellapi.h>
 #include <mmsystem.h>
 #include <string>
 #include <cstdio>
@@ -93,7 +94,23 @@ static std::string exeDir() {
 
 // a1's unpacked jar contents (tools/extract_jar.py's output on
 // roms/RAC-GoingMobile-a1.jar, i.e. goingmobile/extracted_a1/, gitignored).
-static void findDataDir() {
+static void findDataDir(PWSTR cmdLine) {
+  // The launcher passes the unpacked game folder as the first non-flag argument.
+  int argc = 0;
+  LPWSTR* argv = CommandLineToArgvW(cmdLine ? cmdLine : L"", &argc);
+  std::string given;
+  for (int i = 0; argv && i < argc; i++) {
+    if (argv[i][0] == L'-') continue;
+    int n = WideCharToMultiByte(CP_UTF8, 0, argv[i], -1, nullptr, 0, nullptr, nullptr);
+    if (n > 1) {
+      given.assign((size_t)n - 1, 'x');
+      WideCharToMultiByte(CP_UTF8, 0, argv[i], -1, given.data(), n, nullptr, nullptr);
+      for (char& c : given) if (c == '\\') c = '/';
+    }
+    break;
+  }
+  if (argv) LocalFree(argv);
+  if (!given.empty() && setDataDir(given)) return;
   static const char* kCandidates[] = {
       "extracted_a1",          "../extracted_a1",          "../../extracted_a1",
       "../../../extracted_a1", "../../../../goingmobile/extracted_a1",
@@ -108,7 +125,7 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR cmdLine, int) {
 #ifdef _DEBUG
   _CrtSetReportHook2(_CRT_RPTHOOK_INSTALL, crtReportHook);
 #endif
-  findDataDir();
+  findDataDir(cmdLine);
 
   screen::load();
   bool windowed = cmdLine && wcsstr(cmdLine, L"--windowed") != nullptr;

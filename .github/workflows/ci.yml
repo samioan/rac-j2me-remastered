@@ -26,6 +26,12 @@ jobs:
       - name: Build Going Mobile port (Debug)
         run: .\goingmobile\port\build.bat
 
+      - name: Build the Going Mobile release package
+        run: .\goingmobile\port\build_dist.bat 0.0.0-ci
+
+      - name: Check the package
+        run: .\goingmobile\port\check_dist.ps1
+
   windows-clonehome:
     runs-on: windows-latest
     steps:

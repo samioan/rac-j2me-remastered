@@ -1,5 +1,5 @@
-cmake_minimum_required(VERSION 3.20)
-project(goingmobile_port CXX)
+﻿cmake_minimum_required(VERSION 3.20)
+project(goingmobile_port C CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -9,6 +9,21 @@ if(MSVC)
   add_compile_options(/W4 /utf-8)
 endif()
 
+# --- building something other people can download ---------------------
+# GOINGMOBILE_VERSION is what the launcher prints in its corner: a local build
+# stays "-dev" (no update checks); the release workflow passes the git tag
+# with its "goingmobile-v" prefix stripped.
+set(GOINGMOBILE_VERSION "0.1.0-dev" CACHE STRING "Version string shown by the launcher")
+set(GOINGMOBILE_UPDATE_OWNER "samioan" CACHE STRING "GitHub owner to check for updates")
+set(GOINGMOBILE_UPDATE_REPO "rac-j2me-remastered" CACHE STRING "GitHub repo to check for updates")
+set(GOINGMOBILE_UPDATE_TAG_PREFIX "goingmobile-v" CACHE STRING "Release tag prefix identifying a Going Mobile build")
+# The shipping build: only the launcher and the a1 game.
+option(GOINGMOBILE_DIST "Build only the shipped executables (launcher + a1 game)" OFF)
+# Static CRT so "unzip and play" needs no Visual C++ redistributable.
+if(MSVC)
+  set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+endif()
+
 # Milestone 3.1: the boot/splash/menu/save surface, ported behaviorally from
 # goingmobile/src/ (phase 1/2's renamed reference tree) onto a raw Win32
 # software-rendered window -- no SDL/D3D/GL dependency, matching the sibling
@@ -16,6 +31,7 @@ endif()
 # game's screen: 128x128 (Nokia Series 40 FullCanvas, confirmed in phase 1).
 # Gameplay internals (b==0 simulation, LevelMap/Player/Enemy/Projectile
 # behavior) are declared and stubbed; that's milestone 3.2.
+if(NOT GOINGMOBILE_DIST)
 add_executable(goingmobile_port WIN32
   src/main.cpp
   src/midp.cpp
@@ -28,6 +44,7 @@ add_executable(goingmobile_port WIN32
 )
 if(MSVC)
   target_compile_options(goingmobile_port PRIVATE /W4)
+endif()
 endif()
 
 # Milestone 3.1a: a1's boot/splash/menu/save surface, re-based from
@@ -76,4 +93,39 @@ add_executable(goingmobile_port_a1 WIN32
 )
 if(MSVC)
   target_compile_options(goingmobile_port_a1 PRIVATE /W4)
+endif()
+
+# --- the launcher -------------------------------------------------------
+# What a downloaded zip opens: picks and unpacks the user's own .jar, runs the
+# game, and updates itself from GitHub releases. See src/launcher/.
+# Artwork (assets/banner.png, goingmobile.ico) is generated from
+# assets/banner_source.jpg by tools/make_banner.py and tools/make_icon.py.
+add_library(stb_image STATIC third_party/stb/stb_image_impl.cpp)
+target_include_directories(stb_image PUBLIC third_party/stb)
+add_library(puff STATIC third_party/puff/puff.c)
+target_include_directories(puff PUBLIC third_party/puff)
+if(MSVC)
+  target_compile_options(stb_image PRIVATE /W3)
+  target_compile_options(puff PRIVATE /W3)
+endif()
+configure_file(src/launcher/version.h.in
+               "${CMAKE_BINARY_DIR}/generated/launcher/version.h" @ONLY)
+add_executable(goingmobile_launcher WIN32
+  src/launcher/launcher_main.cpp
+  src/launcher/banner.cpp
+  src/launcher/install.cpp
+  src/launcher/launcher_config.cpp
+  src/launcher/update_check.cpp
+  src/launcher/updater.cpp
+  src/launcher/zip_reader.cpp
+  src/platform/win32/exe_dir.cpp
+  src/launcher/launcher.rc
+)
+set_target_properties(goingmobile_launcher PROPERTIES OUTPUT_NAME "GoingMobile")
+target_include_directories(goingmobile_launcher PRIVATE src "${CMAKE_BINARY_DIR}/generated")
+target_link_libraries(goingmobile_launcher PRIVATE stb_image puff comctl32 ole32 winhttp)
+target_compile_definitions(goingmobile_launcher PRIVATE UNICODE _UNICODE NOMINMAX WIN32_LEAN_AND_MEAN)
+if(MSVC)
+  target_compile_options(goingmobile_launcher PRIVATE /W4)
+  target_link_options(goingmobile_launcher PRIVATE /MANIFEST:NO)
 endif()

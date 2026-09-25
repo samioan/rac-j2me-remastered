@@ -110,6 +110,20 @@ every open member (`docs/BUILD_COMPARISON.md`; the `(a)` build is a
 128x160 port of the same revision, a1 is a newer trial build with the
 full class map recovered) -- is complete.
 
+## Download and play (Going Mobile)
+
+![Going Mobile Remastered](goingmobile/port/src/launcher/assets/banner.png)
+
+Windows builds are published on the
+[Releases page](https://github.com/samioan/rac-j2me-remastered/releases). Unzip,
+run `GoingMobile.exe`, point it at your own `RAC-GoingMobile-a1.jar`, press
+Play. The launcher updates itself from new releases. The game is not included.
+Widescreen and high-FPS options are in the game's Settings menu.
+
+To cut a release: `git tag goingmobile-v0.1.0 && git push origin goingmobile-v0.1.0`
+(the tag becomes the version; `.github/workflows/release-goingmobile.yml`
+builds, checks and publishes the zip).
+
 ## Building the ports
 
 ```
