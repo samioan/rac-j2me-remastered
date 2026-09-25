@@ -8,6 +8,7 @@
 #include <string>
 
 #include "gen/classes.h"
+#include "display.h"
 #include "input.h"
 
 using namespace ch;
@@ -49,7 +50,6 @@ static LONG WINAPI crashHandler(EXCEPTION_POINTERS* ep) {
 
 static Game* g_game;
 static Surface g_screen;
-static int g_scale = 2;
 
 static void gameKeyDown(int code) { if (g_game) g_game->platformKey(code, true); }
 static void gameKeyUp(int code) { if (g_game) g_game->platformKey(code, false); }
@@ -66,33 +66,62 @@ static unsigned resolveKey(WPARAM vk, LPARAM lParam) {
   return (unsigned)vk;
 }
 
-static void present(HDC dc) {
-  BITMAPINFO bi = {};
-  bi.bmiHeader.biSize = sizeof bi.bmiHeader;
-  bi.bmiHeader.biWidth = kScreenW;
-  bi.bmiHeader.biHeight = -kScreenH;
-  bi.bmiHeader.biPlanes = 1;
-  bi.bmiHeader.biBitCount = 32;
-  StretchDIBits(dc, 0, 0, kScreenW * g_scale, kScreenH * g_scale, 0, 0, kScreenW, kScreenH, g_screen.px.data(), &bi,
-                DIB_RGB_COLORS, SRCCOPY);
+static void updateTitle(HWND hwnd) {
+  wchar_t title[128];
+  swprintf(title, 128, L"Ratchet and Clank: Clone Home Port  [%d Hz | %s | %s scaling]", g_game ? g_game->targetFps : 0,
+           display::aspectName(), display::scalingName());
+  SetWindowTextW(hwnd, title);
 }
 
 static LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
   switch (msg) {
+    case WM_ERASEBKGND:
+      return 1;  // present() paints the bars itself
     case WM_PAINT: {
       PAINTSTRUCT ps;
-      present(BeginPaint(hwnd, &ps));
+      BeginPaint(hwnd, &ps);
       EndPaint(hwnd, &ps);
+      display::present(hwnd, g_screen);
       return 0;
     }
+    case WM_SETCURSOR:
+      if (display::isFullscreen() && LOWORD(lParam) == HTCLIENT) {
+        SetCursor(nullptr);
+        return TRUE;
+      }
+      return DefWindowProcW(hwnd, msg, wParam, lParam);
+    case WM_SYSKEYDOWN:
+      if (wParam == VK_RETURN && (lParam & (1 << 29))) {  // Alt+Enter
+        display::toggleFullscreen(hwnd);
+        return 0;
+      }
+      return DefWindowProcW(hwnd, msg, wParam, lParam);
     case WM_KEYDOWN:
+      if (wParam == VK_F11) {
+        if (!(lParam & (1 << 30))) display::toggleFullscreen(hwnd);
+        return 0;
+      }
+      if (wParam == VK_F8) {  // resolution: cycle the canvas aspect (Shift+F8 goes back)
+        if (!(lParam & (1 << 30))) {
+          display::cycleAspect(hwnd, GetKeyState(VK_SHIFT) < 0 ? -1 : 1);
+          updateTitle(hwnd);
+        }
+        return 0;
+      }
+      if (wParam == VK_F7) {  // scaling: fit <-> integer multiples
+        if (!(lParam & (1 << 30))) {
+          display::cycleScaling(hwnd);
+          updateTitle(hwnd);
+        }
+        return 0;
+      }
       if (wParam == VK_F5 || wParam == VK_F6) {  // game speed: F5 slower, F6 faster
         if (g_game) {
           int hz = g_game->targetFps + (wParam == VK_F6 ? 5 : -5);
           g_game->targetFps = hz < 5 ? 5 : hz > 120 ? 120 : hz;
-          wchar_t title[96];
-          swprintf(title, 96, L"Ratchet and Clank: Clone Home Port  [%d Hz]", g_game->targetFps);
-          SetWindowTextW(hwnd, title);
+          display::settings().hz = g_game->targetFps;
+          display::save();
+          updateTitle(hwnd);
         }
         return 0;
       }
@@ -128,22 +157,29 @@ static std::string narrow(const wchar_t* w) {
 // --data <dir holding RP1..RP3> (default: exe folder), --saves <dir>,
 // --dump <file.bmp> [--frames N] [--press K@F[:HOLD] ...] [--level W:S] [--fuzz SEED]: run N ticks headless and
 // write a screenshot (K is a MIDP key code, F the frame it is pressed on).
-int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow) {
+int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int) {
   std::string dump;
   int frames = 30, argc;
   struct Press { int key, frame, hold; };
   std::vector<Press> presses;
   unsigned fuzzSeed = 0;
-  int startHz = 25;
+  int startHz = 0;  // 0 = saved setting
+  int fullscreenArg = -1;
+  int headlessWidth = kScreenW;
   bool stats = false;
   int jumpWorld = -1, jumpSection = 0;
-  wchar_t** argv = CommandLineToArgvW(GetCommandLineW(), &argc);
-  for (int i = 1; i + 1 < argc; i++) {
+  wchar_t** argvRaw = CommandLineToArgvW(GetCommandLineW(), &argc);
+  std::vector<const wchar_t*> argv(argvRaw, argvRaw + argc);
+  argv.push_back(L"");  // value options at the very end read an empty string instead of running off the array
+  for (int i = 1; i < argc; i++) {
     if (!wcscmp(argv[i], L"--data")) Platform::dataDir = narrow(argv[++i]);
     else if (!wcscmp(argv[i], L"--saves")) Platform::saveDir = narrow(argv[++i]);
     else if (!wcscmp(argv[i], L"--dump")) dump = narrow(argv[++i]);
     else if (!wcscmp(argv[i], L"--frames")) frames = _wtoi(argv[++i]);
     else if (!wcscmp(argv[i], L"--stats")) stats = true;
+    else if (!wcscmp(argv[i], L"--width")) headlessWidth = _wtoi(argv[++i]);
+    else if (!wcscmp(argv[i], L"--fullscreen")) fullscreenArg = 1;
+    else if (!wcscmp(argv[i], L"--windowed")) fullscreenArg = 0;
     else if (!wcscmp(argv[i], L"--hz")) startHz = _wtoi(argv[++i]);
     else if (!wcscmp(argv[i], L"--level")) swscanf(argv[++i], L"%d:%d", &jumpWorld, &jumpSection);
     else if (!wcscmp(argv[i], L"--fuzz")) fuzzSeed = (unsigned)_wtoi(argv[++i]);
@@ -182,6 +218,8 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow) {
   input::init(gameKeyDown, gameKeyUp, gameContext);
 
   if (!dump.empty()) {
+    if (headlessWidth != kScreenW) g_screen.resize(headlessWidth, kScreenH);
+    Game::viewW = g_screen.w;
     for (int i = 0; i < frames; i++) {
       for (auto& p : presses) {
         if (p.frame == i) g_game->platformKey(p.key, true);
@@ -205,21 +243,11 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow) {
     return writeBmp(g_screen, dump.c_str()) ? 0 : 1;
   }
 
-  const wchar_t* kClassName = L"CloneHomePortWindow";
-  WNDCLASSW wc = {};
-  wc.lpfnWndProc = WindowProc;
-  wc.hInstance = hInstance;
-  wc.hCursor = LoadCursor(nullptr, IDC_ARROW);
-  wc.lpszClassName = kClassName;
-  RegisterClassW(&wc);
-  RECT rc = {0, 0, kScreenW * g_scale, kScreenH * g_scale};
-  DWORD style = WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX;
-  AdjustWindowRect(&rc, style, FALSE);
-  HWND hwnd = CreateWindowExW(0, kClassName, L"Ratchet and Clank: Clone Home Port", style, CW_USEDEFAULT,
-                              CW_USEDEFAULT, rc.right - rc.left, rc.bottom - rc.top, nullptr, nullptr, hInstance,
-                              nullptr);
+  display::load();
+  bool wantFullscreen = fullscreenArg >= 0 ? fullscreenArg == 1 : display::settings().fullscreen;
+  HWND hwnd = display::createWindow(hInstance, WindowProc, wantFullscreen);
   if (!hwnd) return 0;
-  ShowWindow(hwnd, nCmdShow);
+  if (startHz == 0) startHz = display::settings().hz;
 
   timeBeginPeriod(1);  // 1 ms timer/Sleep resolution for steady frame pacing
   g_game->realTime = true;
@@ -250,12 +278,17 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow) {
       g_game->inArena = jumpWorld >= 15;
       g_game->enterLevel(jumpWorld, jumpSection);
     }
+    {
+      RECT crc;
+      GetClientRect(hwnd, &crc);
+      int lw = display::logicalWidth(crc.right - crc.left, crc.bottom - crc.top);
+      if (lw != g_screen.w) g_screen.resize(lw, kScreenH);
+      Game::viewW = g_screen.w;
+    }
     input::poll();
     int sleepMs = g_game->runFrame((long)timeGetTime(), g_screen);
     statFrames++;
-    HDC dc = GetDC(hwnd);
-    present(dc);
-    ReleaseDC(hwnd, dc);
+    display::present(hwnd, g_screen);
     Sleep(sleepMs > 0 ? sleepMs : 1);
   }
   return 0;

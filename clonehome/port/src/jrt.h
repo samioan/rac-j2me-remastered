@@ -13,8 +13,14 @@
 
 namespace ch {
 
+extern "C" unsigned short __stdcall RtlCaptureStackBackTrace(unsigned long, unsigned long, void**, unsigned long*);
+
+// Carries the throw-site call stack so the port can log where the game's own exceptions come from.
 struct JavaException {
   const char* what;
+  void* frames[10];
+  int nframes;
+  JavaException(const char* w) : what(w) { nframes = (int)RtlCaptureStackBackTrace(1, 10, frames, nullptr); }
 };
 
 // ---------------------------------------------------------------- arrays

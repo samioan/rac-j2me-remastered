@@ -22,6 +22,9 @@ class Game : public Engine {
   inline static bool q = false;
   inline static bool r = false;
   inline static int centerX = 0;
+  inline static int viewW = 240;
+  inline static int lastViewW = 240;
+  inline static bool lastWide = true;
   inline static bool booted = false;
   inline static Image* splashImage = nullptr;
   inline static int deltaTime = 0;
@@ -396,6 +399,7 @@ class Game : public Engine {
   inline static bool gv = false;
   inline static bool gw = false;
   Game(RatchetMIDlet* var1);
+  static int uiX();
   static Arr<int8_t> readByteArray();
   void loadGameTables(int var1);
   void checkBonusPickup();
@@ -416,6 +420,7 @@ class Game : public Engine {
   void translateReleaseKeys();
   static void setKeyRelease(int var0);
   void render(Surface* var1) override;
+  void renderInner(Surface* var1);
   static void drawSplash(Surface* var0);
   static void drawLoadingBar(Surface* var0);
   void updateCamera();

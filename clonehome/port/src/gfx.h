@@ -28,6 +28,15 @@ class Surface {
   int w = kScreenW, h = kScreenH;
   std::vector<uint32_t> px = std::vector<uint32_t>(kScreenW * kScreenH, 0xFF000000);
 
+  // Resizes the buffer (logical canvas width changes with the resolution mode); contents become black.
+  void resize(int nw, int nh) {
+    w = nw;
+    h = nh;
+    px.assign((size_t)nw * (size_t)nh, 0xFF000000u);
+    tx_ = ty_ = 0;
+    resetClip();
+  }
+
   // ---- Graphics
   void setColor(int rgb) { color_ = 0xFF000000u | (uint32_t)rgb; }
   void setColor(int r, int g, int b) { color_ = 0xFF000000u | (uint32_t)((r & 255) << 16 | (g & 255) << 8 | (b & 255)); }

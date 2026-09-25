@@ -7,6 +7,7 @@
 #include <cstdio>
 
 #include <windows.h>
+#include <dbghelp.h>
 
 namespace ch {
 
@@ -85,14 +86,35 @@ void Engine::resetFrameTimingNow() {
 
 // The Java game threw uncaught exceptions (killing its thread) in a few corner cases;
 // the port logs them and carries on with the next frame instead.
-static void logJavaException(const char* where, const char* what) {
-  static int count = 0;
-  if (++count > 200) return;
+static void logJavaException(const char* where, const JavaException& e) {
+  static std::string seen;  // log each distinct throw site once
+  std::string sig;
+  for (int i = 0; i < e.nframes && i < 4; i++) sig += std::to_string((uintptr_t)e.frames[i]) + ",";
+  if (seen.find(sig) != std::string::npos || seen.size() > 4000) return;
+  seen += sig + ";";
   FILE* f = std::fopen("exceptions.log", "a");
-  if (f) {
-    std::fprintf(f, "%s: %s\n", where, what);
-    std::fclose(f);
+  if (!f) return;
+  std::fprintf(f, "%s: %s\n", where, e.what);
+  HANDLE proc = GetCurrentProcess();
+  static bool symInit = false;
+  if (!symInit) {
+    SymSetOptions(SYMOPT_LOAD_LINES | SYMOPT_UNDNAME);
+    SymInitialize(proc, nullptr, TRUE);
+    symInit = true;
   }
+  alignas(SYMBOL_INFO) char buf[sizeof(SYMBOL_INFO) + 256];
+  SYMBOL_INFO* sym = (SYMBOL_INFO*)buf;
+  for (int i = 0; i < e.nframes; i++) {
+    sym->SizeOfStruct = sizeof(SYMBOL_INFO);
+    sym->MaxNameLen = 255;
+    DWORD64 disp = 0;
+    DWORD lineDisp = 0;
+    IMAGEHLP_LINE64 line = {sizeof line};
+    if (!SymFromAddr(proc, (DWORD64)e.frames[i], &disp, sym)) continue;
+    bool hasLine = SymGetLineFromAddr64(proc, (DWORD64)e.frames[i], &lineDisp, &line) != 0;
+    std::fprintf(f, "   %s  %s:%lu\n", sym->Name, hasLine ? line.FileName : "?", hasLine ? line.LineNumber : 0);
+  }
+  std::fclose(f);
 }
 
 int Engine::runFrame(long nowMs, Surface& screen) {
@@ -139,7 +161,7 @@ int Engine::runFrame(long nowMs, Surface& screen) {
   try {
     update();
   } catch (const JavaException& e) {
-    logJavaException("update", e.what);
+    logJavaException("update", e);
   }
   if (soundPlayer) soundPlayer->run();
   Player::pumpLoops();
@@ -148,43 +170,20 @@ int Engine::runFrame(long nowMs, Surface& screen) {
   screen.resetTransform();
   bordersCleared = clearBorders_;
   clearBorders_ = false;
-  if (canvasW != kScreenW || canvasH != kScreenH) {
-    if (bordersCleared) {
-      screen.resetClip();
-      int v = (kScreenH - canvasH + 1) >> 1;
-      if (v > 0) {
-        if (offY > 0) screen.fillRectArgb(0, 0, kScreenW, offY, 0xFF000000);
-        screen.fillRectArgb(0, kScreenH - v, kScreenW, v, 0xFF000000);
-      }
-      v = (kScreenW - canvasW + 1) >> 1;
-      if (v > 0) {
-        if (offX > 0) screen.fillRectArgb(0, offY, offX, canvasH, 0xFF000000);
-        screen.fillRectArgb(kScreenW - v, offY, v, canvasH, 0xFF000000);
-      }
-    }
-    screen.translate(offX, offY);
-  }
-  screen.setClip(0, 0, canvasW, canvasH);
+  screen.resetClip();
   try {
     render(&screen);
   } catch (const JavaException& e) {
-    logJavaException("render", e.what);
+    logJavaException("render", e);
   }
   return sleepMs;
 }
 
+// The game calls this every frame with the width it is drawing into: 240 for menus (drawn centred by
+// a translate) or the full logical width for gameplay. It only sets the size resetClip() restores.
 void Engine::setViewport(int w, int h) {
-  clearBorders_ = true;
-  if (w <= 0) w = kScreenW;
-  if (h <= 0) h = kScreenH;
   canvasW = w;
   canvasH = h;
-  offX = kScreenW - w;
-  offY = kScreenH - h;
-  if (offX < 0) offX++;
-  if (offY < 0) offY++;
-  offX >>= 1;
-  offY >>= 1;
 }
 
 // -------------------------------------------------------------------- keys

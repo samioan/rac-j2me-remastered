@@ -813,7 +813,7 @@ void Enemy::draw(Surface* var1, int var2, int var3, int var4) {
   Game::cameraY = var4;
   int var5 = ((this->pixelX() + Game::cameraX) - 22);
   int var6 = (this->feetY() + Game::cameraY);
-  if (((((var5 >= (-44)) && (var5 <= 240)) && (var6 >= (-Game::spriteBaseHeight))) && (var6 <= 320))) {
+  if (((((var5 >= (-44)) && (var5 <= Game::viewW)) && (var6 >= (-Game::spriteBaseHeight))) && (var6 <= 320))) {
     Arr<Sprite*> var7 = Game::enemySprites[this->type];
     int var8 = 0;
     if (((var2 & 1) > 0)) {

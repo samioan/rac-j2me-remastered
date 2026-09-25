@@ -11,6 +11,10 @@ Game::Game(RatchetMIDlet* var1) : Engine(var1) {
   centerX = 120;
 }
 
+int Game::uiX() {
+  return ((viewW - 240) >> 1);
+}
+
 Arr<int8_t> Game::readByteArray() {
   int8_t var0 = (-1);
   Arr<int8_t> var1 = nullptr;
@@ -1205,6 +1209,31 @@ void Game::setKeyRelease(int var0) {
 }
 
 void Game::render(Surface* var1) {
+  bool var2 = (((((state == 0) || (state == 16)) || (state == 17)) || (state == 24)) || (state == 22));
+  if (((var2 != lastWide) || (viewW != lastViewW))) {
+    lastWide = var2;
+    lastViewW = viewW;
+    this->setViewSize(viewW, 299);
+    var1->setClip(0, 0, 4096, 320);
+    var1->setColor(0);
+    var1->fillRect(0, 0, 4096, 320);
+    this->requestClear();
+    hudDirty = true;
+  }
+  bool var4 = (var2 && (state != 22));
+  int var3 = (var4 ? 0 : ((viewW - 240) >> 1));
+  centerX = (var4 ? (viewW >> 1) : 120);
+  this->setViewport((var4 ? viewW : 240), 320);
+  if ((var3 != 0)) {
+    var1->translate(var3, 0);
+  }
+  this->renderInner(var1);
+  if ((var3 != 0)) {
+    var1->translate((-var3), 0);
+  }
+}
+
+void Game::renderInner(Surface* var1) {
   if ((this->gA && (state == 4))) {
     this->gA = false;
   }
@@ -1865,21 +1894,23 @@ void Game::render(Surface* var1) {
             invulnFrames = 1;
           }
           this->drawTileLayer(var1);
-          var1->setClip(0, 21, 240, 299);
+          var1->setClip(0, 21, viewW, 299);
           this->drawWorldObjects(var1);
           this->drawEntities(var1);
           if ((worldId == 16)) {
             this->resetClip(var1);
             var1->setColor(0);
-            var1->fillRect(0, 299, 240, 21);
+            var1->fillRect(0, 299, viewW, 21);
             this->setFont(fontHighlight);
             this->drawString(var1, (jstr(this->getString(332)) + jstr(String::valueOf(this->arenaEnemiesLeft))), centerX, 302, 17);
           }
           if (hudDirty) {
+            var1->translate(uiX(), 0);
             this->setFont(fontMain);
             this->resetClip(var1);
+            var1->setClip((-uiX()), 0, viewW, 21);
             var1->setColor(0);
-            var1->fillRect(0, 0, 240, 21);
+            var1->fillRect((-uiX()), 0, viewW, 21);
             var2 = false;
             var3 = false;
             var4 = false;
@@ -1918,17 +1949,20 @@ void Game::render(Surface* var1) {
               var1->setClip(3, 4, var9, var8);
               var1->drawImage(weaponIconSheet, 3, (4 - ((currentWeapon - 1) * var8)), 0);
             }
+            var1->translate((-uiX()), 0);
             hudDirty = false;
           }
           if (ac) {
             var18 = (weaponIconSheet->getHeight() / 12);
             var92 = weaponIconSheet->getWidth();
-            var1->setClip(((240 - var92) >> 1), 21, var92, var18);
-            var1->drawImage(weaponIconSheet, ((240 - var92) >> 1), (21 - (7 * var18)), 0);
+            var1->setClip(((viewW - var92) >> 1), 21, var92, var18);
+            var1->drawImage(weaponIconSheet, ((viewW - var92) >> 1), (21 - (7 * var18)), 0);
           }
           if (this->messageActive) {
+            var1->translate(uiX(), 0);
             this->drawMessageBox(var1);
             messageNext = this->drawMessageText(var1, messageCursor);
+            var1->translate((-uiX()), 0);
             hudDirty = true;
           }
         }
@@ -1966,9 +2000,9 @@ void Game::updateCamera() {
   int var5 = playerPixelY();
   if ((!ab)) {
     if (facingRight) {
-      var1 = (-(var4 - 57));
+      var1 = (-((var4 - 57) - uiX()));
     } else {
-      var1 = (-((var4 + 57) - 240));
+      var1 = (-(((var4 + 57) - 240) - uiX()));
     }
   } else {
     var1 = (-(af - centerX));
@@ -1997,8 +2031,8 @@ void Game::updateCamera() {
   if ((cameraX > 0)) {
     cameraX = 0;
   }
-  if ((cameraX < (-1356))) {
-    cameraX = (-1356);
+  if ((cameraX < (viewW - 1596))) {
+    cameraX = (viewW - 1596);
   }
   if ((cameraY > 0)) {
     cameraY = 0;
@@ -2108,7 +2142,7 @@ void Game::loadAssetsStep() {
       this->loadStringTable(2098);
       lockIcon = this->loadImage(2090);
       totalScore = 0;
-      cameraMinX = (-1356);
+      cameraMinX = (viewW - 1596);
       cameraMinY = (-364);
       break;
     case 14:
@@ -2491,7 +2525,7 @@ void Game::loadTileset() {
     if ((this->loadedTileset != this->tileset)) {
       this->loadedTileset = this->tileset;
       this->initTileMap(28, 18, this->loadImage(bo[this->tileset]), 57, 38);
-      this->setViewSize(240, 299);
+      this->setViewSize(viewW, 299);
       this->eg = 0;
       this->eh = 0;
       this->ei = 0;
@@ -2631,7 +2665,7 @@ void Game::switchSection(int var1) {
         break;
       case 5:
         playerX = 399616;
-        cameraX = cameraMinX;
+        cameraX = (viewW - 1596);
         break;
       case 6:
         footRow = 16;
@@ -3027,7 +3061,7 @@ void Game::enemyShotHitsCrates(int var1) {
     int var7 = (this->enemyShots[var1]->halfW << 1);
     int var8 = (this->enemyShots[var1]->halfH << 1);
     for (int var9 = 49; (var9 >= 0); (var9--)) {
-      if (((((((crateType[var9] != (-1)) && ((crateX[var9] + cameraX) <= 240)) && (((crateX[var9] + var2) + cameraX) >= 0)) && ((crateY[var9] + cameraY) <= 320)) && (((crateY[var9] + var3) + cameraY) >= 0)) && rectsOverlap(crateX[var9], (crateY[var9] + this->crateFallOffset[var9]), var2, var3, var5, var6, var7, var8))) {
+      if (((((((crateType[var9] != (-1)) && ((crateX[var9] + cameraX) <= viewW)) && (((crateX[var9] + var2) + cameraX) >= 0)) && ((crateY[var9] + cameraY) <= 320)) && (((crateY[var9] + var3) + cameraY) >= 0)) && rectsOverlap(crateX[var9], (crateY[var9] + this->crateFallOffset[var9]), var2, var3, var5, var6, var7, var8))) {
         this->enemyShots[var1]->detonate(true);
       }
     }
@@ -3063,7 +3097,7 @@ void Game::playerShotHitsCrates(int var1) {
       int var8 = (this->playerShots[var1]->halfW << 1);
       int var9 = (this->playerShots[var1]->halfH << 1);
       for (int var10 = 49; (var10 >= 0); (var10--)) {
-        if (((((((crateType[var10] != (-1)) && ((crateX[var10] + cameraX) <= 240)) && (((crateX[var10] + var2) + cameraX) >= 0)) && ((crateY[var10] + cameraY) <= 320)) && (((crateY[var10] + var3) + cameraY) >= 0)) && rectsOverlap(crateX[var10], (crateY[var10] + this->crateFallOffset[var10]), var2, var3, var6, var7, var8, var9))) {
+        if (((((((crateType[var10] != (-1)) && ((crateX[var10] + cameraX) <= viewW)) && (((crateX[var10] + var2) + cameraX) >= 0)) && ((crateY[var10] + cameraY) <= 320)) && (((crateY[var10] + var3) + cameraY) >= 0)) && rectsOverlap(crateX[var10], (crateY[var10] + this->crateFallOffset[var10]), var2, var3, var6, var7, var8, var9))) {
           this->audio->play(0);
           this->removeCrate(var10);
           if ((crateType[var10] == 0)) {
@@ -3224,7 +3258,7 @@ void Game::drawWorldObjects(Surface* var1) {
     if ((pickupKind[var8] >= 0)) {
       int var6 = ((pickupX[var8] >> 8) + var4);
       int var7 = (((pickupY[var8] >> 8) + var5) - (-12));
-      if (((((var6 <= 240) && ((var6 + var2) >= 0)) && (var7 <= 320)) && ((var7 + var3) >= 0))) {
+      if (((((var6 <= viewW) && ((var6 + var2) >= 0)) && (var7 <= 320)) && ((var7 + var3) >= 0))) {
         itemSprites[pickupKind[var8]]->draw(var1, var6, var7, 0);
       }
     }
@@ -3235,7 +3269,7 @@ void Game::drawWorldObjects(Surface* var1) {
     if ((crateType[var10] >= 0)) {
       int var18 = (crateX[var10] + var4);
       int var23 = ((crateY[var10] + this->crateFallOffset[var10]) + var5);
-      if (((((var18 <= 240) && ((var18 + var28) >= 0)) && (var23 <= 320)) && ((var23 + var9) >= 0))) {
+      if (((((var18 <= viewW) && ((var18 + var28) >= 0)) && (var23 <= 320)) && ((var23 + var9) >= 0))) {
         crateSprites[crateType[var10]]->draw(var1, var18, var23, 0);
       }
     }
@@ -3247,7 +3281,7 @@ void Game::drawWorldObjects(Surface* var1) {
       int var24 = (ziplineY1[var11] + var5);
       int var12 = (ziplineX2[var11] + var4);
       int var13 = (ziplineY2[var11] + var5);
-      if ((((((var19 <= 240) || (var12 <= 240)) && ((var19 >= 0) || (var12 >= 0))) && ((var24 <= 320) || (var13 <= 320))) && ((var24 >= 0) || (var13 >= 0)))) {
+      if ((((((var19 <= viewW) || (var12 <= viewW)) && ((var19 >= 0) || (var12 >= 0))) && ((var24 <= 320) || (var13 <= 320))) && ((var24 >= 0) || (var13 >= 0)))) {
         var1->setColor(15658734);
         var1->drawLine(var19, (var24 - 2), var12, (var13 - 2));
         var1->setColor(12303291);
@@ -3268,7 +3302,7 @@ void Game::drawWorldObjects(Surface* var1) {
     int var20 = (((this->doorCol[var29] * 57) + cameraX) + ((57 - var34) >> 1));
     int var25 = ((this->doorRow[var29] * 38) + cameraY);
     if ((this->doorBit[var29] != 0)) {
-      if ((((((var20 + var34) >= 0) && (var20 <= 240)) && ((var25 + var32) >= 0)) && (var25 <= 320))) {
+      if ((((((var20 + var34) >= 0) && (var20 <= viewW)) && ((var25 + var32) >= 0)) && (var25 <= 320))) {
         if (((this->doorBit[var29] >= 2) && (this->doorBit[var29] <= 64))) {
           var36 = 1;
         } else if ((this->doorBit[var29] == (-128))) {
@@ -3299,7 +3333,7 @@ void Game::drawWorldObjects(Surface* var1) {
       int var16 = (this->switchRow[var30] * 38);
       int var21 = ((var15 + cameraX) + ((57 - var34) >> 1));
       int var26 = (((var16 + cameraY) + 38) - (var32 >> 1));
-      if ((((((var21 + var34) >= 0) && (var21 <= 240)) && ((var26 + var32) >= 0)) && (var26 <= 320))) {
+      if ((((((var21 + var34) >= 0) && (var21 <= viewW)) && ((var26 + var32) >= 0)) && (var26 <= 320))) {
         if (rectsOverlap((playerPixelX() - (hitboxX << 1)), (playerPixelY() + (-12)), (hitboxW << 1), hitboxH, var15, var16, itemSprites[5]->width, itemSprites[5]->height)) {
           this->drawAnim(var1, bk, maxEnemies, (var21 + eo), (var26 - itemSprites[5]->height), 0);
           this->stepAnim(maxEnemies, deltaTime);
@@ -3312,7 +3346,7 @@ void Game::drawWorldObjects(Surface* var1) {
     if ((platformDir[var31] >= 0)) {
       int var22 = ((platformOriginX[var31] + platformOffsetX[var31]) + var4);
       int var27 = ((platformOriginY[var31] + platformOffsetY[var31]) + var5);
-      if (((((var22 <= 240) && ((var22 + 57) >= 0)) && (var27 <= 320)) && ((var27 + 38) >= 21))) {
+      if (((((var22 <= viewW) && ((var22 + 57) >= 0)) && (var27 <= 320)) && ((var27 + 38) >= 21))) {
         platformSprites[((this->tileset == 1) ? 2 : 0)]->draw(var1, var22, (var27 - (-10)), 0);
       }
     }
@@ -3320,7 +3354,7 @@ void Game::drawWorldObjects(Surface* var1) {
 }
 
 void Game::drawEntities(Surface* var1) {
-  var1->setClip(0, 21, 240, 299);
+  var1->setClip(0, 21, viewW, 299);
   for (int var2 = (maxEnemies - 1); (var2 >= 0); (var2--)) {
     if ((this->enemies[var2]->type != (-1))) {
       this->enemies[var2]->draw(var1, this->enemies[var2]->drawFlags, cameraX, cameraY);
@@ -3759,7 +3793,7 @@ void Game::checkEnemyHit(int var1) {
     int8_t var7 = Enemy::bodyOffsetY[var5];
     int8_t var8 = Enemy::bodyWidth[var5];
     int8_t var9 = Enemy::bodyHeight[var5];
-    if ((((((((var3 - var6) + var8) + cameraX) >= 0) && (((var3 - var6) + cameraX) <= 240)) && ((((var4 + var7) + var9) + cameraY) >= 0)) && (((var4 + var7) + cameraY) <= 320))) {
+    if ((((((((var3 - var6) + var8) + cameraX) >= 0) && (((var3 - var6) + cameraX) <= viewW)) && ((((var4 + var7) + var9) + cameraY) >= 0)) && (((var4 + var7) + cameraY) <= 320))) {
       for (int var10 = 9; (var10 >= 0); (var10--)) {
         int var11 = this->playerShots[var10]->type;
         if ((((this->playerShots[var10]->type >= 0) && (var11 != 30)) && (((((!this->playerShots[var10]->detonated) || ((var11 >= 9) && (var11 <= 11))) || ((var11 >= 15) && (var11 <= 17))) || (var11 == 2)) || ((var11 >= 21) && (var11 <= 29))))) {
@@ -3935,10 +3969,11 @@ void Game::drawMessageBox(Surface* var1) {
   if (((messageId >= 191) && (messageId <= 194))) {
     int var6 = (((playerX >> 8) - 22) + cameraX);
     int var7 = ((228 + cameraY) + (-12));
-    this->drawAnim(var1, playerSprites, (bt + 1), (var6 + 142), var7, 2);
+    this->drawAnim(var1, playerSprites, (bt + 1), ((var6 + 142) - uiX()), var7, 2);
   }
   var1->setColor(0, 0, 0);
-  var1->fillRect(0, var2, 240, var3);
+  var1->setClip((-uiX()), var2, viewW, var3);
+  var1->fillRect((-uiX()), var2, viewW, var3);
   if ((this->messageHasPortrait && (cL[(messageId - 117)] != (-1)))) {
     var2 += ((var3 - var4) >> 1);
     var1->setColor(9114112);
@@ -5354,7 +5389,7 @@ void Game::a(Projectile* var0) {
       var0->worldX = (var0->worldX + var0->velX);
       int var6 = (var0->worldX >> 8);
       var0->worldY = (var0->worldY + var0->velY);
-      if ((var6 > 240)) {
+      if ((var6 > viewW)) {
         var0->reset();
         return;
       }
@@ -5362,7 +5397,7 @@ void Game::a(Projectile* var0) {
       var0->worldX = (var0->worldX + var0->velX);
       int var5 = (var0->worldX >> 8);
       var0->worldY = (var0->worldY + var0->velY);
-      if ((var5 > 240)) {
+      if ((var5 > viewW)) {
         var0->reset();
         return;
       }
@@ -5370,7 +5405,7 @@ void Game::a(Projectile* var0) {
       if (((var0->type >= 3) && (var0->type <= 5))) {
         var0->worldX = (var0->worldX + var0->velX);
         int var4 = (var0->worldX >> 8);
-        if ((((var0->worldY >> 8) > 320) || (var4 > 240))) {
+        if ((((var0->worldY >> 8) > 320) || (var4 > viewW))) {
           var0->reset();
         }
         var0->worldY = (var0->worldY - var0->velY);
@@ -5385,7 +5420,7 @@ void Game::a(Projectile* var0) {
       } else if (((var0->type >= 12) && (var0->type <= 14))) {
         var0->homeInOnTarget();
         int var3 = 0;
-        if (((var3 = (var0->worldX >> 8)) > 240)) {
+        if (((var3 = (var0->worldX >> 8)) > viewW)) {
           var0->reset();
           return;
         }
@@ -5397,7 +5432,7 @@ void Game::a(Projectile* var0) {
       } else if (((var0->type >= 18) && (var0->type <= 20))) {
         var0->homeInOnTarget();
         int var1 = 0;
-        if (((var1 = (var0->worldX >> 8)) > 240)) {
+        if (((var1 = (var0->worldX >> 8)) > viewW)) {
           var0->reset();
         }
       }
@@ -5798,7 +5833,7 @@ void Game::drawTileLayer(Surface* var1) {
   var1->translate(0, 21);
   this->drawTileMap(var1);
   var1->translate(0, (-21));
-  var1->setClip(0, 21, 240, 299);
+  var1->setClip(0, 21, viewW, 299);
   for (int var10 = var4; (var10 < var6); (var10++)) {
     for (int var11 = var5; (var11 < var7); (var11++)) {
       if ((this->tiles[var10][var11] <= 58)) {
@@ -5847,7 +5882,7 @@ void Game::drawTileLayer(Surface* var1) {
         if ((var16 == 104)) {
           var28 += 2;
         }
-        var1->setClip(0, 21, 240, 299);
+        var1->setClip(0, 21, viewW, 299);
         if ((var28 != (-1))) {
           crateSprites[var28]->draw(var1, (var13 + 28), ((var17 - (-12)) - 38), 0);
         }

@@ -92,3 +92,13 @@ Speed: the game does one logic step per frame (and only when the frame time exce
 minimum frame time, i.e. about 20 steps/s. The port paces at a fixed rate instead, default **25 Hz** (matches the game's own 40 ms tick constant);
 change it with `--hz N` or **F5 (slower) / F6 (faster)** in the window (title bar shows the rate). `--stats` writes the
 measured frame rate to `perf.log` on exit.
+
+## Display options
+
+`port/src/display.cpp` (settings saved in `%LOCALAPPDATA%ac-ch-port\display.cfg`):
+
+* **Borderless fullscreen:** F11 or Alt+Enter (or `--fullscreen` / `--windowed` at launch); a WS_POPUP window over the current monitor, cursor hidden.
+* **Scaling:** F7 toggles *Fit* (largest size keeping the aspect ratio, centred, black bars) and *Integer* (whole multiples only, for crisp pixels). The window is freely resizable.
+* **Resolution:** F8 (Shift+F8 back) cycles Original (240x320), Auto (follows the window shape), 4:3, 16:10, 16:9, 21:9. The canvas keeps its 320 px height and gets wider, so gameplay simply shows more of the level to either side.
+  * How: `tools/ch_widescreen.py` patches the renamed Java before `java2cpp.py` translates it (`clonehome/src` stays a plain decompile). `Game.viewW` is the logical width; the tile layer, clips, culling ranges and camera limits use it; menus, the HUD bar and the dialogue box are 240-px designs drawn centred (a `translate`), on black. The weapon wheel is an overlay in design coordinates. The camera keeps Ratchet where the 240 design put him relative to the centre.
+* Headless: `--width N` renders at a given logical width (e.g. `--width 569 --level 1:0 --dump out.bmp`).

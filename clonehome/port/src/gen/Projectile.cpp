@@ -104,7 +104,7 @@ void Projectile::update(bool var1) {
       int var9 = (this->worldX >> 8);
       this->worldY = (this->worldY + this->velY);
       int var14 = (this->worldY >> 8);
-      if (((((var9 < ((-var4) - 57)) || (var9 > (((-var4) + 240) + 57))) || (var14 < ((-var5) - 38))) || (var14 > (((-var5) + 320) + 38)))) {
+      if (((((var9 < ((-var4) - 57)) || (var9 > (((-var4) + Game::viewW) + 57))) || (var14 < ((-var5) - 38))) || (var14 > (((-var5) + 320) + 38)))) {
         this->detonate(var1);
       }
     } else if (((this->type >= 0) && (this->type <= 2))) {
@@ -112,7 +112,7 @@ void Projectile::update(bool var1) {
       int var8 = (this->worldX >> 8);
       this->worldY = (this->worldY + this->velY);
       int var13 = (this->worldY >> 8);
-      if (((((var8 < ((-var4) - 57)) || (var8 > (((-var4) + 240) + 57))) || (var13 < ((-var5) - 38))) || (var13 > (((-var5) + 320) + 38)))) {
+      if (((((var8 < ((-var4) - 57)) || (var8 > (((-var4) + Game::viewW) + 57))) || (var13 < ((-var5) - 38))) || (var13 > (((-var5) + 320) + 38)))) {
         this->reset();
       }
     } else if (((this->type >= 3) && (this->type <= 5))) {
@@ -136,7 +136,7 @@ void Projectile::update(bool var1) {
       this->homeInOnTarget();
       int var6 = (this->worldX >> 8);
       int var11 = (this->worldY >> 8);
-      if (((((var6 < ((-var4) - 57)) || (var6 > (((-var4) + 240) + 57))) || (var11 < ((-var5) - 38))) || (var11 > (((-var5) + 320) + 38)))) {
+      if (((((var6 < ((-var4) - 57)) || (var6 > (((-var4) + Game::viewW) + 57))) || (var11 < ((-var5) - 38))) || (var11 > (((-var5) + 320) + 38)))) {
         this->reset();
       }
     } else if (((this->type >= 15) && (this->type <= 17))) {
@@ -150,7 +150,7 @@ void Projectile::update(bool var1) {
       this->homeInOnTarget();
       int var2 = (this->worldX >> 8);
       int var3 = (this->worldY >> 8);
-      if (((((var2 < ((-var4) - 57)) || (var2 > (((-var4) + 240) + 57))) || (var3 < ((-var5) - 38))) || (var3 > (((-var5) + 320) + 38)))) {
+      if (((((var2 < ((-var4) - 57)) || (var2 > (((-var4) + Game::viewW) + 57))) || (var3 < ((-var5) - 38))) || (var3 > (((-var5) + 320) + 38)))) {
         this->detonate(var1);
       }
     }

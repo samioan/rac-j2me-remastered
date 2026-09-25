@@ -21,7 +21,7 @@ endif()
 file(GLOB GEN_SRC CONFIGURE_DEPENDS src/gen/*.cpp)
 add_library(ch_core STATIC src/assets.cpp src/gfx.cpp src/engine.cpp src/jrt.cpp src/platform.cpp ${GEN_SRC})
 target_include_directories(ch_core PUBLIC src)
-target_link_libraries(ch_core PUBLIC stb_image)
+target_link_libraries(ch_core PUBLIC stb_image dbghelp)
 
 # Checks every resource against the formats in ../docs/ASSET_FORMATS.md.
 add_executable(clonehome_selftest src/selftest.cpp)
@@ -29,5 +29,5 @@ target_link_libraries(clonehome_selftest PRIVATE ch_core)
 
 # Software-rendered raw Win32 shell (no SDL/D3D/GL dependency), at the
 # original 240x320 SEMC resolution. Game logic to come.
-add_executable(clonehome_port WIN32 src/main.cpp src/input.cpp)
+add_executable(clonehome_port WIN32 src/main.cpp src/input.cpp src/display.cpp)
 target_link_libraries(clonehome_port PRIVATE ch_core shell32 winmm dbghelp xinput)

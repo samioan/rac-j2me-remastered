@@ -47,6 +47,8 @@ tracked (see `.gitignore`).
   `pip install javalang` (patched at import for its dropped cast prefix). Prints
   statements whose evaluation order might differ from Java (all reviewed benign so far:
   `&&`/`||` chains and assign-after-read).
+- **`ch_widescreen.py`** -- data module for `java2cpp.py`: the textual patches that make the
+  Clone Home port's canvas width variable (widescreen), kept out of `clonehome/src`.
 - **`parse_gm.py`** -- goingmobile phase 2: parsers/validators for every
   custom asset format of the canonical build (tilemaps, menu table,
   bitmap font with ASCII rendering, animation/geometry tables). Each one
