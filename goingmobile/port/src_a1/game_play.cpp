@@ -2,6 +2,7 @@
 // helpers, room transitions and hint/dialogue panel, transcribed from
 // src_a1/Game.java (see game.h for the obfuscated-name -> C++ overload map).
 #include "game.h"
+#include "screen.h"
 #include "canvasshell.h"
 #include "midlet.h"
 #include "intromanager.h"
@@ -270,9 +271,9 @@ void Game::H_(Graphics* g) {
   bool portrait = cC && cH >= 104 && cH - 104 < 109 && cB[cH - 104] != -1;
   if (portrait && 42 < at->getHeight() / 5 + 12) panelH = at->getHeight() / 5 + 12;
   int top = 220 - panelH;
-  g->setClip(0, 0, 176, 220);
+  g->setClip(-screen::offsetX(), 0, screen::width, 220);
   g->setColor(16777215);
-  g->fillRect(0, top, 176, panelH);
+  g->fillRect(-screen::offsetX(), top, screen::width, panelH);
   if (portrait) {
     int ph = at->getHeight() / 5;
     int pw = at->getWidth();
@@ -698,7 +699,7 @@ void Game::l_(int idx) {
     int py = (pr->posY >> 8) - pr->halfHeight;
     int pw = pr->halfWidth << 1, ph = pr->halfHeight << 1;
     for (int i2 = 49; i2 >= 0; i2--) {
-      if (bn[i2] != -1 && bl[i2] + x <= 176 && bl[i2] + w + x >= 0 && bm[i2] + y <= 220 && bm[i2] + h2 + y >= 0 &&
+      if (bn[i2] != -1 && bl[i2] + x <= screen::width && bl[i2] + w + x >= 0 && bm[i2] + y <= 220 && bm[i2] + h2 + y >= 0 &&
           a_(bl[i2], bm[i2], w, h2, px, py, pw, ph))
         pr->detonate(true);
     }
@@ -740,7 +741,7 @@ void Game::m_(int idx) {
     int py = (pr->posY >> 8) - pr->halfHeight;
     int pw = pr->halfWidth << 1, ph = pr->halfHeight << 1;
     for (int i2 = 49; i2 >= 0; i2--) {
-      if (bn[i2] != -1 && bl[i2] + x <= 176 && bl[i2] + w + x >= 0 && bm[i2] + y <= 220 && bm[i2] + h2 + y >= 0 &&
+      if (bn[i2] != -1 && bl[i2] + x <= screen::width && bl[i2] + w + x >= 0 && bm[i2] + y <= 220 && bm[i2] + h2 + y >= 0 &&
           a_(bl[i2], bm[i2] + bo[i2], w, h2, px, py, pw, ph)) {
         n_(i2);
         dE++;
@@ -936,7 +937,7 @@ void Game::q_(int idx) {
   jbyte k = en->kind;
   jbyte hx = Enemy::HITBOX_X_OFFSETS[k], hy = Enemy::HITBOX_Y_OFFSETS[k];
   jbyte hw = Enemy::HITBOX_WIDTHS[k], hh = Enemy::HITBOX_HEIGHTS[k];
-  if (!(ex - hx + hw + x >= 0 && ex - hx + x <= 176 && ey + hy + hh + y >= 0 && ey + hy + y <= 220)) return;
+  if (!(ex - hx + hw + x >= 0 && ex - hx + x <= screen::width && ey + hy + hh + y >= 0 && ey + hy + y <= 220)) return;
   for (int i2 = 9; i2 >= 0; i2--) {
     Projectile* pr = playerProjectiles[i2];
     jbyte pt = pr->type;

@@ -1,4 +1,5 @@
 #include <cstdio>
+#include "screen.h"
 #include <cstdlib>
 // game_level.cpp -- Game's level-entry, spawn helpers, camera and in-level
 // render pipeline, transcribed from src_a1/Game.java (see game.h for the
@@ -388,9 +389,10 @@ void Game::updateCamera() {
   jshort px = (jshort)(player->posX >> 8);
   jshort py = (jshort)(player->row * tileHeight + (player->posInRow >> 8));
   if (!z) {
-    cx = player->facingRight ? -(px - tileWidth) : -(px + tileWidth - 176);
+    // Framing is relative to the original 176-wide window, centred in the wider view.
+    cx = player->facingRight ? -(px - tileWidth - screen::offsetX()) : -(px + tileWidth - 176 - screen::offsetX());
   } else {
-    cx = -(E - 88);
+    cx = -(E - screen::width / 2);
     // The original also releases the hold when the player stands on the
     // ground (needs Player::groundYAhead, tick slice); z is never set true
     // yet, so only the distance test can run.
@@ -403,7 +405,7 @@ void Game::updateCamera() {
   if (x > cx) { x -= 10; if (x < cx) x = cx; }
   else if (x < cx) { x += 10; if (x > cx) x = cx; }
   if (x > 0) x = 0;
-  if (x < -(28 * tileWidth - 176)) x = -(28 * tileWidth - 176);
+  if (x < -(28 * tileWidth - screen::width)) x = -(28 * tileWidth - screen::width);
   if (y > 0) y = 0;
   if (y < -(18 * tileHeight - 220)) y = -(18 * tileHeight - 220);
 }
@@ -411,11 +413,11 @@ void Game::updateCamera() {
 // ---- in-level render pipeline ---------------------------------------------
 
 void Game::a_(Graphics* g) {
-  g->setClip(0, hudHeight, 176, 220 - hudHeight);
+  g->setClip(0, hudHeight, screen::width, 220 - hudHeight);
   for (int i2 = 0; i2 < 8; i2++) {
     if (bj[i2] == -1) return;
     int px = bj[i2] + x, py = bk[i2] + y;
-    if (px < 176 && py < 220 && px + 22 >= 0 && py + 22 >= 0) g->drawImage(au, px, py, 3);
+    if (px < screen::width && py < 220 && px + 22 >= 0 && py + 22 >= 0) g->drawImage(au, px, py, 3);
   }
 }
 
@@ -423,7 +425,7 @@ void Game::b_(Graphics* g) {
   if (bX == -1) return;
   int px = bX * tileWidth + x + ((tileWidth - 19) >> 1);
   int py = bY * tileHeight + y + ((tileHeight - 19) >> 1);
-  if (px < 176 && px + 19 >= 0 && py < 220 && py + 19 >= 0) {
+  if (px < screen::width && px + 19 >= 0 && py < 220 && py + 19 >= 0) {
     b_(g, px, py, 19, 19);
     g->drawImage(aL, px, py - 475, 0);
   }
@@ -435,7 +437,7 @@ void Game::c_(Graphics* g) {
   int h2 = ax->getHeight() / 2;
   int px = cc * tileWidth + x;
   int py = cd * tileHeight + y + L;
-  if (px < 176 && px + w >= 0 && py < 220 && py + h2 >= 0 && h2 > 0) {
+  if (px < screen::width && px + w >= 0 && py < 220 && py + h2 >= 0 && h2 > 0) {
     b_(g, px, py, w, h2);
     g->drawImage(ax, px, py - ce * h2, 0);
   }
@@ -444,7 +446,7 @@ void Game::c_(Graphics* g) {
 void Game::D_(Graphics* g) {
   int w = aw->getWidth(), h2 = aw->getHeight();
   int px = ca * tileWidth + x, py = cb * tileHeight + y;
-  if (px < 176 && px + w >= 0 && py < 220 && py + h2 >= 0 && h2 > 0) {
+  if (px < screen::width && px + w >= 0 && py < 220 && py + h2 >= 0 && h2 > 0) {
     b_(g, px, py, w, h2);
     g->drawImage(aw, px, py, 0);
   }
@@ -456,8 +458,8 @@ void Game::z_(Graphics* g) {
   for (int i2 = 3; i2 >= 0; i2--) {
     if (bc[i2] == -1) continue;
     int x1 = bc[i2] + ox, y1 = bd[i2] + oy, x2 = be[i2] + ox, y2 = bf[i2] + oy;
-    if ((x1 <= 176 || x2 <= 176) && (x1 >= 0 || x2 >= 0) && (y1 <= 220 || y2 <= 220) && (y1 >= 0 || y2 >= 0)) {
-      g->setClip(0, hudHeight, 176, 220 - hudHeight);
+    if ((x1 <= screen::width || x2 <= screen::width) && (x1 >= 0 || x2 >= 0) && (y1 <= 220 || y2 <= 220) && (y1 >= 0 || y2 >= 0)) {
+      g->setClip(0, hudHeight, screen::width, 220 - hudHeight);
       for (int k2 = 0; k2 < 5; k2++) {
         g->setColor(cols[k2]);
         g->drawLine(x1, y1 - 2 + k2, x2, y2 - 2 + k2);
@@ -471,7 +473,7 @@ void Game::A_(Graphics* g) {
   for (int i2 = 3; i2 >= 0; i2--) {
     if (cq[i2] < 0) continue;
     int px = cm[i2] + co[i2] + x, py = cn[i2] + cp[i2] + y;
-    if (px < 176 && px + tw >= 0 && py < 220 && py + th >= 0 && th > 0) {
+    if (px < screen::width && px + tw >= 0 && py < 220 && py + th >= 0 && th > 0) {
       b_(g, px, py, tw, th);
       g->drawImage(aD, px, py - aQ * tileHeight, 0);
     }
@@ -483,7 +485,7 @@ void Game::B_(Graphics* g) {
   for (int i2 = 0; i2 < 50; i2++) {
     if (bn[i2] < 0) continue;
     int px = bl[i2] + x, py = bm[i2] + bo[i2] + y;
-    if (px < 176 && px + w >= 0 && py < 220 && py + h2 >= 0 && h2 > 0) {
+    if (px < screen::width && px + w >= 0 && py < 220 && py + h2 >= 0 && h2 > 0) {
       b_(g, px, py, w, h2);
       g->drawImage(aJ, px, py - bn[i2] * h2, 0);
     }
@@ -494,7 +496,7 @@ void Game::C_(Graphics* g) {
   for (int i2 = 11; i2 >= 0; i2--) {
     if (ck[i2] < 0) continue;
     int px = (cg[i2] >> 8) + x, py = (ch[i2] >> 8) + y;
-    if (px < 176 && px + 19 >= 0 && py < 220 && py + 19 >= 0) {
+    if (px < screen::width && px + 19 >= 0 && py < 220 && py + 19 >= 0) {
       b_(g, px, py, 19, 19);
       g->drawImage(aL, px, py - ck[i2] * 19, 0);
     }
@@ -517,7 +519,7 @@ void Game::G_(Graphics* g) {
     if (bC[i2] == -128 || (bC[i2] != 0 && (bw & bC[i2]) != 0)) {
       int px = bD[i2] * tileWidth + x + ((tileWidth - w) >> 1);
       int py = bE[i2] * tileHeight + y;
-      if (px + w >= 0 && px < 176 && py + h4 >= 0 && py < 220) {
+      if (px + w >= 0 && px < screen::width && py + h4 >= 0 && py < 220) {
         if (bC[i2] >= 2 && bC[i2] <= 64) shift = h4;
         else if (bC[i2] == -128) {
           shift = h4 * 3;
@@ -536,7 +538,7 @@ void Game::G_(Graphics* g) {
     int mask = 1 << t;
     int px = bF[i2] * tileWidth + x + ((tileWidth - 19) >> 1);
     int py = bG[i2] * tileHeight + y + tileHeight - 19;
-    if (px + 19 >= 0 && px < 176 && py + 38 >= 0 && py < 220) {
+    if (px + 19 >= 0 && px < screen::width && py + 38 >= 0 && py < 220) {
       b_(g, px, py, 19, 38);
       g->drawImage(aL, px, py - (((bw & mask) == 0) ? 38 : 0) - 133, 0);
     }
@@ -545,16 +547,32 @@ void Game::G_(Graphics* g) {
 
 void Game::x_(Graphics* g) {
   ratchetandclank::currentFont = ratchetandclank::smallFont;
-  g->setClip(0, 0, 176, hudHeight);
+  const int sw = screen::width;
+  g->setClip(0, 0, sw, hudHeight);
   g->setColor(0);
-  g->fillRect(0, 0, 176, hudHeight);
-  int right = 176 - (tileWidth >> 1) + 2 - 5;
+  g->fillRect(0, 0, sw, hudHeight);
+  int right = sw - (tileWidth >> 1) + 2 - 5;
   int h12 = aE->getHeight() / 12;
   int w = aE->getWidth();
   if (player->health < 0) player->health = 0;
   int lost = 20 - player->health;
   int half = h12 >> 1;
-  g->drawImage(an, 0, 0, 0);
+  // hud.png is 176 wide: columns 0..116 (weapon slot + health pill), a flat strip that repeats
+  // unchanged over columns 117..158, and the right cap at 159..175. Wider screens keep the left
+  // and right pieces at their native size and tile the flat strip between them.
+  if (sw == 176) {
+    g->drawImage(an, 0, 0, 0);
+  } else {
+    g->setClip(0, 0, 117, hudHeight);
+    g->drawImage(an, 0, 0, 0);
+    for (int sx = 117; sx < sw - 17; sx += 42) {
+      g->setClip(sx, 0, std::min(42, sw - 17 - sx), hudHeight);
+      g->drawImage(an, sx - 117, 0, 0);
+    }
+    g->setClip(sw - 17, 0, 17, hudHeight);
+    g->drawImage(an, sw - 176, 0, 0);
+    g->setClip(0, 0, sw, hudHeight);
+  }
   g->setColor(0xFFFFFF);
   jbyte wpn = player->currentWeapon;
   if (wpn != 6 && wpn != 0)
@@ -576,40 +594,57 @@ void Game::y_(Graphics* g) {
   if (A) {
     int h12 = aE->getHeight() / 12;
     int w = aE->getWidth();
-    g->setClip((176 - w) >> 1, hudHeight, w, h12);
-    g->drawImage(aE, (176 - w) >> 1, hudHeight - 7 * h12, 0);
+    int ax = screen::offsetX() + ((176 - w) >> 1);
+    g->setClip(ax, hudHeight, w, h12);
+    g->drawImage(aE, ax, hudHeight - 7 * h12, 0);
   }
 }
 
 void Game::render(Graphics* g) {
   if (U > 0 || m) return;
+  const int sw = screen::width, off = screen::offsetX();
   if (dT != -1 || dU != -1 || dZ) {
-    g->setClip(0, 0, 176, 220);
+    g->setClip(0, 0, sw, 220);
     g->setColor(0);
-    g->fillRect(0, 0, 176, 220);
+    g->fillRect(0, 0, sw, 220);
     d = true;
     return;
   }
   if (aF == nullptr) return;
+  // Screens laid out in 176x220 design coordinates: drawn centred, never scaled. The weapon
+  // wheel (22) is an overlay on the frozen world, so its side areas are left alone.
   switch (b) {
-    case 1: drawExtras(g); return;
-    case 2: drawEndStats(g); return;
-    case 23: drawRestartPrompt(g); return;
-    case 3: drawWorldMap(g); return;
-    case 11: drawWeaponBuy(g); return;
-    case 12: drawBuyConfirm(g); return;
-    case 13: drawNoFunds(g); return;
-    case 14: drawChallengeIntro(g); return;
-    case 15: drawChallengeEnd(g); return;
-    case 19: drawChallengeFail(g); return;
-    case 10: drawInfo(g); return;
-    case 18: drawResults(g, dB); return;
-    case 21: drawLevelEnd(g); return;
-    case 4: d_(g); return;
-    case 5: f_(g); return;
-    case 7: v_(g); return;
-    case 8: u_(g); return;
-    case 22: drawWheel(g); return;
+    case 1: case 2: case 23: case 3: case 11: case 12: case 13: case 14: case 15: case 19:
+    case 10: case 18: case 21: case 4: case 5: case 7: case 8: case 22:
+      g->translate(off, 0);
+      switch (b) {
+        case 1: drawExtras(g); break;
+        case 2: drawEndStats(g); break;
+        case 23: drawRestartPrompt(g); break;
+        case 3: drawWorldMap(g); break;
+        case 11: drawWeaponBuy(g); break;
+        case 12: drawBuyConfirm(g); break;
+        case 13: drawNoFunds(g); break;
+        case 14: drawChallengeIntro(g); break;
+        case 15: drawChallengeEnd(g); break;
+        case 19: drawChallengeFail(g); break;
+        case 10: drawInfo(g); break;
+        case 18: drawResults(g, dB); break;
+        case 21: drawLevelEnd(g); break;
+        case 4: d_(g); break;
+        case 5: f_(g); break;
+        case 7: v_(g); break;
+        case 8: u_(g); break;
+        case 22: drawWheel(g); break;
+      }
+      g->translate(-off, 0);
+      if (b != 22 && off > 0) {
+        g->setClip(0, 0, sw, 220);
+        g->setColor(0);
+        g->fillRect(0, 0, off, 220);
+        g->fillRect(off + 176, 0, sw - off - 176, 220);
+      }
+      return;
     case 6: case 9:
       return;  // Game's own pause/store/results/game-over screens: later 3.2a slice
     default:
@@ -636,33 +671,39 @@ void Game::render(Graphics* g) {
       bossRender(g);
       for (int k2 = 9; k2 >= 0; k2--) playerProjectiles[k2]->render(g);
     }
-    g->setClip(0, 0, 176, hudHeight);
+    g->setClip(0, 0, sw, hudHeight);
     g->setColor(0);
-    g->fillRect(0, 0, 176, hudHeight);
-    g->setClip(0, 220 - hudHeight, 176, hudHeight);
+    g->fillRect(0, 0, sw, hudHeight);
+    g->setClip(0, 220 - hudHeight, sw, hudHeight);
     g->setColor(0);
-    g->fillRect(0, 220 - hudHeight, 176, hudHeight);
+    g->fillRect(0, 220 - hudHeight, sw, hudHeight);
+    g->translate(off, 0);
     midlet->introManager->a_(g, -1, -1, this);
+    g->translate(-off, 0);
   }
   if (Z == 11) {
-    g->setClip(0, 220 - hudHeight, 176, hudHeight);
+    g->setClip(0, 220 - hudHeight, sw, hudHeight);
     g->setColor(0);
-    g->fillRect(0, 220 - hudHeight, 176, hudHeight);
+    g->fillRect(0, 220 - hudHeight, sw, hudHeight);
     ratchetandclank::currentFont = ratchetandclank::smallFont;
     g->setColor(1882828);
-    ratchetandclank::currentFont->drawText(g, ratchetandclank::strings[311] + " " + std::to_string(db), 88, 220 - hudHeight + 3, 17);
+    ratchetandclank::currentFont->drawText(g, ratchetandclank::strings[311] + " " + std::to_string(db), sw / 2, 220 - hudHeight + 3, 17);
   }
   if (e) {
     x_(g);
     e = false;
   }
   if (cD) {
+    g->translate(off, 0);
     H_(g);
     cG = a_(g, cF);
+    g->translate(-off, 0);
   }
   if (dX != -1) {
     cu = dX;
+    g->translate(off, 0);
     drawWheel(g);
+    g->translate(-off, 0);
     b = 22;
     dX = -1;
   }

@@ -329,7 +329,14 @@ re-basing onto a1 rather than finishing the legacy build's gameplay.
       Alt+Enter toggles it; the
       176x220 canvas is fit with its aspect ratio kept (black bars) via
       `computeViewport()` in `midp.cpp`, which only reads the canvas size --
-      the hook where a widescreen mode (wider logical canvas) plugs in later.
+      the hook where a widescreen mode (wider logical canvas) plugs in.
+      Widescreen (`screen.h/.cpp`): Settings > Resolution (main menu and pause
+      menu) cycles Original / Auto / 4:3 / 16:10 / 16:9 / 21:9, saved in
+      `%LOCALAPPDATA%ac-gm-port-a1\display.cfg`. Height stays 220; the canvas
+      width becomes `screen::width`. World rendering, culling, camera and the HUD bar
+      (hud.png tiled, never stretched) use the full width; every 176x220 design
+      screen (menus, dialogue text, cutscene overlays) is drawn unscaled at
+      `screen::offsetX()` between black bars. Not yet widened: menu wallpapers.
       Tutorial fixes (level 0 was not completable): (1) `Enemy.groundYAhead`
       scales the found row by tileHeight and then tests `r >= 18`, always
       true, so every enemy's ground was the map bottom and it fell through

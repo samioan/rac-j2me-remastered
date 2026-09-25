@@ -1,6 +1,7 @@
 // levelmap.cpp -- implementation of LevelMap (see levelmap.h), transcribed
 // from src_a1/LevelMap.java's static tables and constructor.
 #include "levelmap.h"
+#include "screen.h"
 #include "game.h"
 
 const jbyte LevelMap::PLATFORM_TILE_TYPES[12] = {15, 15, 16, 17, 18, 18, 19, 20, 21, 21, 22, 23};
@@ -105,14 +106,14 @@ void LevelMap::render(Graphics* g) {
   int c1 = c0, r1 = r0;
   int x0 = c0 * tileWidth + camX, y0 = r0 * tileHeight + camY;
   int px = x0, py = y0;
-  c1 = (jbyte)(c1 + 176 / tileWidth + 2);
+  c1 = (jbyte)(c1 + screen::width / tileWidth + 2);
   r1 = (jbyte)(r1 + 220 / tileHeight + 2);
   if (c1 > 28) c1 = 28;
   if (r1 > 18) r1 = 18;
   if (++tileAnimCounter >= 12) tileAnimCounter = 0;
   for (int c = c0; c < c1; c++) {
     for (int r = r0; r < r1; r++) {
-      if (c >= 0 && r >= 0 && px < 176 && py < 220) {
+      if (c >= 0 && r >= 0 && px < screen::width && py < 220) {
         int t = tiles[c][r];
         if (t <= 34) {
           if (tileAnimCounter >> 1 > 2) {

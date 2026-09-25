@@ -654,6 +654,19 @@ void toggleFullscreen() {
 
 bool isFullscreen() { return g_fullscreen; }
 
+void clientSize(int& w, int& h) {
+  RECT rc = {};
+  if (g_hwnd) GetClientRect(g_hwnd, &rc);
+  w = rc.right - rc.left;
+  h = rc.bottom - rc.top;
+}
+
+void resizeCanvas(int w, int h) {
+  canvas.w = w;
+  canvas.h = h;
+  canvas.px.assign((size_t)w * (size_t)h, 0xFF000000u);
+}
+
 static LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
   switch (msg) {
     case WM_DESTROY:

@@ -2,6 +2,7 @@
 // transcribed from src_a1/Projectile.java (data tables + constructor live in
 // projectile.cpp).
 #include "projectile.h"
+#include "screen.h"
 #include "game.h"
 #include "canvasshell.h"
 
@@ -52,7 +53,7 @@ void Projectile::update(bool enemyShot) {
   if (type == -1) return;
 
   auto offscreen = [&](int px, int py) {
-    return px < -camX - tileWidth || px > -camX + 176 + tileWidth ||
+    return px < -camX - tileWidth || px > -camX + screen::width + tileWidth ||
            py < -camY - tileHeight || py > -camY + 220 + tileHeight;
   };
 
@@ -173,7 +174,7 @@ void Projectile::render(Graphics* g) {
     int shift = age * 44;
     int px = (posX >> 8) + camX - 22;
     int py = (posY >> 8) + camY - 22;
-    if (px < 176 && px + 44 >= 0) {
+    if (px < screen::width && px + 44 >= 0) {
       game_->b_(g, px, py, 44, 44);
       g->drawImage(Game::aM, px, py - shift, 0);
     }
@@ -183,7 +184,7 @@ void Projectile::render(Graphics* g) {
     int shift = age * h3;
     int px = (posX >> 8) + camX - (w >> 1);
     int py = (posY >> 8) + camY - (h3 >> 1);
-    if (0 < h3 && px < 176 && px + w >= 0) {
+    if (0 < h3 && px < screen::width && px + w >= 0) {
       game_->b_(g, px, py, w, h3);
       g->drawImage(Game::ay, px, py - shift, 0);
     }
@@ -192,8 +193,8 @@ void Projectile::render(Graphics* g) {
     int py = (posY >> 8) + camY - (Game::aO->getHeight() >> 1);
     int dx = tileWidth * 14 - ((posX >> 8) - (Game::aO->getWidth() >> 1));
     int dy = tileHeight * 9 - ((posY >> 8) - (Game::aO->getHeight() >> 1));
-    if (dx * dx + dy * dy > 1764 && px < 176 && px + 12 >= 0 && py < 220 && py + 12 >= 0) {
-      g->setClip(0, hudHeight, 176, 220 - hudHeight);
+    if (dx * dx + dy * dy > 1764 && px < screen::width && px + 12 >= 0 && py < 220 && py + 12 >= 0) {
+      g->setClip(0, hudHeight, screen::width, 220 - hudHeight);
       g->drawImage(Game::aO, px, py, 0);
     }
   } else {
@@ -203,7 +204,7 @@ void Projectile::render(Graphics* g) {
       int py = (posY >> 8) + camY;
       if (type >= 9 && type <= 11) {
         px -= vx > 0 ? halfWidth : -halfWidth;
-        g->setClip(0, hudHeight, 176, 220 - hudHeight);
+        g->setClip(0, hudHeight, screen::width, 220 - hudHeight);
         g->setColor(age == 0 ? 0xFFFFFF : 0x0000FF);
         int ex = vx > 0 ? px + 168 : px - 168;
         g->drawLine(px, py, ex, py + 11);
@@ -215,7 +216,7 @@ void Projectile::render(Graphics* g) {
       if (type >= 12 && type <= 14) {
         int x1 = (prevX >> 8) + camX, y1 = (prevY >> 8) + camY;
         int x2 = (prev2X >> 8) + camX, y2 = (prev2Y >> 8) + camY;
-        g->setClip(0, hudHeight, 176, 220 - hudHeight);
+        g->setClip(0, hudHeight, screen::width, 220 - hudHeight);
         g->setColor(0xFFFF00);
         g->drawLine(px, py, x1, y1);
         g->drawLine(x1, y1, x2, y2);
@@ -232,7 +233,7 @@ void Projectile::render(Graphics* g) {
         px = (posX >> 8) + camX;
         py = (posY >> 8) + camY;
         px -= vx > 0 ? halfWidth : -halfWidth;
-        g->setClip(0, hudHeight, 176, 220 - hudHeight);
+        g->setClip(0, hudHeight, screen::width, 220 - hudHeight);
         g->setColor(0x0000FF);
         if (vx > 0) {
           g->fillRoundRect(px, py - 11, 168, 22, 12, 12);
@@ -245,14 +246,14 @@ void Projectile::render(Graphics* g) {
         }
         return;
       }
-      g->setClip(0, hudHeight, 176, 220 - hudHeight);
+      g->setClip(0, hudHeight, screen::width, 220 - hudHeight);
       g->setColor(0xFFFFFF);
       g->fillRect(px - 3, py - 3, 6, 6);
       return;
     }
     int px = (posX >> 8) + camX - 9;
     int py = (posY >> 8) + camY - 9;
-    if (px >= 176 || py >= 220 || px + 19 < 0 || py + 19 < 0) return;
+    if (px >= screen::width || py >= 220 || px + 19 < 0 || py + 19 < 0) return;
     game_->b_(g, px, py, 19, 19);
     if (vx > 0) {
       g->drawImage(Game::aL, px, py - sheetY, 20);

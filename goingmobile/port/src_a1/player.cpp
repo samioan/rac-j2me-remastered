@@ -1,6 +1,7 @@
 // player.cpp -- implementation of Player (see player.h), transcribed from
 // src_a1/Player.java's constructor and asset loading.
 #include "player.h"
+#include "screen.h"
 #include "game.h"
 #include "canvasshell.h"
 #include <cstddef>
@@ -153,7 +154,7 @@ void Player::render(Graphics* g, int, int cameraX, int cameraY) {
     for (int i = 0; i < 20; i++) {
       int var20 = var13 >> 8;
       int var21 = var14 >> 8;
-      if (var20 < 176 && var21 < 220 && var20 + 19 >= 0 && var21 + 19 >= 0) {
+      if (var20 < screen::width && var21 < 220 && var20 + 19 >= 0 && var21 + 19 >= 0) {
         game_->b_(g, var20, var21, 19, 19);
         g->drawImage(Game::aL, var20, var21 - 114, 0);
       }
@@ -162,7 +163,7 @@ void Player::render(Graphics* g, int, int cameraX, int cameraY) {
     }
     int var33 = (var13 - var17) >> 8;
     int var25 = ((var14 - var18) >> 8) - 9;
-    if (var33 < 176 && var25 < 220 && var33 + 19 >= 0 && var25 + 19 >= 0) {
+    if (var33 < screen::width && var25 < 220 && var33 + 19 >= 0 && var25 + 19 >= 0) {
       game_->b_(g, var33, var25, 19, 19);
       if (facingRight) g->drawImage(Game::aL, var33, var25 - 95, 20);
       else CanvasShell::directGraphics->drawImageManip(Game::aL, var33, var25 - 95, 20, 8192);
@@ -173,7 +174,7 @@ void Player::render(Graphics* g, int, int cameraX, int cameraY) {
     jbyte fr = ANIM_FRAMES[kind][animState][animFrame];
     const jbyte* f = FRAME_GEOMETRY[fr];
     int f0 = f[0] & 255, f1 = f[1] & 255, f2 = f[2] & 255, f3 = f[3] & 255, f4 = f[4] & 255, f5 = f[5] & 255;
-    if (var5 + f4 < 176 && var6 + f5 < 220 && var5 + f4 + f2 >= 0 && var6 + f5 + f3 >= 0) {
+    if (var5 + f4 < screen::width && var6 + f5 < 220 && var5 + f4 + f2 >= 0 && var6 + f5 + f3 >= 0) {
       game_->b_(g, var5 + f4, var6 + f5, f2, f3);
       if (ap == 0 && facingRight) {
         g->drawImage(Game::aH, var5 + f4 - f0, var6 + f5 - f1, 20);

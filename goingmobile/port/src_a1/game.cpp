@@ -3,6 +3,7 @@
 // src_a1/Game.java), t()'s mapData.txt parser, and sleep(). Everything
 // else is still a no-op stub (see game.h's header note).
 #include "game.h"
+#include "screen.h"
 #include "canvasshell.h"
 #include "midlet.h"
 #include "intromanager.h"
@@ -139,7 +140,7 @@ void Game::runBootStep(int step) {
       I += 12;
       r = false;
       dA = 0;
-      v = (jshort)(28 * -tileWidth + 176);
+      v = (jshort)(28 * -tileWidth + screen::width);
       w = (jshort)(18 * -tileHeight + 220);
       if (10 > hudHeight) hudHeight = 16;
       levelMap = new LevelMap(this);
@@ -198,6 +199,12 @@ void Game::runBootStep(int step) {
 
 // --- menu-screen rendering helpers (see game.h's note on these) -----------
 
+void Game::onScreenResize() {
+  v = (jshort)(28 * -tileWidth + screen::width);
+  d = true;
+  e = true;
+}
+
 void Game::a_(Graphics* g, int x, int y, int w, int h) {
   g->setClip(x, y, w, h);
 }
@@ -234,7 +241,7 @@ void Game::x_() {
 void Game::b_(Graphics* g, int x, int y, int w, int h) {
   if (x < 0) { w -= -x; x = 0; }
   if (y < hudHeight) { h -= hudHeight - y; y = hudHeight; }
-  if (x + w > 176) w = 176 - x;
+  if (x + w > screen::width) w = screen::width - x;
   if (y + h > 220) h = 220 - y;
   g->setClip(x, y, w, h);
 }

@@ -242,6 +242,8 @@ void setCharCallback(void (*onChar)(int));  // printable characters typed (WM_CH
 void pumpEvents();
 void present();       // stretch-blit canvas to the window
 void requestQuit();
+void clientSize(int& w, int& h);        // window client area in pixels
+void resizeCanvas(int w, int h);        // reallocate the canvas (cleared to black)
 void toggleFullscreen();   // F11 / Alt+Enter: borderless fullscreen, aspect ratio preserved
 bool isFullscreen();
 bool quitRequested();

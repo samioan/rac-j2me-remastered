@@ -5,6 +5,7 @@
 #include "game.h"
 #include "intromanager.h"
 #include "font.h"
+#include "screen.h"
 
 Graphics* CanvasShell::directGraphics = nullptr;
 
@@ -44,22 +45,32 @@ void CanvasShell::activate() {
 
 void CanvasShell::paint(Graphics* g) {
   if (canvasState == 1) {
-    g->setClip(0, 0, 176, 220);
+    g->setClip(0, 0, screen::width, 220);
     g->setColor(0);
-    g->fillRect(0, 0, 176, 220);
+    g->fillRect(0, 0, screen::width, 220);
     g->setColor(16777215);
     if (ratchetandclank::largeFont)
-      ratchetandclank::largeFont->drawText(g, "Press * Key...", 88, 110, 17);
+      ratchetandclank::largeFont->drawText(g, "Press * Key...", screen::width / 2, 110, 17);
   } else if (canvasState == 2) {
-    g->setClip(0, 0, 176, 220);
+    g->setClip(0, 0, screen::width, 220);
     g->setColor(0);
-    g->fillRect(0, 0, 176, 220);
+    g->fillRect(0, 0, screen::width, 220);
   } else if (canvasState == 0) {
     directGraphics = g;
     if (midlet_->gameStarted) {
       if (midlet_->game) midlet_->game->render(g);
     } else if (midlet_->introManager) {
+      // Intro screens are 176x220 design layouts: centred between black side bars, unscaled.
+      const int off = screen::offsetX();
+      g->translate(off, 0);
       midlet_->introManager->a_(g);
+      g->translate(-off, 0);
+      if (off > 0) {  // bars are painted last: sprites that walk off the 176 edge are cut off
+        g->setClip(0, 0, screen::width, 220);
+        g->setColor(0);
+        g->fillRect(0, 0, off, 220);
+        g->fillRect(off + screen::kBaseW, 0, screen::width - off - screen::kBaseW, 220);
+      }
     }
     directGraphics = nullptr;
   }

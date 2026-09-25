@@ -354,6 +354,7 @@ class Game {
   void pause();
   void resume();
   void render(Graphics* g);
+  void onScreenResize();  // logical screen width changed: refresh derived bounds, force redraw
   void tick();
   void keyPressed(int key);
   void keyReleased(int key);

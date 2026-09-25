@@ -9,6 +9,7 @@
 #include "game.h"
 #include "intromanager.h"
 #include "input.h"
+#include "screen.h"
 #include "midp.h"
 
 #define WIN32_LEAN_AND_MEAN
@@ -107,6 +108,7 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR cmdLine, int) {
 #endif
   findDataDir();
 
+  screen::load();
   bool windowed = cmdLine && wcsstr(cmdLine, L"--windowed") != nullptr;
   if (!platform::initWindow(!windowed)) return 0;
   input::init(onKeyDown, onKeyUp, currentContext);
@@ -132,6 +134,10 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR cmdLine, int) {
     }
     platform::pumpEvents();
     input::poll();
+    if (screen::update()) {  // widescreen mode / window shape changed: repaint everything
+      if (g_midlet->game) g_midlet->game->onScreenResize();
+      if (g_midlet->introManager) g_midlet->introManager->f = (jbyte)(g_midlet->introManager->f | 3);
+    }
     if (platform::quitRequested()) break;
 
     if (g_midlet->canvas) {

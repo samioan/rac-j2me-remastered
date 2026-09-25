@@ -3,6 +3,7 @@
 // Game.c(byte)), end-of-game stats (b==2) and the New-Game+ prompt (b==23).
 // Transcribed from Game.java.
 #include "game.h"
+#include "screen.h"
 #include "midlet.h"
 #include "intromanager.h"
 #include "font.h"
@@ -333,7 +334,7 @@ void Game::bossHit(int part) {
     bx0 = BOSS_NX[part] * tileWidth;
     by0 = BOSS_NY[part] * tileHeight;
   }
-  if (bx0 + w + x >= 0 && bx0 + x <= 176 && by0 + hgt + y >= 0 && by0 + hgt * 0 + y <= 220) {
+  if (bx0 + w + x >= 0 && bx0 + x <= screen::width && by0 + hgt + y >= 0 && by0 + hgt * 0 + y <= 220) {
     for (int k2 = 9; k2 >= 0; k2--) {
       Projectile* pr = playerProjectiles[k2];
       jbyte t2 = pr->type;
@@ -438,7 +439,7 @@ void Game::bossRender(Graphics* g) {
     default:
       manip = 16384; x2 += (bw2 >> 1) - (bw2 >> 3); y2 += (bh2 >> 3) - (bh2 >> 5); cx = x2; cy = y2;
   }
-  if (cx < 176 && cy < 220 && cx + cw > 0 && cy + ch > 0) {
+  if (cx < screen::width && cy < 220 && cx + cw > 0 && cy + ch > 0) {
     b_(g, cx, cy, cw, ch);
     if (manip) g->drawImageManip(aP, x2, y2, 20, manip);
     else g->drawImage(aP, x2, y2, 20);
@@ -454,7 +455,7 @@ void Game::bossRender(Graphics* g) {
       case 2: mm = 8192; px2 -= bw2; py2 -= (bh2 >> 2) + ph * bH[k2]; qx -= pw; qy -= ph; break;
       case 3: mm = 180; px2 -= bw2; py2 -= 3 * (bh2 >> 2) - ph * bH[k2]; qx -= pw; break;
     }
-    if (qx + pw >= 0 && qx <= 176 && qy + ph >= 0 && qy <= 220) {
+    if (qx + pw >= 0 && qx <= screen::width && qy + ph >= 0 && qy <= 220) {
       b_(g, qx, qy, pw, ph);
       if (mm) g->drawImageManip(aN, px2, py2, 20, mm);
       else g->drawImage(aN, px2, py2, 20);
@@ -468,7 +469,7 @@ void Game::bossMaxRender(Graphics* g, jbyte frame) {
   int x2 = tileWidth * 14 + x;
   int y2 = tileHeight * 7 + y;
   player->updateAnimation();
-  if (x2 - 3 < 176 && y2 < 220 && x2 - 3 + w >= 0 && y2 + fh >= 0) {
+  if (x2 - 3 < screen::width && y2 < 220 && x2 - 3 + w >= 0 && y2 + fh >= 0) {
     g->setClip(x2 - (tileWidth >> 1), y2, w, fh);
     g->drawImage(av, x2 - 3, y2 - fh * frame, 17);
   }

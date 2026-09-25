@@ -1,6 +1,7 @@
 // enemy.cpp -- implementation of Enemy (see enemy.h), transcribed from
 // src_a1/Enemy.java's constructor and asset loading.
 #include "enemy.h"
+#include "screen.h"
 #include "game.h"
 #include "canvasshell.h"
 #include <cstddef>
@@ -123,7 +124,7 @@ void Enemy::render(Graphics* g, int enemyIndex, int visibilityFlags, int cameraX
   Game::y = (jshort)cameraY;
   int px = x() + Game::x - (Game::J >> 1);
   int py = y() + Game::y;
-  if (px >= -Game::J && px < 176 && py >= -Game::K && py < 220) {
+  if (px >= -Game::J && px < screen::width && py >= -Game::K && py < 220) {
     if ((visibilityFlags & 1) > 0 && py + Game::K > hudHeight && py < 220) {
       game_->b_(g, px, py, Game::J, Game::K);
       if (ap == 0 && facingRight) {

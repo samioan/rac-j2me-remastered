@@ -2,6 +2,7 @@
 // src_a1/Enemy.java (tables, constructor, animation and render are in
 // enemy.cpp).
 #include "enemy.h"
+#include "screen.h"
 #include "game.h"
 
 int Enemy::groundYAhead(bool sampleTile) {
@@ -153,7 +154,7 @@ void Enemy::tick() {
   }
   if (animState == 7 || animState == 6) return;
 
-  if (!(abs(pl->x() - x()) <= 176 && abs(pl->y() - y()) <= 220)) {
+  if (!(abs(pl->x() - x()) <= screen::width && abs(pl->y() - y()) <= 220)) {
     velX = velY = 0;
     return;
   }
