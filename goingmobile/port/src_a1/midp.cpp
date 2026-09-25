@@ -279,17 +279,20 @@ void Graphics::drawImage(Image* img, int x, int y, int anchor) {
 
 void Graphics::drawImageManip(Image* img, int x, int y, int anchor, int manipulation) {
   if (!img || img->isNull()) return;
-  if (manipulation >= 90) {  // Nokia DirectGraphics codes: rotation + FLIP_H(8192)/FLIP_V(16384)
-    int rotDeg = manipulation & 0x1FFF;
-    bool fh = (manipulation & 8192) != 0, fv = (manipulation & 16384) != 0;
-    int m = rotDeg == 90 ? 1 : rotDeg == 180 ? 2 : rotDeg == 270 ? 3 : 0;
-    if (fh && fv) m = (m + 2) & 3;                                // both flips == extra 180
-    else if (fh) m = (m == 0) ? MANIP_MIRROR : (m == 1) ? MANIP_MIRROR_ROT_90 : (m == 2) ? MANIP_MIRROR_ROT_180 : MANIP_MIRROR_ROT_270;
-    else if (fv) m = (m == 0) ? MANIP_MIRROR_ROT_180 : (m == 1) ? MANIP_MIRROR_ROT_270 : (m == 2) ? MANIP_MIRROR : MANIP_MIRROR_ROT_90;
-    manipulation = m;
+  // Nokia DirectGraphics codes: rotation is counterclockwise for 90 and clockwise for 270
+  // (matches the offsets the game uses), then FLIP_H(8192)/FLIP_V(16384) apply to the result.
+  bool nokia = manipulation >= 90;
+  int nRot = 0;
+  bool nFh = false, nFv = false;
+  if (nokia) {
+    nRot = manipulation & 0x1FFF;
+    nFh = (manipulation & 8192) != 0;
+    nFv = (manipulation & 16384) != 0;
+    manipulation = 0;
   }
   int w = img->w, h = img->h;
-  bool rot = (manipulation >= 1 && manipulation <= 7 && manipulation != 4 && manipulation != 6);
+  bool rot = nokia ? (nRot == 90 || nRot == 270)
+                   : (manipulation >= 1 && manipulation <= 7 && manipulation != 4 && manipulation != 6);
   int dw = w, dh = h;
   if (rot) { dw = h; dh = w; }
   if ((anchor & RIGHT) != 0) x -= dw;
@@ -306,7 +309,15 @@ void Graphics::drawImageManip(Image* img, int x, int y, int anchor, int manipula
     for (int dx = X0; dx < X1; dx++) {
       int dxx = dx - x;
       int sx = dxx, sy = dyy;
-      switch (manipulation) {
+      if (nokia) {
+        int rx = nFh ? dw - 1 - dxx : dxx, ry = nFv ? dh - 1 - dyy : dyy;
+        switch (nRot) {
+          case 90:  sx = w - 1 - ry; sy = rx; break;
+          case 180: sx = w - 1 - rx; sy = h - 1 - ry; break;
+          case 270: sx = ry; sy = h - 1 - rx; break;
+          default:  sx = rx; sy = ry; break;
+        }
+      } else switch (manipulation) {
         case MANIP_ROT_90:        sx = dyy; sy = h - 1 - dxx; break;
         case MANIP_ROT_180:      sx = w - 1 - dxx; sy = h - 1 - dyy; break;
         case MANIP_ROT_270:      sx = w - 1 - dyy; sy = dxx; break;
