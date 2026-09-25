@@ -81,6 +81,7 @@ class IntroManager {
   static jint y;
 
   explicit IntroManager(ratchetandclank* midlet);
+  void textInput(int ch);        // a printable character typed on the keyboard (state 15 only)
 
   void a_(Graphics* g);                        // paint dispatch
   void a_(Graphics* g, int weaponIndex);        // state 5 (weapon store) render
@@ -114,6 +115,17 @@ class IntroManager {
   void j_(Graphics* g);           // state 9: exit-game confirm
   void c_(Graphics* g);           // state 11: new-game slot picker
   void g_(Graphics* g);           // state 16: "get Ratchet skin" message
+  // States 15/17 (skin-name entry and the resulting codes). The original used a native MIDP
+  // Form/TextField for 15; the port draws its own field and takes typed characters via textInput().
+  void nameEntry_(Graphics* g);   // state 15
+  void codesResult_(Graphics* g); // state 17
+  int codeRow_(Graphics* g, int which, int y);
+  void nameKey_(int key, int action);
+  void codesKey_(int key, int action);
+  void computeCodes_(const String& name, int which);
+  static int codeGroup_(int nibble);
+  String errTitle_, errBody_;
+  jlong errUntil_ = 0;
   void i_(Graphics* g);           // state 20: language select
 
   // --- per-screen input (screen e selects one; see b_(int)) ---------------

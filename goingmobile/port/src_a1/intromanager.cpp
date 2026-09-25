@@ -365,11 +365,15 @@ void IntroManager::a_(jbyte state) {
     I = 0;
   }
   if (state == 15) {
+    n = currentTimeMillis();
+    errUntil_ = 0;
     // Unlock-code name-entry Form/TextField -- not modeled (unreachable on
     // a fresh/normal playthrough: only reached from the main menu when
     // isGameWon() is already true, see src_a1/IntroManager.java's c(int,int)).
   }
   if (state == 17) {
+    computeCodes_(m, 0);
+    computeCodes_(m, 1);
     // a(this.m, 0); a(this.m, 1); -- cheat-hash helper, depends on the
     // Form-entered name above; skipped alongside it.
   }
@@ -407,6 +411,8 @@ void IntroManager::a_(Graphics* g_gfx) {
             g_gfx->fillRect(0, 0, 176, 220);
             return;
           case 11: c_(g_gfx); return;
+          case 15: nameEntry_(g_gfx); return;
+          case 17: codesResult_(g_gfx); return;
           case 16: g_(g_gfx); return;
           case 20: i_(g_gfx); return;
           default:
@@ -450,7 +456,9 @@ void IntroManager::b_(int key) {
     case 8: g_(key, action); return;
     case 9: i_(key, action); return;
     case 11: l_(key, action); return;
+    case 15: nameKey_(key, action); return;
     case 16: b_(key, action); return;
+    case 17: codesKey_(key, action); return;
     case 20: f_(key, action); return;
     default:
       // 3/10/12/13/14/18/19 unused; 15/17 unreachable (see header note).
@@ -1173,3 +1181,121 @@ void IntroManager::f_(int key, int action) {
 
 void IntroManager::a_(Command*, Displayable*) {}
 void IntroManager::b_(Command*, Displayable*) {}
+
+// --- states 15/17: "Get Ratchet Skin" name entry and codes -------------------
+
+void IntroManager::textInput(int ch) {
+  if (e != 15 || errUntil_ > currentTimeMillis()) return;
+  if (ch >= 32 && ch < 127 && m.size() < 15) m += (char)ch;
+}
+
+void IntroManager::nameEntry_(Graphics* g_gfx) {
+  a_(g_gfx, (jbyte)0);
+  g_gfx->setClip(0, 0, 176, 220);
+  int y = a_(g_gfx, ratchetandclank::strings[286]);
+  ratchetandclank::currentFont = ratchetandclank::smallFont;
+  y += 5;
+  g_gfx->setColor(14474495);
+  y = midlet_->game->a_(g_gfx, ratchetandclank::strings[289], b_(), y, 17, 176 - 2 * b_());
+  y += 8;
+  int boxX = b_(), boxW = 176 - 2 * b_(), boxH = ratchetandclank::currentFont->lineHeight + 8;
+  g_gfx->setColor(0);
+  g_gfx->fillRect(boxX, y, boxW, boxH);
+  g_gfx->setColor(1175023);
+  g_gfx->drawRect(boxX, y, boxW - 1, boxH - 1);
+  g_gfx->setColor(16777215);
+  String shown = m;
+  if ((currentTimeMillis() / 500) % 2 == 0) shown += "_";
+  ratchetandclank::currentFont->drawText(g_gfx, shown, boxX + 4, y + 4, 20);
+  a_(g_gfx, 39, 8, this);
+  if (errUntil_ > currentTimeMillis()) {
+    g_gfx->setClip(0, 0, 176, 220);
+    g_gfx->setColor(0);
+    g_gfx->fillRect(8, 70, 160, 80);
+    g_gfx->setColor(1175023);
+    g_gfx->drawRect(8, 70, 159, 79);
+    ratchetandclank::currentFont = ratchetandclank::largeFont;
+    g_gfx->setColor(14474495);
+    int ey = midlet_->game->a_(g_gfx, errTitle_, 88, 76, 17, 148);
+    ratchetandclank::currentFont = ratchetandclank::smallFont;
+    midlet_->game->a_(g_gfx, errBody_, 88, ey + 4, 17, 148);
+  }
+}
+
+void IntroManager::nameKey_(int key, int) {
+  if (errUntil_ > currentTimeMillis()) return;
+  if (n != 0 && currentTimeMillis() - n < 1000) return;
+  // Printable keys arrive through textInput(); only the command keys matter here.
+  if (key == KEY_FIRE || key == KEY_SOFT_LEFT) {
+    String trimmed = trim(m);
+    if (trimmed.size() < 4) {
+      errTitle_ = ratchetandclank::strings[292];
+      errBody_ = ratchetandclank::strings[293];
+      errUntil_ = currentTimeMillis() + 1500;
+      return;
+    }
+    if (trimmed.size() >= 16) {
+      errTitle_ = ratchetandclank::strings[292];
+      errBody_ = ratchetandclank::strings[294];
+      errUntil_ = currentTimeMillis() + 1500;
+      return;
+    }
+    m = trimmed;
+    a_((jbyte)17);
+  } else if (key == KEY_SOFT_RIGHT) {
+    // Right soft key ("Back"): deletes a character, and leaves the screen once the field is empty.
+    if (!m.empty()) m.pop_back();
+    else a_((jbyte)1);
+  }
+}
+
+int IntroManager::codeGroup_(int nibble) {
+  if (nibble >= 0 && nibble <= 3) return 0;
+  if (nibble >= 4 && nibble <= 7) return 1;
+  return (nibble >= 8 && nibble <= 11) ? 2 : 3;
+}
+
+void IntroManager::computeCodes_(const String& name, int which) {
+  String up = toUpperCase(name);
+  int sum = 0;
+  for (int i = 0; i < (int)up.size(); i++) sum += (int)(unsigned char)up[(size_t)i] * (i + 1);
+  int32_t value = (int32_t)((uint32_t)sum * (uint32_t)v[which]);
+  for (int k = 0; k < 8; k++) {
+    int shift = k * 4;
+    int32_t mask = (int32_t)(15u << shift);
+    w[which][k] = codeGroup_((value & mask) >> shift);
+  }
+}
+
+int IntroManager::codeRow_(Graphics* g_gfx, int which, int y) {
+  int width = Game::aq ? Game::aq->getWidth() : 150;
+  y = midlet_->game->a_(g_gfx, ratchetandclank::strings[which == 0 ? 312 : 313], -1, y, 17, width);
+  int x = 33;
+  for (int k = 0; k < 8; k++, x += 14) {
+    g_gfx->setClip(x, y, 12, 12);
+    g_gfx->drawImage(Game::am, x - w[which][k] * 12, y, 20);
+  }
+  g_gfx->setClip(0, 0, 176, 220);
+  return y + 14;
+}
+
+void IntroManager::codesResult_(Graphics* g_gfx) {
+  a_(g_gfx, (jbyte)0);
+  g_gfx->setClip(0, 0, 176, 220);
+  int y = a_(g_gfx, ratchetandclank::strings[286]);
+  ratchetandclank::currentFont = ratchetandclank::smallFont;
+  y += ratchetandclank::smallFont->lineHeight / 2;
+  y = a_(g_gfx, ratchetandclank::strings[290], -1, y, 17, false);
+  y = a_(g_gfx, m, -1, y, 17, false) + ratchetandclank::currentFont->lineHeight / 2;
+  ratchetandclank::currentFont = ratchetandclank::largeFont;
+  g_gfx->setColor(14474495);
+  y = codeRow_(g_gfx, 1, y) + ratchetandclank::currentFont->lineHeight / 2;
+  y = codeRow_(g_gfx, 0, y) + ratchetandclank::currentFont->lineHeight / 2;
+  a_(g_gfx, ratchetandclank::strings[288], -1, y, 17, false);
+  a_(g_gfx, 39, 8, this);
+}
+
+void IntroManager::codesKey_(int key, int) {
+  if (key == KEY_SOFT_RIGHT || key == -8) a_((jbyte)15);
+  else if (key == KEY_SOFT_LEFT || key == KEY_FIRE) a_((jbyte)1);
+}

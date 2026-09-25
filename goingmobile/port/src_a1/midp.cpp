@@ -608,6 +608,7 @@ static HWND g_hwnd = nullptr;
 static bool g_quit = false;
 static void (*g_onKeyDown)(int) = nullptr;
 static void (*g_onKeyUp)(int) = nullptr;
+static void (*g_onChar)(int) = nullptr;
 
 // Fullscreen state: a borderless WS_POPUP window covering the current monitor.
 static bool g_fullscreen = false;
@@ -702,6 +703,9 @@ static LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPara
       if (code != 0 && g_onKeyDown) g_onKeyDown(code);
       return 0;
     }
+    case WM_CHAR:
+      if (wParam >= 32 && wParam < 127 && g_onChar) g_onChar((int)wParam);
+      return 0;
     case WM_KEYUP: {
       int code = mapVirtualKey(wParam);
       if (code != 0 && g_onKeyUp) g_onKeyUp(code);
@@ -740,6 +744,8 @@ bool initWindow(bool fullscreen) {
   if (fullscreen) toggleFullscreen();  // windowed placement is captured first, so F11 returns to it
   return true;
 }
+
+void setCharCallback(void (*onChar)(int)) { g_onChar = onChar; }
 
 void setKeyCallback(void (*onKeyDown)(int), void (*onKeyUp)(int)) {
   g_onKeyDown = onKeyDown;

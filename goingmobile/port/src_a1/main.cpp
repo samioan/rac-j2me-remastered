@@ -7,6 +7,7 @@
 #include "canvasshell.h"
 #include "midlet.h"
 #include "game.h"
+#include "intromanager.h"
 #include "midp.h"
 
 #define WIN32_LEAN_AND_MEAN
@@ -59,6 +60,9 @@ static ratchetandclank* g_midlet = nullptr;
 static void onKeyDown(int code) {
   if (g_midlet && g_midlet->canvas) g_midlet->canvas->keyPressed(code);
 }
+static void onChar(int ch) {
+  if (g_midlet && !g_midlet->gameStarted && g_midlet->introManager) g_midlet->introManager->textInput(ch);
+}
 static void onKeyUp(int code) {
   if (g_midlet && g_midlet->canvas) g_midlet->canvas->keyReleased(code);
 }
@@ -93,6 +97,7 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR cmdLine, int) {
   bool windowed = cmdLine && wcsstr(cmdLine, L"--windowed") != nullptr;
   if (!platform::initWindow(!windowed)) return 0;
   platform::setKeyCallback(onKeyDown, onKeyUp);
+  platform::setCharCallback(onChar);
 
   g_midlet = new ratchetandclank();
   g_midlet->startApp();
