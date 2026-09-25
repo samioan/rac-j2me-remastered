@@ -38,8 +38,8 @@ tracked (see `.gitignore`).
   Applies a few textual patches for decompiler artifacts, then compiles the
   result against `midp-stubs/`. Regenerates `src/` entirely; edit `names.map`,
   not `src/`.
-- **`parse_ch.py`** -- clonehome phase 2: parses the `RP*` banks and all 30 sprite
-  atlases, asserting exact byte consumption and in-bounds rectangles. Output to
+- **`parse_ch.py`** -- clonehome phase 2: parses the `RP*` banks, all 30 sprite
+  atlases and all 10 animation sets, asserting exact byte consumption and in-bounds rectangles. Output to
   stdout only (derived data, never commit).
 - **`parse_gm.py`** -- goingmobile phase 2: parsers/validators for every
   custom asset format of the canonical build (tilemaps, menu table,

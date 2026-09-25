@@ -92,6 +92,78 @@ def parse_atlas(rid):
     return image_id, sprites, sizes
 
 
+class Reader:
+    def __init__(self, b):
+        self.b, self.p = b, 0
+
+    def byte(self):
+        v = self.b[self.p]
+        self.p += 1
+        return v - 256 if v > 127 else v
+
+    def short(self):
+        v = struct.unpack(">h", self.b[self.p:self.p + 2])[0]
+        self.p += 2
+        return v
+
+    def char(self):
+        v = struct.unpack(">H", self.b[self.p:self.p + 2])[0]
+        self.p += 2
+        return v
+
+
+def parse_animset(rid):
+    """Engine.loadAnimSet: header + 11 delta-coded columns.
+
+    Per sequence: col 0 = loop count, col 1 = step count. Per step (cols 2..6,
+    per Engine.stepAnim): duration, x, y, (priority & 63 | interpolate << 6),
+    frame-list index. Per frame list: col 7 = part count. Per part (cols 8..10):
+    sprite index, dx, dy.
+    """
+    r, t = resource(rid)
+    assert t == 247, f"{rid}: type {t}, not an anim set"
+    R = Reader(r)
+    n_seq = R.char() & 0x7FFF
+    n_lists = R.char()
+    R.char(), R.char(), R.char()
+    steps = parts = 0
+    cols = []
+    for c in range(11):
+        n = n_seq
+        if c > 1:
+            n = steps
+        if c > 6:
+            n = n_lists
+        if c > 7:
+            n = parts
+        delta = c != 8
+        acc, col = 0, []
+        for _ in range(n):
+            v = R.byte()
+            if v == -128 and delta:
+                v = R.short()
+            val = acc + v
+            if delta:
+                acc = val
+            if c == 1:
+                steps += val
+            if c == 7:
+                parts += val
+            col.append(val)
+        cols.append(col)
+    assert R.p == len(r), f"{rid}: consumed {R.p} of {len(r)}"
+    return dict(sequences=n_seq, frame_lists=n_lists, steps=steps, parts=parts, cols=cols)
+
+
+def verify_animsets():
+    ids = [(n << 10) | i for n in BANKS for i, t in enumerate(BANKS[n][2]) if t == 247]
+    for rid in ids:
+        a = parse_animset(rid)
+        print(f"animset {rid}: {a['sequences']} sequences, {a['steps']} steps, "
+              f"{a['frame_lists']} frame lists, {a['parts']} parts")
+    print(f"{len(ids)} animation sets parsed exactly")
+
+
 def verify():
     atlases = [(n << 10) | i for n in BANKS for i, t in enumerate(BANKS[n][2]) if t == 254]
     bad = 0
@@ -105,6 +177,7 @@ def verify():
         print(f"atlas {rid}: image {image_id} (type {it}) {w}x{h}, {len(sprites)} sprites"
               + (f", {len(oob)} rects outside the image" if oob else ""))
     print(f"{len(atlases)} atlases parsed exactly; {bad} with out-of-bounds rects")
+    verify_animsets()
 
 
 if __name__ == "__main__":

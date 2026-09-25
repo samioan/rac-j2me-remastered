@@ -56,7 +56,7 @@ the name/code entry, and a handful of sprite arrays.
 `RP*` container, every resource's *type byte* (images, atlases, anim sets, data,
 strings, audio), the level tile/info format, the 28 game tables, the string table
 (449 strings) and the sound cues are confirmed and verified against the real
-banks by independent parsing. The sprite-atlas format is parsed and verified (`tools/parse_ch.py`, all 30 atlases). What remains: a parser for the animation-set format (type 247), and labelling which of the 68 image resources is which sprite (start from
+banks by independent parsing. The sprite-atlas format is parsed and verified (`tools/parse_ch.py`, all 30 atlases). Animation sets (type 247) are parsed and verified too. What remains is labelling which of the 68 image resources is which sprite (start from
 `Game.loadAssetsStep`).
 
 **Phase 3 (not started): PC port.** Scaffold is in `port/` (CMake + Ninja

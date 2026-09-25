@@ -89,6 +89,18 @@ exactly its payload with every rectangle inside its PNG (atlas 1049 = the player
 mostly uses image `N + 26` in RP1, and 2082..2084 use 2085/2088/2089 (the three
 tilesets, 59 tiles each).
 
+## Animation-set format (type 247, `Engine.loadAnimSet`) -- verified
+
+Header: `char sequences (& 0x7fff)`, `char frameLists`, three ignored chars. Then 11
+columns of signed bytes read back to back; columns 0..7 and 9..10 are
+delta-coded (a `-128` byte escapes to a 2-byte short), column 8 is raw. Counts:
+cols 0-1 = `sequences`, cols 2-6 = total steps (sum of col 1), col 7 = `frameLists`,
+cols 8-10 = total parts (sum of col 7). Meaning: per sequence loop count and step
+count; per step duration, x, y, `priority & 63 | interpolate << 6`, frame-list
+index; per frame list its part count; per part sprite index, dx, dy.
+`parse_ch.py` parses all ten sets exactly (1024..1033); the player's (1028) has
+15 sequences, matching `playerAnim` 0..14.
+
 ## Other files
 
 | File | Format | Notes |
@@ -102,4 +114,4 @@ The container is solved, and levels, tables, strings and sounds are now mapped
 (above and in `CLASS_MAP.md`). What remains for phase 2 is only the *labelling*: which
 of the 68 image/atlas resources is which sprite. `Game.loadAssetsStep`
 (`src/Game.java`) is the index -- it loads the images, atlases and anim sets by role
-across 17 boot steps -- and the animation-set format (type 247) still needs a standalone parser.
+across 17 boot steps -- (both container formats are now parsed).
