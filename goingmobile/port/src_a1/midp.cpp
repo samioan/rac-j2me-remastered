@@ -18,6 +18,12 @@
 #include <cstdlib>
 #include <cstring>
 #include <algorithm>
+#include <atomic>
+#include <chrono>
+#include <condition_variable>
+#include <deque>
+#include <mutex>
+#include <thread>
 
 #pragma comment(lib, "gdiplus.lib")
 #pragma comment(lib, "winmm.lib")
@@ -509,9 +515,45 @@ bool SoundPlayer::playMenuLoop(bool) {
   return true;
 }
 
+// MCI open/play/close block for tens of ms (MIDI sequencer setup especially), so every
+// MCI call runs on one worker thread instead of the game thread.
+static std::mutex g_mciMutex;
+static std::condition_variable g_mciCv;
+static std::deque<std::string> g_mciQueue;
+static std::atomic<bool> g_mciLoop{false};
+static std::once_flag g_mciOnce;
+
+static void mciWorker() {
+  for (;;) {
+    std::deque<std::string> batch;
+    {
+      std::unique_lock<std::mutex> lk(g_mciMutex);
+      g_mciCv.wait_for(lk, std::chrono::milliseconds(250), [] { return !g_mciQueue.empty(); });
+      batch.swap(g_mciQueue);
+    }
+    for (auto& c : batch) mciSendStringA(c.c_str(), nullptr, 0, nullptr);
+    if (g_mciLoop) {
+      char mode[32] = {};
+      mciSendStringA("status racsnd_a1 mode", mode, sizeof(mode), nullptr);
+      if (strcmp(mode, "stopped") == 0)
+        mciSendStringA("play racsnd_a1 from 0", nullptr, 0, nullptr);  // sequencer rejects "repeat"
+    }
+  }
+}
+
+static void mciPost(const std::string& cmd) {
+  std::call_once(g_mciOnce, [] { std::thread(mciWorker).detach(); });
+  {
+    std::lock_guard<std::mutex> lk(g_mciMutex);
+    g_mciQueue.push_back(cmd);
+  }
+  g_mciCv.notify_one();
+}
+
 void SoundPlayer::haltPlayer() {
   if (playing_) {
-    mciSendStringA("close racsnd_a1", nullptr, 0, nullptr);
+    g_mciLoop = false;
+    mciPost("close racsnd_a1");
     playing_ = false;
   }
 }
@@ -523,51 +565,23 @@ void SoundPlayer::stop() {
 }
 
 void SoundPlayer::update() {
-  if (playing_) {
-    char mode[32] = {};
-    mciSendStringA("status racsnd_a1 mode", mode, sizeof(mode), nullptr);
-    if (strcmp(mode, "stopped") == 0) {
-      if (playingLoop_ == -1) mciSendStringA("play racsnd_a1 from 0", nullptr, 0, nullptr);  // sequencer rejects "repeat"
-      else endOfMedia_ = true;
-    }
-  }
-  if (endOfMedia_ && pendingLoop_ != -1) pendingSound_ = -2;
-  endOfMedia_ = false;
-
-  if (pendingSound_ >= 0 && pendingSound_ <= 5 && !wavData_[pendingSound_].empty()) {
+  if (pendingSound_ < 0) return;
+  if (pendingSound_ > 5) { pendingSound_ = -1; return; }
+  if (!wavData_[pendingSound_].empty()) {
     if (playing_) haltPlayer();
     PlaySoundA(wavData_[pendingSound_].data(), nullptr, SND_MEMORY | SND_ASYNC | SND_NODEFAULT);
     pendingSound_ = -1;
     return;
   }
-
-  if (pendingSound_ <= -1) {
-    if (pendingSound_ == -2) {
-      pendingSound_ = -1;
-      haltPlayer();
-    }
-  } else if (playing_) {
-    haltPlayer();
-  } else {
-    if (pendingSound_ < 0 || pendingSound_ > 5) { pendingSound_ = -1; return; }
-    if (soundFiles_[pendingSound_].empty()) {
-      if (pendingLoop_ != -1) pendingSound_ = -1;
-      return;
-    }
-    char cmd[512];
-    const char* type = isWav_[pendingSound_] ? "waveaudio" : "sequencer";
-    sprintf_s(cmd, "open \"%s\" type %s alias racsnd_a1",
-              soundFiles_[pendingSound_].c_str(), type);
-    if (mciSendStringA(cmd, nullptr, 0, nullptr) == 0) {
-      playingLoop_ = pendingLoop_;
-      sprintf_s(cmd, "play racsnd_a1%s", pendingLoop_ == -1 ? " repeat" : "");
-      mciSendStringA("play racsnd_a1", nullptr, 0, nullptr);
-      playing_ = true;
-      pendingSound_ = -1;
-    } else {
-      if (pendingLoop_ != -1) pendingSound_ = -1;
-    }
-  }
+  if (soundFiles_[pendingSound_].empty()) { pendingSound_ = -1; return; }
+  if (playing_) haltPlayer();
+  const char* type = isWav_[pendingSound_] ? "waveaudio" : "sequencer";
+  mciPost("open \"" + soundFiles_[pendingSound_] + "\" type " + type + " alias racsnd_a1");
+  mciPost("play racsnd_a1");
+  g_mciLoop = (pendingLoop_ == -1);
+  playingLoop_ = pendingLoop_;
+  playing_ = true;
+  pendingSound_ = -1;
 }
 
 // ---- platform (Win32 window, input, presentation) -------------------------
