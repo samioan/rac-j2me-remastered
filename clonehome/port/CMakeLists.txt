@@ -10,10 +10,27 @@ if(MSVC)
   add_compile_definitions(NOMINMAX WIN32_LEAN_AND_MEAN)
 endif()
 
+# --- building something other people can download ---------------------
+# CLONEHOME_VERSION is what the launcher prints in its corner: a local build stays "-dev" (no update
+# checks); the release workflow passes the git tag with its "clonehome-v" prefix stripped.
+set(CLONEHOME_VERSION "0.1.0-dev" CACHE STRING "Version string shown by the launcher")
+set(CLONEHOME_UPDATE_OWNER "samioan" CACHE STRING "GitHub owner to check for updates")
+set(CLONEHOME_UPDATE_REPO "rac-j2me-remastered" CACHE STRING "GitHub repo to check for updates")
+set(CLONEHOME_UPDATE_TAG_PREFIX "clonehome-v" CACHE STRING "Release tag prefix identifying a Clone Home build")
+# The shipping build: only the launcher and the game (no self-test).
+option(CLONEHOME_DIST "Build only the shipped executables (launcher + game)" OFF)
+# Static CRT so "unzip and play" needs no Visual C++ redistributable.
+if(MSVC)
+  set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+endif()
+
 add_library(stb_image STATIC third_party/stb/stb_image_impl.cpp)
 target_include_directories(stb_image PUBLIC third_party/stb)
+add_library(puff STATIC third_party/puff/puff.c)
+target_include_directories(puff PUBLIC third_party/puff)
 if(MSVC)
   target_compile_options(stb_image PRIVATE /W3)
+  target_compile_options(puff PRIVATE /W3)
 endif()
 
 # Bank/atlas/anim-set loaders, the software renderer, the Java runtime shims,
@@ -24,10 +41,35 @@ target_include_directories(ch_core PUBLIC src)
 target_link_libraries(ch_core PUBLIC stb_image dbghelp)
 
 # Checks every resource against the formats in ../docs/ASSET_FORMATS.md.
-add_executable(clonehome_selftest src/selftest.cpp)
-target_link_libraries(clonehome_selftest PRIVATE ch_core)
+if(NOT CLONEHOME_DIST)
+  add_executable(clonehome_selftest src/selftest.cpp)
+  target_link_libraries(clonehome_selftest PRIVATE ch_core)
+endif()
 
-# Software-rendered raw Win32 shell (no SDL/D3D/GL dependency), at the
-# original 240x320 SEMC resolution. Game logic to come.
+# The game: a software-rendered raw Win32 shell (no SDL/D3D/GL dependency) around the translated game.
 add_executable(clonehome_port WIN32 src/main.cpp src/input.cpp src/display.cpp)
 target_link_libraries(clonehome_port PRIVATE ch_core shell32 winmm dbghelp xinput)
+
+# --- the launcher -------------------------------------------------------
+# What a downloaded zip opens: picks and unpacks the user's own .jar, runs the game, and updates itself
+# from GitHub releases. See src/launcher/. Artwork (assets/banner.png, clonehome.ico) is generated from
+# assets/banner_source.png by tools/make_banner.py and tools/make_icon.py.
+configure_file(src/launcher/version.h.in "${CMAKE_BINARY_DIR}/generated/launcher/version.h" @ONLY)
+add_executable(clonehome_launcher WIN32
+  src/launcher/launcher_main.cpp
+  src/launcher/banner.cpp
+  src/launcher/install.cpp
+  src/launcher/launcher_config.cpp
+  src/launcher/update_check.cpp
+  src/launcher/updater.cpp
+  src/launcher/zip_reader.cpp
+  src/platform/win32/exe_dir.cpp
+  src/launcher/launcher.rc
+)
+set_target_properties(clonehome_launcher PROPERTIES OUTPUT_NAME "CloneHome")
+target_include_directories(clonehome_launcher PRIVATE src "${CMAKE_BINARY_DIR}/generated")
+target_link_libraries(clonehome_launcher PRIVATE stb_image puff comctl32 ole32 winhttp)
+target_compile_definitions(clonehome_launcher PRIVATE UNICODE _UNICODE)
+if(MSVC)
+  target_link_options(clonehome_launcher PRIVATE /MANIFEST:NO)
+endif()

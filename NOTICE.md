@@ -16,16 +16,18 @@ distributed with any release. See `.gitignore`.
 
 ## Artwork and third-party code
 
-The Going Mobile launcher's background and icon are key art supplied by the
-project owner (`goingmobile/port/src/launcher/assets/banner_source.jpg`;
-`banner.png` and `goingmobile.ico` are generated from it by
-`tools/make_banner.py` / `tools/make_icon.py`). The "Ratchet & Clank" wordmark
-and characters in it belong to their owners.
+The launchers' backgrounds and icons are key art supplied by the project
+owner (Going Mobile: `goingmobile/port/src/launcher/assets/banner_source.jpg`;
+Clone Home: `clonehome/port/src/launcher/assets/banner_source.png`; the
+`banner.png` and `.ico` files are generated from them by `tools/make_banner.py`
+/ `tools/make_icon.py`). The "Ratchet & Clank" wordmark and characters in them
+belong to their owners.
 
 | Component | Licence | Where |
 |---|---|---|
-| `stb_image` | public domain / MIT | `goingmobile/port/third_party/stb/` |
-| `puff` (zlib's reference inflate) | zlib | `goingmobile/port/third_party/puff/` |
+| `stb_image` | public domain / MIT | `goingmobile/port/third_party/stb/`, `clonehome/port/third_party/stb/` |
+| `puff` (zlib's reference inflate) | zlib | `goingmobile/port/third_party/puff/`, `clonehome/port/third_party/puff/` |
+| `javalang` (dev tool only, not shipped) | MIT | used by `tools/java2cpp.py` |
 
 The launcher's file picker uses `IFileOpenDialog` (COM) and its update check
 uses WinHTTP, both Windows system components. Release builds link the CRT

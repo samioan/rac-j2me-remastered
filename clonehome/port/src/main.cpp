@@ -257,7 +257,11 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int) {
         }
       }
     }
-    if (Platform::saveDir == "saves") Platform::saveDir = dir + "/saves";
+    if (Platform::saveDir == "saves") {  // survives updates, which replace the files next to the exe
+      const char* local = std::getenv("LOCALAPPDATA");
+      Platform::saveDir = local ? std::string(local) + "/rac-ch-port/saves" : dir + "/saves";
+      if (local) CreateDirectoryA((std::string(local) + "/rac-ch-port").c_str(), nullptr);
+    }
   }
   SetUnhandledExceptionFilter(crashHandler);
   RatchetMIDlet* midlet = new RatchetMIDlet();

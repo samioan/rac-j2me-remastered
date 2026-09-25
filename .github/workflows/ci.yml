@@ -42,3 +42,9 @@ jobs:
 
       - name: Build Clone Home port (Debug)
         run: .\clonehome\port\build.bat
+
+      - name: Build the Clone Home release package
+        run: .\clonehome\port\build_dist.bat 0.0.0-ci
+
+      - name: Check the package
+        run: .\clonehome\port\check_dist.ps1

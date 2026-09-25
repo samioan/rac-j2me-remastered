@@ -130,3 +130,18 @@ logic stays at 25.0 Hz at every FPS setting.
   range now scales with the width (`viewW / 57 + 2`), otherwise anchors beyond the first 6 columns vanished in widescreen.
 * Debug options: `--watch-enemies` logs enemies that move implausibly far in one tick; `--sim-fps N` runs the real-time loop with a fake clock
   headless (exercises the interpolation and logs enemies whose *drawn* position jumps between frames).
+
+## Launcher and releases
+
+`clonehome/port/src/launcher/` is the Going Mobile launcher adapted for Clone Home (`CloneHome.exe`): "Choose file..." unpacks the
+user's own `RAC-CloneHome.jar` into `data\` (recognised by `RP1`/`RP2`/`RP3`), Fullscreen/Windowed, Play (runs
+`bin\clonehome_port.exe --data <data> --fullscreen|--windowed`), and a self-update from GitHub releases whose tag starts with
+`clonehome-v`. Saves live in `%LOCALAPPDATA%ac-ch-port\saves`, so updates never touch them. The banner and icon come from
+`assets/banner_source.png` via `tools/make_banner.py` / `tools/make_icon.py`.
+
+* Local package: `clonehome\portuild_dist.bat <version>` then `clonehome\port\check_dist.ps1` (layout, no game data, no VC runtime,
+  artwork embedded). Output is `clonehome\port\dist\`.
+* Release: push a tag `clonehome-vX.Y.Z` (e.g. `git tag clonehome-v0.1.0 && git push origin clonehome-v0.1.0`);
+  `.github/workflows/release-clonehome.yml` builds, checks, zips `CloneHomeRemastered-<tag>-win64.zip` and publishes it (a pre-release
+  while the major version is 0), with notes from `.github/release_notes_template_clonehome.md`. Going Mobile's own workflow only reacts
+  to `goingmobile-v*` tags, so the two never collide. CI (`ci.yml`) also builds and checks the package on every push.
