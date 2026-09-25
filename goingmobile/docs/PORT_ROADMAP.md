@@ -337,6 +337,10 @@ re-basing onto a1 rather than finishing the legacy build's gameplay.
       (hud.png tiled, never stretched) use the full width; every 176x220 design
       screen (menus, dialogue text, cutscene overlays) is drawn unscaled at
       `screen::offsetX()` between black bars. Menu wallpaper: its edge columns are continued outward (`screen::captureEdges/paintSideBars`).
+      FPS (Settings > FPS: Original/60/90/120/144/165/240/Unlimited): logic stays on the
+      fixed ~30 Hz step; extra frames are drawn interpolated (`game_interp.cpp`
+      blends camera, player, enemy and projectile positions at render time, skipping
+      jumps > 48 px). Only live gameplay (b == 0) is drawn between ticks.
       Tutorial fixes (level 0 was not completable): (1) `Enemy.groundYAhead`
       scales the found row by tileHeight and then tests `r >= 18`, always
       true, so every enemy's ground was the map bottom and it fell through

@@ -353,7 +353,11 @@ class Game {
   // --- call surface CanvasShell.java/ratchetandclank.java exercise -------
   void pause();
   void resume();
-  void render(Graphics* g);
+  void render(Graphics* g);      // applies frame interpolation, then renderImpl
+  void renderImpl(Graphics* g);
+  void snapshotForInterp();      // call right before each logic tick
+  float interpAlpha = 1.0f;      // 0..1 position between the previous and current tick
+  bool advanceAnim = true;       // false on extra interpolated frames (render-driven counters hold)
   void onScreenResize();  // logical screen width changed: refresh derived bounds, force redraw
   void tick();
   void keyPressed(int key);

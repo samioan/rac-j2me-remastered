@@ -45,19 +45,41 @@ const char* modeName(Mode m) {
     default: return "";
   }
 }
+
+const int kFpsChoices[] = {0, 60, 90, 120, 144, 165, 240, -1};
+constexpr int kFpsCount = sizeof(kFpsChoices) / sizeof(kFpsChoices[0]);
+int g_fpsIdx = 0;
+
+void save() {
+  std::string path = configPath();
+  if (path.empty()) return;
+  FILE* f = nullptr;
+  if (fopen_s(&f, path.c_str(), "w") == 0 && f) {
+    fprintf(f, "%d %d\n", (int)g_mode, g_fpsIdx);
+    fclose(f);
+  }
+}
 }  // namespace
+
+int fpsTarget() { return kFpsChoices[g_fpsIdx]; }
+
+void cycleFps(int dir) {
+  g_fpsIdx = (g_fpsIdx + dir + kFpsCount) % kFpsCount;
+  save();
+}
+
+std::string fpsLabel() {
+  int v = fpsTarget();
+  if (v == 0) return "FPS: Original";
+  if (v < 0) return "FPS: Unlimited";
+  return "FPS: " + std::to_string(v);
+}
 
 Mode mode() { return g_mode; }
 
 void setMode(Mode m) {
   g_mode = m;
-  std::string path = configPath();
-  if (path.empty()) return;
-  FILE* f = nullptr;
-  if (fopen_s(&f, path.c_str(), "w") == 0 && f) {
-    fprintf(f, "%d\n", (int)m);
-    fclose(f);
-  }
+  save();
 }
 
 void cycleMode(int dir) {
@@ -73,6 +95,7 @@ void load() {
   if (path.empty() || fopen_s(&f, path.c_str(), "r") != 0 || !f) return;
   int v = -1;
   if (fscanf_s(f, "%d", &v) == 1 && v >= 0 && v < (int)Mode::Count) g_mode = (Mode)v;
+  if (fscanf_s(f, "%d", &v) == 1 && v >= 0 && v < kFpsCount) g_fpsIdx = v;
   fclose(f);
 }
 

@@ -21,6 +21,12 @@ Mode mode();
 void setMode(Mode m);          // saves the choice
 void cycleMode(int dir);       // +1 / -1, wraps
 std::string modeLabel();       // e.g. "Resolution: 16:9"
+// Frame-rate setting. Game logic always runs at the original ~30 Hz; higher rates render
+// interpolated frames in between (see game_interp.cpp).
+int fpsTarget();               // 0 = original (30 Hz, no interpolation), -1 = unlimited, else fps
+void cycleFps(int dir);
+std::string fpsLabel();        // e.g. "FPS: 60"
+
 void load();                   // read the saved choice (call once at start-up)
 
 // Side areas beside a centred 176-wide screen. Menu wallpaper calls captureEdges() right after

@@ -50,6 +50,7 @@ add_executable(goingmobile_port_a1 WIN32
   src_a1/midp.cpp
   src_a1/input.cpp
   src_a1/screen.cpp
+  src_a1/game_interp.cpp
   src_a1/font.cpp
   src_a1/midlet.cpp
   src_a1/canvasshell.cpp

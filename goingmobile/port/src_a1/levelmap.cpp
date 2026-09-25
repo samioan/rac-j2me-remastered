@@ -110,7 +110,7 @@ void LevelMap::render(Graphics* g) {
   r1 = (jbyte)(r1 + 220 / tileHeight + 2);
   if (c1 > 28) c1 = 28;
   if (r1 > 18) r1 = 18;
-  if (++tileAnimCounter >= 12) tileAnimCounter = 0;
+  if (game_->advanceAnim && ++tileAnimCounter >= 12) tileAnimCounter = 0;
   for (int c = c0; c < c1; c++) {
     for (int r = r0; r < r1; r++) {
       if (c >= 0 && r >= 0 && px < screen::width && py < 220) {

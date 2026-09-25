@@ -600,7 +600,7 @@ void Game::y_(Graphics* g) {
   }
 }
 
-void Game::render(Graphics* g) {
+void Game::renderImpl(Graphics* g) {
   if (U > 0 || m) return;
   const int sw = screen::width, off = screen::offsetX();
   if (dT != -1 || dU != -1 || dZ) {

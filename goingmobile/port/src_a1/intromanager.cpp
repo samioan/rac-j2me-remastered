@@ -715,7 +715,8 @@ void IntroManager::h_(Graphics* g_gfx) {
   int y2 = apH / 2 + a_(g_gfx, ratchetandclank::strings[33], 0 + A + (A >> 1), y1, 0, G == 1);
   g[2] = y2;
   int y3 = g[3] = apH / 2 + a_(g_gfx, ratchetandclank::strings[314], 88, y2, 17, G == 2);
-  a_(g_gfx, screen::modeLabel(), 0 + A + (A >> 1), y3, 0, G == 3);
+  int y4 = g[4] = apH / 2 + a_(g_gfx, screen::modeLabel(), 0 + A + (A >> 1), y3, 0, G == 3);
+  a_(g_gfx, screen::fpsLabel(), 0 + A + (A >> 1), y4, 0, G == 4);
   a_(g_gfx, 7, 8, this);
   a_(g_gfx, 0 + A + (A >> 1), g[G]);
 }
@@ -725,14 +726,16 @@ void IntroManager::e_(int key, int action) {
     a_((jbyte)1);
     midlet_->writeSoundAndLanguageSettings((jbyte)(midlet_->soundEnabled ? 1 : 0));
   } else if (action == -1 || key == 50) {
-    G = a_(G, (jbyte)0, (jbyte)3);
+    G = a_(G, (jbyte)0, (jbyte)4);
     f = (jbyte)(f | 3);
-  } else if (G == 3 && (action == -3 || action == -4 || key == 52 || key == 54)) {
-    screen::cycleMode((action == -3 || key == 52) ? -1 : 1);
+  } else if (G >= 3 && (action == -3 || action == -4 || key == 52 || key == 54)) {
+    int dir = (action == -3 || key == 52) ? -1 : 1;
+    if (G == 3) screen::cycleMode(dir); else screen::cycleFps(dir);
     f = (jbyte)(f | 3);
   } else if (action != -2 && key != 56) {
     if (key == 53 || action == -5 || key == -6) {
       if (G == 3) { screen::cycleMode(1); f = (jbyte)(f | 3); return; }
+      if (G == 4) { screen::cycleFps(1); f = (jbyte)(f | 3); return; }
       if (G == 0) {
         if (midlet_->soundEnabled) {
           s = 0;
@@ -749,7 +752,7 @@ void IntroManager::e_(int key, int action) {
       if (G == 2 && c) a_((jbyte)20);
     }
   } else {
-    G = b_(G, (jbyte)3, (jbyte)0);
+    G = b_(G, (jbyte)4, (jbyte)0);
     f = (jbyte)(f | 3);
   }
 }

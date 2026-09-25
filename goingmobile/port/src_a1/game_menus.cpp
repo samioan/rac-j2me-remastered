@@ -53,7 +53,8 @@ void Game::f_(Graphics* g) {
   RC::currentFont = RC::smallFont;
   dc[0] = 100;
   int y1 = dc[1] = ap->getHeight() / 2 + im->a_(g, midlet->soundEnabled ? RC::strings[28] : RC::strings[29], tileWidth + (tileWidth >> 1), 100, 0, cu == 0);
-  im->a_(g, screen::modeLabel(), tileWidth + (tileWidth >> 1), y1, 0, cu == 1);
+  int y2 = dc[2] = ap->getHeight() / 2 + im->a_(g, screen::modeLabel(), tileWidth + (tileWidth >> 1), y1, 0, cu == 1);
+  im->a_(g, screen::fpsLabel(), tileWidth + (tileWidth >> 1), y2, 0, cu == 2);
   im->a_(g, 7, 8, this);
   im->a_(g, tileWidth >> 1, dc[cu]);
 }
@@ -109,11 +110,12 @@ void Game::h_(int key, int action) {
 void Game::i_(int key, int action) {
   IntroManager* im = midlet->introManager;
   if (action == -1 || key == 50) {
-    cu = im->a_((jbyte)cu, (jbyte)0, (jbyte)1);
+    cu = im->a_((jbyte)cu, (jbyte)0, (jbyte)2);
   } else if (action == -2 || key == 56) {
-    cu = im->b_((jbyte)cu, (jbyte)1, (jbyte)0);
-  } else if (cu == 1 && (action == -3 || action == -4 || key == 52 || key == 54)) {
-    screen::cycleMode((action == -3 || key == 52) ? -1 : 1);
+    cu = im->b_((jbyte)cu, (jbyte)2, (jbyte)0);
+  } else if (cu >= 1 && (action == -3 || action == -4 || key == 52 || key == 54)) {
+    int dir = (action == -3 || key == 52) ? -1 : 1;
+    if (cu == 1) screen::cycleMode(dir); else screen::cycleFps(dir);
   } else if (key != 53 && action != -5 && key != -6) {
     if (key == -7) {
       cu = 0;
@@ -126,6 +128,8 @@ void Game::i_(int key, int action) {
     midlet->writeSoundAndLanguageSettings((jbyte)(midlet->soundEnabled ? 1 : 0));
   } else if (cu == 1) {
     screen::cycleMode(1);
+  } else if (cu == 2) {
+    screen::cycleFps(1);
   }
 }
 

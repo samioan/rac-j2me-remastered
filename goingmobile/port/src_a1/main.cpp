@@ -14,9 +14,11 @@
 
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
+#include <mmsystem.h>
 #include <string>
 #include <cstdio>
 #include <cstdlib>
+#pragma comment(lib, "winmm.lib")
 #ifdef _DEBUG
 #include <crtdbg.h>
 #include <dbghelp.h>
@@ -118,6 +120,12 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR cmdLine, int) {
   g_midlet->startApp();
 
   Graphics g(&platform::canvas);
+  timeBeginPeriod(1);
+  LARGE_INTEGER freq;
+  QueryPerformanceFrequency(&freq);
+  long long lastCounter = 0;
+  double acc = 0;
+  const double kStep = 0.033;
   const char* startLevel = getenv("RAC_LEVEL");  // debug aid: start straight in a level
   int frame = 0;
   while (!platform::quitRequested()) {
@@ -140,13 +148,65 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR cmdLine, int) {
     }
     if (platform::quitRequested()) break;
 
-    if (g_midlet->canvas) {
-      g_midlet->canvas->tick();
-      g_midlet->canvas->paint(&g);
-      platform::present();
+    const int fps = screen::fpsTarget();
+    if (fps == 0) {
+      // Original cadence: one tick + one paint per ~33 ms, no interpolation.
+      if (g_midlet->game) { g_midlet->game->interpAlpha = 1.0f; g_midlet->game->advanceAnim = true; }
+      if (g_midlet->canvas) {
+        g_midlet->canvas->tick();
+        g_midlet->canvas->paint(&g);
+        platform::present();
+      }
+      if (g_midlet->soundPlayer) g_midlet->soundPlayer->update();
+      Sleep(33);
+      lastCounter = 0;
+    } else {
+      // Logic stays on its fixed ~30 Hz step; frames in between are drawn interpolated.
+      LARGE_INTEGER now;
+      QueryPerformanceCounter(&now);
+      if (lastCounter == 0) { lastCounter = now.QuadPart; acc = 0; }
+      acc += (double)(now.QuadPart - lastCounter) / (double)freq.QuadPart;
+      lastCounter = now.QuadPart;
+      if (acc > 0.25) acc = 0.25;
+      bool ticked = false;
+      Game* game = g_midlet->game;
+      bool live = g_midlet->gameStarted && game;
+      for (int steps = 0; acc >= kStep && steps < 4; steps++) {
+        if (live) game->snapshotForInterp();
+        if (g_midlet->canvas) g_midlet->canvas->tick();
+        acc -= kStep;
+        ticked = true;
+      }
+      if (acc >= kStep) acc = 0;
+      live = g_midlet->gameStarted && game;
+      if (live) { game->interpAlpha = (float)(acc / kStep); game->advanceAnim = ticked; }
+      else if (game) { game->interpAlpha = 1.0f; game->advanceAnim = true; }
+      // Menus and screens are drawn only when the logic advanced; the world every frame.
+      if (g_midlet->canvas && (ticked || (live && game->b == 0))) {
+        g_midlet->canvas->paint(&g);
+        platform::present();
+        if (getenv("RAC_FPSLOG")) {  // debug aid: presented frames per second -> fps.txt
+          static int n = 0; static DWORD t0 = GetTickCount();
+          n++;
+          if (GetTickCount() - t0 >= 1000) { FILE* d = nullptr; if (fopen_s(&d, "fps.txt", "a") == 0 && d) { fprintf(d, "%d\n", n); fclose(d); } n = 0; t0 = GetTickCount(); }
+        }
+      }
+      if (g_midlet->soundPlayer) g_midlet->soundPlayer->update();
+      // Pace to the target rate: sleep most of the wait, spin the last millisecond.
+      if (fps > 0) {
+        double period = 1.0 / fps;
+        for (;;) {
+          LARGE_INTEGER t;
+          QueryPerformanceCounter(&t);
+          double elapsed = (double)(t.QuadPart - lastCounter) / (double)freq.QuadPart;
+          if (elapsed >= period) break;
+          if (period - elapsed > 0.002) Sleep(1);
+          else if (platform::quitRequested()) break;
+        }
+      } else {
+        Sleep(0);
+      }
     }
-    if (g_midlet->soundPlayer) g_midlet->soundPlayer->update();
-    Sleep(33);
   }
 
   return 0;
