@@ -555,6 +555,7 @@ void SoundPlayer::haltPlayer() {
     g_mciLoop = false;
     mciPost("close racsnd_a1");
     playing_ = false;
+    playingId_ = -1;
   }
 }
 
@@ -574,12 +575,14 @@ void SoundPlayer::update() {
     return;
   }
   if (soundFiles_[pendingSound_].empty()) { pendingSound_ = -1; return; }
+  if (playing_ && playingId_ == pendingSound_ && pendingLoop_ == -1 && playingLoop_ == -1) { pendingSound_ = -1; return; }
   if (playing_) haltPlayer();
   const char* type = isWav_[pendingSound_] ? "waveaudio" : "sequencer";
   mciPost("open \"" + soundFiles_[pendingSound_] + "\" type " + type + " alias racsnd_a1");
   mciPost("play racsnd_a1");
   g_mciLoop = (pendingLoop_ == -1);
   playingLoop_ = pendingLoop_;
+  playingId_ = pendingSound_;
   playing_ = true;
   pendingSound_ = -1;
 }

@@ -227,6 +227,7 @@ class SoundPlayer {
   bool playing_ = false;          // MCI player exists
   bool endOfMedia_ = false;      // MCI signalled completion
   int  playingLoop_ = 1;
+  int  playingId_ = -1;           // cue currently open in MCI
 };
 
 // ---- platform ----------------------------------------------------------
