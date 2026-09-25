@@ -318,7 +318,8 @@ re-basing onto a1 rather than finishing the legacy build's gameplay.
       and plays (MCI rc=0), all five .wav cues open. Every Game/Player
       `playSoundIfEnabled` call site in the Java tree is ported except the one
       in Game's unused own slot picker (b==9). Not audibly compared.
-      Display: F11 / Alt+Enter toggles a borderless fullscreen window; the
+      Display: starts in borderless fullscreen (`--windowed` opts out); F11 /
+      Alt+Enter toggles it; the
       176x220 canvas is fit with its aspect ratio kept (black bars) via
       `computeViewport()` in `midp.cpp`, which only reads the canvas size --
       the hook where a widescreen mode (wider logical canvas) plugs in later.

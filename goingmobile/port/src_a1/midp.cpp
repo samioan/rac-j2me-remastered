@@ -716,7 +716,7 @@ static LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPara
   }
 }
 
-bool initWindow() {
+bool initWindow(bool fullscreen) {
   canvas.w = 176;
   canvas.h = 220;
   canvas.px.assign(176u * 220u, 0xFF000000u);
@@ -737,6 +737,7 @@ bool initWindow() {
                             nullptr, nullptr, wc.hInstance, nullptr);
   if (!g_hwnd) return false;
   ShowWindow(g_hwnd, SW_SHOWDEFAULT);
+  if (fullscreen) toggleFullscreen();  // windowed placement is captured first, so F11 returns to it
   return true;
 }
 

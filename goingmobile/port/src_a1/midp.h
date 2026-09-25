@@ -237,7 +237,7 @@ class SoundPlayer {
 // canvas size and key mapping differ, both in midp.cpp.
 namespace platform {
 extern Image canvas;
-bool initWindow();    // returns false on failure
+bool initWindow(bool fullscreen = true);    // returns false on failure
 void setKeyCallback(void (*onKeyDown)(int), void (*onKeyUp)(int));
 void pumpEvents();
 void present();       // stretch-blit canvas to the window

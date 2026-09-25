@@ -84,13 +84,14 @@ static void findDataDir() {
   }
 }
 
-int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int) {
+int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR cmdLine, int) {
 #ifdef _DEBUG
   _CrtSetReportHook2(_CRT_RPTHOOK_INSTALL, crtReportHook);
 #endif
   findDataDir();
 
-  if (!platform::initWindow()) return 0;
+  bool windowed = cmdLine && wcsstr(cmdLine, L"--windowed") != nullptr;
+  if (!platform::initWindow(!windowed)) return 0;
   platform::setKeyCallback(onKeyDown, onKeyUp);
 
   g_midlet = new ratchetandclank();
