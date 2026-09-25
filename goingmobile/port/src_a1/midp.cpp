@@ -5,6 +5,7 @@
 // path) differ for a1.
 #include <cmath>
 #include "midp.h"
+#include "input.h"
 
 #define WIN32_LEAN_AND_MEAN
 #define NOMINMAX
@@ -606,8 +607,6 @@ Image canvas;
 
 static HWND g_hwnd = nullptr;
 static bool g_quit = false;
-static void (*g_onKeyDown)(int) = nullptr;
-static void (*g_onKeyUp)(int) = nullptr;
 static void (*g_onChar)(int) = nullptr;
 
 // Fullscreen state: a borderless WS_POPUP window covering the current monitor.
@@ -630,27 +629,6 @@ static Viewport computeViewport(int clientW, int clientH, int canvasW, int canva
   return {0, (clientH - h) / 2, clientW, h};
 }
 
-// See midp.h's KeyCode note: arrows/fire/soft-keys map to the same Nokia
-// values the legacy build's shim used, '/' still stands in for the keypad
-// '*' (CanvasShell.java checks literal 42, MIDP's KEY_STAR). Provisional --
-// revisit once a real keyPressed handler (IntroManager's) is transcribed.
-static int mapVirtualKey(WPARAM vk) {
-  switch (vk) {
-    case VK_UP: return KEY_UP;
-    case VK_DOWN: return KEY_DOWN;
-    case VK_LEFT: return KEY_LEFT;
-    case VK_RIGHT: return KEY_RIGHT;
-    case VK_RETURN:
-    case VK_SPACE: return KEY_FIRE;
-    case VK_ESCAPE: return KEY_SOFT_LEFT;
-    case VK_BACK: return KEY_SOFT_RIGHT;
-    case VK_TAB: return 35;  // '#' (weapon wheel)
-    case VK_OEM_2: return KEY_STAR;  // '/' -- stand-in for the keypad '*'
-    default:
-      if (vk >= '0' && vk <= '9') return (int)vk;
-      return 0;
-  }
-}
 
 void toggleFullscreen() {
   if (!g_hwnd) return;
@@ -697,20 +675,19 @@ static LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPara
     case WM_SYSKEYDOWN:
       if (wParam == VK_RETURN && (lParam & (1 << 29))) { toggleFullscreen(); return 0; }  // Alt+Enter
       return DefWindowProcW(hwnd, msg, wParam, lParam);
-    case WM_KEYDOWN: {
+    case WM_KEYDOWN:
       if (wParam == VK_F11) { if (!(lParam & (1 << 30))) toggleFullscreen(); return 0; }
-      int code = mapVirtualKey(wParam);
-      if (code != 0 && g_onKeyDown) g_onKeyDown(code);
+      input::keyEvent((unsigned)wParam, true, (lParam & (1 << 30)) != 0);
       return 0;
-    }
+    case WM_KILLFOCUS:
+      input::releaseAll();
+      return DefWindowProcW(hwnd, msg, wParam, lParam);
     case WM_CHAR:
       if (wParam >= 32 && wParam < 127 && g_onChar) g_onChar((int)wParam);
       return 0;
-    case WM_KEYUP: {
-      int code = mapVirtualKey(wParam);
-      if (code != 0 && g_onKeyUp) g_onKeyUp(code);
+    case WM_KEYUP:
+      input::keyEvent((unsigned)wParam, false, false);
       return 0;
-    }
     case WM_CLOSE:
       g_quit = true;
       DestroyWindow(hwnd);
@@ -746,11 +723,6 @@ bool initWindow(bool fullscreen) {
 }
 
 void setCharCallback(void (*onChar)(int)) { g_onChar = onChar; }
-
-void setKeyCallback(void (*onKeyDown)(int), void (*onKeyUp)(int)) {
-  g_onKeyDown = onKeyDown;
-  g_onKeyUp = onKeyUp;
-}
 
 void pumpEvents() {
   MSG msg;

@@ -8,6 +8,7 @@
 #include "midlet.h"
 #include "game.h"
 #include "intromanager.h"
+#include "input.h"
 #include "midp.h"
 
 #define WIN32_LEAN_AND_MEAN
@@ -60,6 +61,18 @@ static ratchetandclank* g_midlet = nullptr;
 static void onKeyDown(int code) {
   if (g_midlet && g_midlet->canvas) g_midlet->canvas->keyPressed(code);
 }
+// Which mapping the bindings use right now: live gameplay, menu-style screens (menus,
+// dialogue, cutscenes, weapon wheel), or typing a name.
+static input::Context currentContext() {
+  if (!g_midlet) return input::Context::Menu;
+  if (g_midlet->gameStarted) {
+    Game* game = g_midlet->game;
+    return (game && game->b == 0 && !game->cD) ? input::Context::Gameplay : input::Context::Menu;
+  }
+  IntroManager* im = g_midlet->introManager;
+  return (im && im->e == 15) ? input::Context::Text : input::Context::Menu;
+}
+
 static void onChar(int ch) {
   if (g_midlet && !g_midlet->gameStarted && g_midlet->introManager) g_midlet->introManager->textInput(ch);
 }
@@ -96,7 +109,7 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR cmdLine, int) {
 
   bool windowed = cmdLine && wcsstr(cmdLine, L"--windowed") != nullptr;
   if (!platform::initWindow(!windowed)) return 0;
-  platform::setKeyCallback(onKeyDown, onKeyUp);
+  input::init(onKeyDown, onKeyUp, currentContext);
   platform::setCharCallback(onChar);
 
   g_midlet = new ratchetandclank();
@@ -118,6 +131,7 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR cmdLine, int) {
       g_midlet->game->loadLevel(atoi(startLevel), (short)(room ? atoi(room) : 0));
     }
     platform::pumpEvents();
+    input::poll();
     if (platform::quitRequested()) break;
 
     if (g_midlet->canvas) {

@@ -238,7 +238,6 @@ class SoundPlayer {
 namespace platform {
 extern Image canvas;
 bool initWindow(bool fullscreen = true);    // returns false on failure
-void setKeyCallback(void (*onKeyDown)(int), void (*onKeyUp)(int));
 void setCharCallback(void (*onChar)(int));  // printable characters typed (WM_CHAR), for text entry
 void pumpEvents();
 void present();       // stretch-blit canvas to the window
