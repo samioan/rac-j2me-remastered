@@ -38,8 +38,8 @@ the numbers themselves are read by the loader, not stored as text.)
 
 | Type | Format | Evidence |
 |---|---|---|
-| Images | **Standard PNGs, embedded whole** | `a.b(DataInputStream)` skips the 8-byte PNG signature then walks chunks (32-bit length + 4CC type) until `IEND` (0x49454E44); a custom chunk type constant `"PAGG"` (0x50414747) also appears in the walker. Some resources additionally pass through a **byte-swap decode** (`a`'s two-array interleave loop just above `b()`) before being treated as images -- likely a cheap obfuscation of the pixel data. |
-| String tables | **short count+1, short offsets, UTF-8 bytes** | `a.g(int)`: reads `short n`, builds `t[n+1]` offset table, packs the UTF-8 payload into `s`, serves `a.f(i)` as `new String(s, t[i], t[i+1]-t[i], "UTF-8")`. |
+| Images | **Standard PNGs, embedded whole** (the splash, type 252 / resource 1067, is a JPEG) | `Engine.loadImage` hands the bytes to `Image.createImage`. With a swap array (types 251: 1094/1095) it first overwrites the PNG's `PLTE` palette chunk payload (found by `findPngDataChunk`, chunk type 0x504C5445) with the array, decodes, then restores it -- a palette swap for the font colours, not a pixel scramble. |
+| String tables | **short count, then per string: short length + UTF-8 bytes** | `Engine.loadStringTable` builds the offset table while reading; `getString(i)` slices it. |
 | Level tiles | **`sections x 28 x 18` bytes, each `tile + 32`** | `Game.loadLevelTiles`. Verified: every level resource's length is an exact multiple of 504 (3,4,5,6 or 2 sections) and matches its info header. |
 | Level info | **`sectionCount, tilesetId, startSection, exits[sectionCount*4], tileBase[sectionCount]`** | `Game.loadLevelInfo`; e.g. resource 2067 = `03 00 00 | ff ff 01 ff ...` (18 bytes = 3 + 12 + 3). `0xff` = no exit. |
 | Game tables | **28 length-prefixed byte arrays** (resource 1034) | `Game.loadGameTables`; verified to consume exactly 746/746 bytes. See `CLASS_MAP.md`. |

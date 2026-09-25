@@ -59,7 +59,7 @@ strings, audio), the level tile/info format, the 28 game tables, the string tabl
 banks by independent parsing. The sprite-atlas format is parsed and verified (`tools/parse_ch.py`, all 30 atlases). Animation sets (type 247) are parsed and verified too. What remains is labelling which of the 68 image resources is which sprite (start from
 `Game.loadAssetsStep`).
 
-**Phase 3 (not started): PC port.** Scaffold is in `port/` (CMake + Ninja
+**Phase 3 (in progress): PC port.** Milestone 1 done: `port/src/assets.cpp` loads the banks, atlases, anim sets, images (PNG + the JPEG splash, with palette swaps) and the string table; `clonehome_selftest` checks every resource. Milestone 2 done: `port/src/gfx.cpp` is a 240x320 software surface (clip, fill, mirrored alpha blits, `Sprite.draw` semantics) shown through a Win32 window; `clonehome_port --data <dir> --dump out.bmp` renders headless. Next: engine shim (tick loop, input, RMS saves, sound), then the game slices. Scaffold is in `port/` (CMake + Ninja
 + MSVC, matching the `tes-travels-decomp` ports' toolchain) -- currently
 just proves the build works. Because all content is data-driven out of
 the `RP*` banks (not hand-written per level in Java), a faithful port
