@@ -336,7 +336,7 @@ re-basing onto a1 rather than finishing the legacy build's gameplay.
       width becomes `screen::width`. World rendering, culling, camera and the HUD bar
       (hud.png tiled, never stretched) use the full width; every 176x220 design
       screen (menus, dialogue text, cutscene overlays) is drawn unscaled at
-      `screen::offsetX()` between black bars. Not yet widened: menu wallpapers.
+      `screen::offsetX()` between black bars. Menu wallpaper: its edge columns are continued outward (`screen::captureEdges/paintSideBars`).
       Tutorial fixes (level 0 was not completable): (1) `Enemy.groundYAhead`
       scales the found row by tileHeight and then tests `r >= 18`, always
       true, so every enemy's ground was the map bottom and it fell through

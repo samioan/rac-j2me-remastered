@@ -23,6 +23,13 @@ void cycleMode(int dir);       // +1 / -1, wraps
 std::string modeLabel();       // e.g. "Resolution: 16:9"
 void load();                   // read the saved choice (call once at start-up)
 
+// Side areas beside a centred 176-wide screen. Menu wallpaper calls captureEdges() right after
+// it is drawn (before any text or sprites); paintSideBars() then continues those edge columns
+// outward, or fills black when no wallpaper was drawn this frame.
+void beginFrame();
+void captureEdges();
+void paintSideBars();
+
 // Recomputes the width for the current mode and window; resizes the canvas when it changed.
 // Returns true when the width changed (callers then force a full redraw).
 bool update();

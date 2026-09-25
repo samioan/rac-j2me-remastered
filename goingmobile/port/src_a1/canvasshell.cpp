@@ -57,6 +57,7 @@ void CanvasShell::paint(Graphics* g) {
     g->fillRect(0, 0, screen::width, 220);
   } else if (canvasState == 0) {
     directGraphics = g;
+    screen::beginFrame();
     if (midlet_->gameStarted) {
       if (midlet_->game) midlet_->game->render(g);
     } else if (midlet_->introManager) {
@@ -65,12 +66,7 @@ void CanvasShell::paint(Graphics* g) {
       g->translate(off, 0);
       midlet_->introManager->a_(g);
       g->translate(-off, 0);
-      if (off > 0) {  // bars are painted last: sprites that walk off the 176 edge are cut off
-        g->setClip(0, 0, screen::width, 220);
-        g->setColor(0);
-        g->fillRect(0, 0, off, 220);
-        g->fillRect(off + screen::kBaseW, 0, screen::width - off - screen::kBaseW, 220);
-      }
+      screen::paintSideBars();  // painted last: sprites that walk off the 176 edge are cut off
     }
     directGraphics = nullptr;
   }

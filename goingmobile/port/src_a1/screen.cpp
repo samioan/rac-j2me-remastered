@@ -76,6 +76,36 @@ void load() {
   fclose(f);
 }
 
+namespace {
+uint32_t g_edgeL[kHeight], g_edgeR[kHeight];
+bool g_edgesValid = false;
+}
+
+void beginFrame() { g_edgesValid = false; }
+
+void captureEdges() {
+  const Image& c = platform::canvas;
+  int off = offsetX();
+  if (off <= 0 || c.w < off + kBaseW || c.h < kHeight) return;
+  for (int y = 0; y < kHeight; y++) {
+    g_edgeL[y] = c.px[(size_t)y * c.w + off];
+    g_edgeR[y] = c.px[(size_t)y * c.w + off + kBaseW - 1];
+  }
+  g_edgesValid = true;
+}
+
+void paintSideBars() {
+  Image& c = platform::canvas;
+  int off = offsetX();
+  if (off <= 0 || c.h < kHeight) return;
+  for (int y = 0; y < kHeight; y++) {
+    uint32_t* row = &c.px[(size_t)y * c.w];
+    uint32_t l = g_edgesValid ? g_edgeL[y] : 0xFF000000u, r = g_edgesValid ? g_edgeR[y] : 0xFF000000u;
+    std::fill(row, row + off, l);
+    std::fill(row + off + kBaseW, row + c.w, r);
+  }
+}
+
 bool update() {
   int cw = 0, ch = 0;
   platform::clientSize(cw, ch);

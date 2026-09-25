@@ -613,6 +613,7 @@ void IntroManager::a_(Graphics* g_gfx, jbyte) {
     g_gfx->drawImage(Game::aF, x, 220 - hTile - 4 * hTile, 0);
   }
   g_gfx->setClip(0, 0, 176, 220);
+  screen::captureEdges();
 }
 
 // "Page X/Y" footer, shared by the weapon store and the credits pager.

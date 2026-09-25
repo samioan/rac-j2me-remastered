@@ -638,12 +638,7 @@ void Game::render(Graphics* g) {
         case 22: drawWheel(g); break;
       }
       g->translate(-off, 0);
-      if (b != 22 && off > 0) {
-        g->setClip(0, 0, sw, 220);
-        g->setColor(0);
-        g->fillRect(0, 0, off, 220);
-        g->fillRect(off + 176, 0, sw - off - 176, 220);
-      }
+      if (b != 22) screen::paintSideBars();
       return;
     case 6: case 9:
       return;  // Game's own pause/store/results/game-over screens: later 3.2a slice
