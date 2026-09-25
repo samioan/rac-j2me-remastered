@@ -193,7 +193,7 @@ class Game {
   // --- level entry / spawn helpers (Game.java a/c/d/e/f/P/Q/u ...), see game_level.cpp ---
   void a_(int col, int row);                                   // bj[] zip-hook anchor
   void a_(int col, int row, bool isStart, int idx);            // zip-line endpoint
-  void a_(int col, int row, int spriteRow, int rowKind, int idx);  // moving-platform slot
+  void a_(int col, int row, int rowKind, int spriteRow, int idx);  // moving-platform slot
   void a_(int col, int row, jbyte enemyAnim, int slot);        // enemy spawn (slot -1 = first free)
   void a_(jbyte col, jbyte row);                               // bF[] switch anchor
   void a_(jbyte col, jbyte row, int tile);                     // bC[] gated-wall anchor

@@ -523,10 +523,13 @@ void SoundPlayer::stop() {
 }
 
 void SoundPlayer::update() {
-  if (playing_ && playingLoop_ != -1) {
+  if (playing_) {
     char mode[32] = {};
     mciSendStringA("status racsnd_a1 mode", mode, sizeof(mode), nullptr);
-    if (strcmp(mode, "stopped") == 0) endOfMedia_ = true;
+    if (strcmp(mode, "stopped") == 0) {
+      if (playingLoop_ == -1) mciSendStringA("play racsnd_a1 from 0", nullptr, 0, nullptr);  // sequencer rejects "repeat"
+      else endOfMedia_ = true;
+    }
   }
   if (endOfMedia_ && pendingLoop_ != -1) pendingSound_ = -2;
   endOfMedia_ = false;
@@ -558,7 +561,7 @@ void SoundPlayer::update() {
     if (mciSendStringA(cmd, nullptr, 0, nullptr) == 0) {
       playingLoop_ = pendingLoop_;
       sprintf_s(cmd, "play racsnd_a1%s", pendingLoop_ == -1 ? " repeat" : "");
-      mciSendStringA(cmd, nullptr, 0, nullptr);
+      mciSendStringA("play racsnd_a1", nullptr, 0, nullptr);
       playing_ = true;
       pendingSound_ = -1;
     } else {

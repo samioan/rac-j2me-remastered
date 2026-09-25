@@ -53,7 +53,7 @@ void Game::a_(int col, int row, bool isStart, int idx) {
   }
 }
 
-void Game::a_(int col, int row, int spriteRow, int rowKind, int idx) {
+void Game::a_(int col, int row, int rowKind, int spriteRow, int idx) {
   jshort room = X;
   if (cV) room = 0;
   int word = (idx + room * 50) >> 5;
@@ -97,10 +97,10 @@ void Game::a_(int col, int row, jbyte anim, int slot) {
   en->flattenedRenderFlag = false;
   en->wallCrawlFlipped = false;
   en->stateTimer = 0;
-  en->attackPhase = (jbyte)slot;
+  en->attackPhase = 0;
   en->bounceTimer = 0;
-  en->spawnBitIndex = 0;
-  en->patrolTargetX = en->posX;
+  en->spawnBitIndex = (jbyte)slot;
+  en->patrolTargetX = (en->kind == 1) ? 0 : en->posX;
   // Game.java also writes `enemies[i].tileWidth = 0` here for kind 1; tileWidth is
   // Enemy's STATIC tile width (divisor in x()/column math), so zeroing it would
   // crash the original too -- a field-name mix-up from decompilation, omitted.
