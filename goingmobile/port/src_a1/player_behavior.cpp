@@ -438,8 +438,8 @@ void Player::tick() {
         posInRow = (jshort)((floorY % tileHeight) << 8);
         posX = posX + (ledgeSnapOffsetX << 8);
         velY = 0;
-        if (!gm->levelMap->isWalkable(columnLeft(), row)) posX = (y() + 1) << 8;
-        else if (!gm->levelMap->isWalkable(columnRight(), row)) posX = (y() - 1) << 8;
+        if (!gm->levelMap->isWalkable(columnLeft(), row)) posX = (x() + 1) << 8;
+        else if (!gm->levelMap->isWalkable(columnRight(), row)) posX = (x() - 1) << 8;
       } else {
         if ((jumpPhase >= 0 || y() < floorY) && ap == 0) {
           if (jumpPhase == 2) velY = -768;
@@ -696,7 +696,7 @@ void Player::updateHyperCastTimer() {
 
 void Player::updatePickupMagnet() {
   Game* gm = game_;
-  int refY = x() + 7 + 37;
+  int refY = y() + 7 + 37;
   for (int i2 = 11; i2 >= 0; i2--) {
     jbyte type = gm->ck[i2];
     int px = gm->cg[i2];

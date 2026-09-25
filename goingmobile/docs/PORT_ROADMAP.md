@@ -333,8 +333,20 @@ re-basing onto a1 rather than finishing the legacy build's gameplay.
       as the landing check; now `en->y() > y()` and `x() > en->x()`.
       Verified by playing level 0 through: enemy on the floor, melee kill,
       Clank cutscene, zip-line ride and landing.
+      Further src_a1 naming errors found by diffing against the raw decompile
+      (`decompiled_a1/b.java` = Player, `h.java` = Game): Player's own
+      `b()`/`c()` are x/y, so `updatePickupMagnet`'s reference y and the
+      ledge-snap wall pushes had x/y swapped (fixed); Game.B() writes the
+      platform-carry field `Player.H` (an instance short, i.e.
+      `ledgeSnapOffsetX`), not the static hudHeight copy (fixed). The
+      tutorial's teleporter Down-press calls `Game.a(C, D)`, which was still
+      a stub; it is now `Game::exitLevel(-1)` (save, reload menu backdrop,
+      world map), so level 0 now ends at the level-select map. Verified by
+      playing: tutorial -> map -> Circuit Circuit; crates, bolts, Lancer
+      pickup, wrench kill (`/` = melee; Enter only melees on a lock/enemy or
+      with no ammo), wall-jump shaft, grind rails, hint panels.
       Remaining for 3.2a: an end-to-end playthrough of levels 1-11 (only
-      levels 0, 1 and 12 have been exercised) to shake out further
+      the first section of level 1 and level 12 have been exercised) to shake out further
       transcription bugs of this kind (src_a1's renamed fields can be wrong;
       cross-check against decompiled_a1 when behaviour looks off), Game's
       own unused slot picker (b==6/9), and a pixel/behaviour comparison

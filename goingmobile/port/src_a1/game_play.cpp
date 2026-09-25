@@ -93,9 +93,9 @@ short Game::B_() {
         cm[i2] + co[i2] + tileWidth >= (player->posX >> 8) - 8 && (v2 = cn[i2] + cp[i2]) < best &&
         v2 > player->y()) {
       best = (short)v2;
-      Player::hudHeight = 0;
-      if (cq[i2] == 0) Player::hudHeight = 2;
-      else if (cq[i2] == 2) Player::hudHeight = -2;
+      player->ledgeSnapOffsetX = 0;
+      if (cq[i2] == 0) player->ledgeSnapOffsetX = 2;
+      else if (cq[i2] == 2) player->ledgeSnapOffsetX = -2;
     }
   }
   return (short)(best - tileHeight);
@@ -549,7 +549,7 @@ void Game::A_(int key, int action) {
         return;
       }
       if (B) {
-        // Level exit (Game.a(int,boolean) with C=-1): results flow not ported yet.
+        exitLevel(C);
         return;
       }
       if (player->ledgeAhead) {

@@ -210,6 +210,23 @@ void Game::drawLevelEnd(Graphics* g) {
   im->a_(g, tileWidth >> 1, dc[cu]);
 }
 
+void Game::exitLevel(int target) {
+  if (target != -1) return;
+  ec = cu = 0;
+  W_();
+  midlet->writeSaveSlot(ac);
+  y_();
+  b = 3;
+  if (cV) {
+    bv[0] = -1;
+    bv[1] = -1;
+    cV = false;
+    X_();
+    b = 1;
+    player->ownedWeapons = da;
+  }
+}
+
 void Game::W_() {
   cu = 0;
   for (int k2 = 0; k2 < 19; k2++) {

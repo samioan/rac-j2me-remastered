@@ -239,6 +239,7 @@ class Game {
   void levelEndKey(int key, int action);
   void infoKey(int key, int action);
   void W_();                                     // cu = first unlocked map node
+  void exitLevel(int target);                    // Game.a(int,boolean): -1 = leave level to the world map
   void loadLevel(int level, jshort room);        // Game.a(int,short)
   // --- store / challenge rooms (game_store.cpp) ---
   static const jint cl[12];
