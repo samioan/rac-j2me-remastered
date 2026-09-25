@@ -54,7 +54,7 @@ const Binding kGamepad[] = {
     {kPad + XINPUT_GAMEPAD_DPAD_UP, Action::Up},       {kStickUp, Action::Up},
     {kPad + XINPUT_GAMEPAD_DPAD_DOWN, Action::Down},   {kStickDown, Action::Down},
     {kPad + XINPUT_GAMEPAD_A, Action::Jump},
-    {kPad + XINPUT_GAMEPAD_B, Action::Fire},           {kTriggerR, Action::Fire},
+    {kPad + XINPUT_GAMEPAD_B, Action::PadFire},        {kTriggerR, Action::PadFire},
     {kPad + XINPUT_GAMEPAD_X, Action::Melee},          {kTriggerL, Action::Melee},
     {kPad + XINPUT_GAMEPAD_Y, Action::Wheel},
     {kPad + XINPUT_GAMEPAD_RIGHT_SHOULDER, Action::Wheel}, {kPad + XINPUT_GAMEPAD_LEFT_SHOULDER, Action::Wheel},
@@ -79,7 +79,7 @@ int translate(Action a, Context c) {
       case Action::Right: return kRight;
       case Action::Up: case Action::Jump: return kUp;
       case Action::Down: return kDown;
-      case Action::Fire: case Action::Confirm: return kFire;
+      case Action::Fire: case Action::PadFire: case Action::Confirm: return kFire;
       case Action::Melee: return kStar;
       case Action::Wheel: case Action::Secondary: return kHash;
       case Action::Pause: return kSoftLeft;

@@ -79,13 +79,13 @@ Going Mobile port; physical input -> action -> phone keypad code by context):
 |---|---|---|
 | Move | arrows, WASD | d-pad, left stick |
 | Jump | Space, Left Shift | Cross (A) |
-| Fire (also confirms in menus) | J, X, Left Ctrl, left mouse | Circle (B), right trigger |
+| Fire (keyboard/mouse also confirm in menus) | J, X, Left Ctrl, left mouse | Circle (B), right trigger (gameplay only) |
 | Wrench (melee only) | K, C, `/` | Square (X), left trigger |
 | Weapon wheel | Q, E, Tab, right mouse | Triangle (Y), either shoulder |
 | Pause | Esc, P | Start |
 | Back (menus) | Backspace | Triangle (Y), Select/Back |
 
-In menus: Enter/Space/Fire confirm, and wrench/Pause/Back/right mouse go back; a held arrow repeats. The number row and numpad
+In menus and dialogue boxes: Enter/Space/Fire and, on a pad, **Cross** advance (Circle does nothing there); wrench/Pause/Back/right mouse and, on a pad, Triangle go back; a held arrow repeats. An open dialogue box counts as a menu. The number row and numpad
 still send the raw handset digits (the game reads 1-9 directly, and the name/code entry screens are typed with them).
 
 Speed: the game does one logic step per frame (and only when the frame time exceeds 40 ms), and the phone build had a 50 ms
@@ -122,3 +122,11 @@ player, enemies, both projectile pools, moving platforms, pickups, falling crate
 blended. Extra frames only happen in live gameplay (menus draw once per tick), and they freeze `deltaTime` because two decorative
 animations step inside the game's render code. `--stats` writes the measured frame and logic rates to `perf.log`: at 25 Hz logic the
 logic stays at 25.0 Hz at every FPS setting.
+
+### Widescreen notes
+
+* Menus stay 240-px designs drawn centred on black (an edge-column fill for the side areas was tried and dropped).
+* `drawTileLayer` draws per-tile objects (swingshot anchors, hints, checkpoints) for only 6 tile columns from the left edge; that
+  range now scales with the width (`viewW / 57 + 2`), otherwise anchors beyond the first 6 columns vanished in widescreen.
+* Debug options: `--watch-enemies` logs enemies that move implausibly far in one tick; `--sim-fps N` runs the real-time loop with a fake clock
+  headless (exercises the interpolation and logs enemies whose *drawn* position jumps between frames).

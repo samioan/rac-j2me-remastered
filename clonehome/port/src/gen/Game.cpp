@@ -2785,6 +2785,7 @@ void Game::switchSection(int var1) {
       targetSection = sectionExits[((sectionId * 4) + 3)];
     case 3:
     case 4:
+    default:
       break;
     case 5:
       this->cF = 2;
@@ -2811,6 +2812,7 @@ void Game::switchSection(int var1) {
         cameraX = 0;
       case 3:
       case 4:
+      default:
         break;
       case 5:
         playerX = 399616;
@@ -4793,6 +4795,7 @@ void Game::handleScreenInput() {
       case 13:
       case 14:
       case 18:
+      default:
         return;
       case 4:
         if (this->b(var1, 0, 2, 1)) {
@@ -5146,6 +5149,7 @@ void Game::renderMenuScreen(Surface* var1) {
     case 12:
     case 13:
     case 14:
+    default:
       break;
     case 4:
       this->e(var1, 3);
@@ -5440,6 +5444,7 @@ void Game::updateMenuScreen() {
     case 2:
     case 3:
     case 4:
+    default:
       break;
     case 5:
       this->es |= 1;
@@ -5968,7 +5973,7 @@ void Game::drawTileLayer(Surface* var1) {
   int var9 = ((var5 * 38) + var3);
   int var13 = var8;
   int var14 = var9;
-  var6 += 6;
+  var6 += ((viewW / 57) + 2);
   var7 += 10;
   if ((var6 > 28)) {
     var6 = 28;

@@ -122,6 +122,7 @@ void RatchetMIDlet::destroyApp(bool var1) {
     case 10:
     case 16:
     case 17:
+    default:
       game->onLifecycle(3);
     }
   }

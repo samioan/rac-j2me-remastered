@@ -95,7 +95,10 @@ static void gameKeyUp(int code) { if (g_game) g_game->platformKey(code, false); 
 // State 0 is live play (16/17/24 are the level-start transitions); every other state is a menu.
 static input::Context gameContext() {
   int st = Game::state;
-  return (st == 0 || st == 16 || st == 17 || st == 24) ? input::Context::Gameplay : input::Context::Menu;
+  bool live = st == 0 || st == 16 || st == 17 || st == 24;
+  // An open dialogue box is a menu: cross advances it (Up would go back a message).
+  if (live && g_game && g_game->messageActive) live = false;
+  return live ? input::Context::Gameplay : input::Context::Menu;
 }
 
 // WM_KEYDOWN reports VK_SHIFT/VK_CONTROL without a side; the bindings use the left ones.
@@ -213,6 +216,8 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int) {
   int fullscreenArg = -1;
   int headlessWidth = kScreenW;
   bool stats = false;
+  bool watchEnemies = false;
+  int simFps = 0;  // headless: run the real-time loop with a fake clock at this display rate (tests interpolation)
   int jumpWorld = -1, jumpSection = 0;
   wchar_t** argvRaw = CommandLineToArgvW(GetCommandLineW(), &argc);
   std::vector<const wchar_t*> argv(argvRaw, argvRaw + argc);
@@ -223,6 +228,8 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int) {
     else if (!wcscmp(argv[i], L"--dump")) dump = narrow(argv[++i]);
     else if (!wcscmp(argv[i], L"--frames")) frames = _wtoi(argv[++i]);
     else if (!wcscmp(argv[i], L"--stats")) stats = true;
+    else if (!wcscmp(argv[i], L"--watch-enemies")) watchEnemies = true;
+    else if (!wcscmp(argv[i], L"--sim-fps")) simFps = _wtoi(argv[++i]);
     else if (!wcscmp(argv[i], L"--width")) headlessWidth = _wtoi(argv[++i]);
     else if (!wcscmp(argv[i], L"--fullscreen")) fullscreenArg = 1;
     else if (!wcscmp(argv[i], L"--windowed")) fullscreenArg = 0;
@@ -284,7 +291,61 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int) {
           g_game->platformKey(keys[(fuzzSeed >> 16) % (sizeof keys / sizeof *keys)], ((fuzzSeed >> 8) & 1) != 0);
         }
       }
+      if (simFps > 0) {
+        g_game->realTime = true;
+        g_game->targetFps = 25;
+        g_game->interpolate = Game::state == 0 || Game::state == 16 || Game::state == 17 || Game::state == 24;
+        g_game->runFrame(i * (1000.0 / simFps), g_screen);
+        if (g_game->interpolate && Game::iValid && g_game->enemies != nullptr) {  // blended enemy positions of this frame
+          static int bx[16], by[16], bt[16], bf = 0;
+          for (int e = 0; e < 10; e++) {
+            int t = Game::iCur[4 + 3 * e], x = Game::iBlend[4 + 3 * e + 1] >> 8, y = Game::iBlend[4 + 3 * e + 2] >> 8;
+            if (t != -1 && bt[e] == t && bf > 0) {
+              int dx = x - bx[e], dy = y - by[e];
+              if (dx > 12 || dx < -12 || dy > 12 || dy < -12) {
+                FILE* wf = std::fopen("enemy_jumps.log", "a");
+                if (wf) {
+                  std::fprintf(wf, "sim frame %d enemy %d type %d drawn-step %d,%d px (cur %d,%d prev %d,%d) alpha %d tick %d\n", i, e, t,
+                               dx, dy, Game::iCur[4 + 3 * e + 1] >> 8, Game::iCur[4 + 3 * e + 2] >> 8,
+                               Game::iPrev[4 + 3 * e + 1] >> 8, Game::iPrev[4 + 3 * e + 2] >> 8, Engine::interpAlpha,
+                               (int)Engine::tickFrame);
+                  std::fclose(wf);
+                }
+              }
+            }
+            bx[e] = x;
+            by[e] = y;
+            bt[e] = t;
+          }
+          bf = 1;
+        }
+        continue;
+      }
       g_game->runFrame(i * 50L, g_screen);
+      if (g_game->quit) {  // headless: stop at the game's own quit request
+        writeBmp(g_screen, dump.c_str());
+        return 42;
+      }
+      if (watchEnemies && g_game->enemies != nullptr) {  // debug: log enemies that move implausibly far in one tick
+        static int px[16], py[16], pt[16];
+        for (int e = 0; e < 10; e++) {
+          Enemy* en = g_game->enemies[e];
+          if (en->type != -1 && pt[e] == en->type) {
+            int dx = (en->worldX - px[e]) >> 8, dy = (en->worldY - py[e]) >> 8;
+            if (dx > 40 || dx < -40 || dy > 40 || dy < -40) {
+              FILE* wf = std::fopen("enemy_jumps.log", "a");
+              if (wf) {
+                std::fprintf(wf, "frame %d enemy %d type %d state %d moved %d,%d px (now %d,%d) worldId %d\n", i, e, en->type,
+                             en->state, dx, dy, en->worldX >> 8, en->worldY >> 8, Game::worldId);
+                std::fclose(wf);
+              }
+            }
+          }
+          px[e] = en->worldX;
+          py[e] = en->worldY;
+          pt[e] = en->type;
+        }
+      }
     }
     return writeBmp(g_screen, dump.c_str()) ? 0 : 1;
   }
@@ -387,5 +448,6 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int) {
       nextRender = nowMs();
     }
   }
+  Sleep(200);  // let the audio thread close the music player and delete its temp file
   return 0;
 }

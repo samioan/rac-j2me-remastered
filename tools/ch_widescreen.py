@@ -59,6 +59,9 @@ PATCHES = [
       if (this.gA && state == 4) {""" % WIDE_STATES, 1),
 
     # ---- world drawing
+    # drawTileLayer draws its per-tile objects (swingshot anchors, hints, checkpoints, doors' caps) for a fixed
+    # 6 tile columns from the left edge: enough for 240 px, but objects further right vanished when widened.
+    ("Game.java", "      var6 += 6;\n", "      var6 += viewW / 57 + 2;\n", 1),
     ("Game.java", "var1.setClip(0, 21, 240, 299);", "var1.setClip(0, 21, viewW, 299);", 4),
     ("Game.java", "var1.fillRect(0, 299, 240, 21);", "var1.fillRect(0, 299, viewW, 21);", 1),
     ("Game.java", "this.setViewSize(240, 299);", "this.setViewSize(viewW, 299);", 1),

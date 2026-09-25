@@ -67,6 +67,31 @@ def _patch_javalang():
 
     P.Parser.parse_expression_3 = parse_expression_3
 
+    def parse_switch_block_statement_group(self):
+        """javalang drops a `default:` label that follows other labels of the same group
+        (`case 16: case 17: default: ...`), silently changing which cases reach the default body.
+        Keep it as the string "default" in the label list."""
+        labels, statements = [], []
+        while True:
+            case_type = self.tokens.next().value
+            if case_type == "case":
+                if self.would_accept(P.Identifier, ":"):
+                    labels.append(self.parse_identifier())
+                else:
+                    labels.append(self.parse_expression())
+            elif case_type == "default":
+                labels.append("default")
+            else:
+                self.illegal("Expected switch case")
+            self.accept(":")
+            if self.tokens.look().value not in ("case", "default"):
+                break
+        while self.tokens.look().value not in ("case", "default", "}"):
+            statements.append(self.parse_block_statement())
+        return TT.SwitchStatementCase(case=labels, statements=statements)
+
+    P.Parser.parse_switch_block_statement_group = parse_switch_block_statement_group
+
 
 _patch_javalang()
 
@@ -743,9 +768,10 @@ class Emit:
         for case in s.cases:
             labels = ""
             for lab in case.case:
-                labels += "%scase %s:\n" % (I + "  ", self.expr(lab)[0]) if lab is not None else ""
-            if not case.case:
-                labels = "%sdefault:\n" % (I + "  ")
+                if lab == "default":
+                    labels += "%sdefault:\n" % (I + "  ")
+                else:
+                    labels += "%scase %s:\n" % (I + "  ", self.expr(lab)[0])
             inner = "".join(self.stmt(x, I + "    ") for x in case.statements)
             if not inner:
                 inner = "%s;\n" % (I + "    ")

@@ -8,13 +8,15 @@
 namespace input {
 
 enum class Context {
-  Gameplay,  // state 0 (and the transient level-start states): the player is controllable
+  Gameplay,  // state 0 without a dialogue box (and the transient level-start states): the player is controllable
   Menu,      // everything else: menus, shops, map, weapon wheel, dialogue screens
 };
 
 // Fire is the circle button (fire, also confirms in menus); Melee is the wrench (square) and
 // does nothing else in gameplay.
-enum class Action { Left, Right, Up, Down, Jump, Fire, Melee, Wheel, Pause, Confirm, Back, Secondary, Count };
+// PadFire is the gamepad circle / right trigger: it fires in gameplay but does nothing in menus and
+// dialogue, where cross (Jump) is the only advance button.
+enum class Action { Left, Right, Up, Down, Jump, Fire, PadFire, Melee, Wheel, Pause, Confirm, Back, Secondary, Count };
 
 // keyDown/keyUp receive MIDP key codes; context() is polled on every press so the mapping
 // follows the game state.
