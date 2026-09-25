@@ -679,6 +679,10 @@ static LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPara
       if (wParam == VK_F11) { if (!(lParam & (1 << 30))) toggleFullscreen(); return 0; }
       input::keyEvent((unsigned)wParam, true, (lParam & (1 << 30)) != 0);
       return 0;
+    case WM_LBUTTONDOWN: SetCapture(hwnd); input::keyEvent(VK_LBUTTON, true, false); return 0;
+    case WM_LBUTTONUP: input::keyEvent(VK_LBUTTON, false, false); if (!(wParam & MK_RBUTTON)) ReleaseCapture(); return 0;
+    case WM_RBUTTONDOWN: SetCapture(hwnd); input::keyEvent(VK_RBUTTON, true, false); return 0;
+    case WM_RBUTTONUP: input::keyEvent(VK_RBUTTON, false, false); if (!(wParam & MK_LBUTTON)) ReleaseCapture(); return 0;
     case WM_KILLFOCUS:
       input::releaseAll();
       return DefWindowProcW(hwnd, msg, wParam, lParam);

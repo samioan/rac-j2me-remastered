@@ -321,7 +321,7 @@ re-basing onto a1 rather than finishing the legacy build's gameplay.
       Controls (`input.cpp`): keyboard + XInput gamepad map to logical actions, which are
       translated to the original handset key codes per context (gameplay / menu+dialogue /
       text entry). Keyboard: A/D or arrows move, W/Up/Space jump, J/X/LCtrl fire, K/C melee,
-      Q/E/Tab weapon wheel, Esc/P pause, Enter confirm, Backspace back. Gamepad: stick/D-pad
+      Q/E/Tab weapon wheel, left mouse = fire (which melees on its own when an enemy is adjacent), right mouse = weapon wheel (Back in menus), Esc/P pause, Enter confirm, Backspace back. Gamepad: stick/D-pad
       move, A jump, X/RT fire, B/LT melee, Y/bumpers wheel, Start pause, Back = back. In menus
       Space/J/Enter/A confirm and Esc/K/Backspace/B go back. Bindings are two tables at the
       top of `input.cpp`, the hook for a remapping screen. Gamepad path not hardware-tested.

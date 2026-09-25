@@ -37,6 +37,8 @@ const Binding kKeyboard[] = {
     {VK_ESCAPE, Action::Pause}, {'P', Action::Pause},
     {VK_RETURN, Action::Confirm},
     {VK_BACK, Action::Back},
+    {VK_LBUTTON, Action::Fire},       // fire also melees when the game decides to (adjacent enemy, no ammo)
+    {VK_RBUTTON, Action::Secondary},
 };
 
 const Binding kGamepad[] = {
@@ -73,6 +75,7 @@ int translate(Action a, Context c) {
         case Action::Wheel: return 35;  // '#'
         case Action::Pause: return KEY_SOFT_LEFT;
         case Action::Back: return KEY_SOFT_RIGHT;
+        case Action::Secondary: return 35;  // weapon wheel, same as Wheel
         default: return 0;
       }
     case Context::Menu:
@@ -82,7 +85,7 @@ int translate(Action a, Context c) {
         case Action::Up: return KEY_UP;
         case Action::Down: return KEY_DOWN;
         case Action::Jump: case Action::Fire: case Action::Confirm: return KEY_FIRE;
-        case Action::Melee: case Action::Pause: case Action::Back: return KEY_SOFT_RIGHT;
+        case Action::Melee: case Action::Pause: case Action::Back: case Action::Secondary: return KEY_SOFT_RIGHT;
         default: return 0;
       }
     case Context::Text:
