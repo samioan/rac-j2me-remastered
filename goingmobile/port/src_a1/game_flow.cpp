@@ -412,7 +412,10 @@ void Game::infoKey(int key, int action) {
       W_();
       b = 3;
     }
-    // c == 15 (weapon store return) not ported yet.
+    else if (c == 15) {
+      X_();
+      b = 1;
+    }
     midlet->playSoundIfEnabled(3);
   }
 }
