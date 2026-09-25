@@ -68,3 +68,10 @@ loading the original `RP1`/`RP2`/`RP3` files directly -- same conclusion
 as tes-travels-decomp reached for Oblivion's Superscape `.scr`/`.cml`
 content. The jad's 240x320 SEMC screen size is the port's natural window
 size.
+
+## Playing the port
+
+Run `clonehome/port/build/clonehome_port.exe` (it finds `clonehome/extracted` itself; elsewhere put `RP1`-`RP3` next to
+the exe or pass `--data <dir>`). Keys map to the phone keypad: arrows move, Enter/Space = fire/select, F1/F2 (or Esc) = soft
+keys, digits/numpad = keypad digits, **Tab or Q = `#` (weapon wheel)**, **Ctrl, E or numpad `*` = `*` (melee)**.
+Saves live in `saves/` next to the exe.

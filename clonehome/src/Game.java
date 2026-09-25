@@ -6778,8 +6778,8 @@ public final class Game extends Engine {
       boolean var5 = false;
       var3 = 0;
 
-      for (byte var8 = -16; var3 < 12; var8 += 28) {
-         byte var4 = -6;
+      for (int var8 = -16; var3 < 12; var8 += 28) {
+         int var4 = -6;
 
          for (int var2 = 0; var2 < 6; var4 += 42) {
             if (ep[(var1 * 6 + var2) * 12 + var3] >= 0) {
@@ -8634,7 +8634,7 @@ public final class Game extends Engine {
    private int drawCodeRow(Graphics var1, int var2, int var3) {
       var3 = this.b(var1, this.getString(var2 == 0 ? 333 : 334), var3, 17);
       this.resetClip(var1);
-      byte var4 = 51;
+      int var4 = 51;
 
       for (int var5 = 0; var5 < 8; var4 += 18) {
          aR[7 + this.gj[var2 * 8 + var5]].draw(var1, var4, var3, 0);

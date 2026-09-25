@@ -44,6 +44,7 @@ class Engine {
 
   bool ok() const { return ok_; }
   bool quit = false;
+  bool realTime = false;  // sleep to hold the minimum frame time (set by the window loop)
   MIDlet* midlet;
   SoundPlayer* soundPlayer = nullptr;
   bool soundEnabled = false;

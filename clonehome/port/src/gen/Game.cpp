@@ -5329,15 +5329,15 @@ void Game::f(Surface* var0, int var1) {
   int var3 = 0;
   bool var5 = false;
   var3 = 0;
-  for (int8_t var8 = (-16); (var3 < 12); (var8 += 28)) {
-    int8_t var4 = (-6);
+  for (int var8 = (-16); (var3 < 12); (var8 += 28)) {
+    int var4 = (-6);
     for (int var2 = 0; (var2 < 6); (var4 += 42)) {
       if ((ep[((((var1 * 6) + var2) * 12) + var3)] >= 0)) {
         if (((((aY == nullptr) || (var1 > 1)) || (var2 > 5)) || (var3 > 11))) {
           menuCursor = 0;
         }
         bool var6 = (ep[((((var1 * 6) + var2) * 12) + var3)] > 8);
-        aY[(var6 ? (int)((ep[((((var1 * 6) + var2) * 12) + var3)] - 9)) : (int)(ep[((((var1 * 6) + var2) * 12) + var3)]))]->draw(var0, (var6 ? (int)((var4 + 42)) : (int)(var4)), var8, (var6 ? 2 : 0));
+        aY[(var6 ? (int)((ep[((((var1 * 6) + var2) * 12) + var3)] - 9)) : (int)(ep[((((var1 * 6) + var2) * 12) + var3)]))]->draw(var0, (var6 ? (var4 + 42) : var4), var8, (var6 ? 2 : 0));
       } else {
         var0->setColor(0);
         var0->fillRect(var4, var8, 42, 28);
@@ -6957,7 +6957,7 @@ int Game::nibbleToSymbol(int var0) {
 int Game::drawCodeRow(Surface* var1, int var2, int var3) {
   var3 = this->b(var1, this->getString(((var2 == 0) ? 333 : 334)), var3, 17);
   this->resetClip(var1);
-  int8_t var4 = 51;
+  int var4 = 51;
   for (int var5 = 0; (var5 < 8); (var4 += 18)) {
     aR[(7 + this->gj[((var2 * 8) + var5)])]->draw(var1, var4, var3, 0);
     var5++;

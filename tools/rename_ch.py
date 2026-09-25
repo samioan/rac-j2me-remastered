@@ -47,6 +47,11 @@ PATCHES: list[tuple[str, str, str]] = [
     ("Game.java", "B var1 = null;", "byte[] var1 = null;"),
     ("Game.java", "((Object[])var1)[var2] = bB.readByte();", "var1[var2] = bB.readByte();"),
     ("Game.java", "return (byte[])var1;", "return var1;"),
+    # Vineflower types iinc'd int locals as byte when they start from a small constant; these
+    # step past 127 (wrapping the menu backdrop and the code-entry row), so they are ints.
+    ("Game.java", "for (byte var8 = -16; var3 < 12; var8 += 28) {", "for (int var8 = -16; var3 < 12; var8 += 28) {"),
+    ("Game.java", "         byte var4 = -6;", "         int var4 = -6;"),
+    ("Game.java", "      byte var4 = 51;", "      int var4 = 51;"),
 ]
 
 

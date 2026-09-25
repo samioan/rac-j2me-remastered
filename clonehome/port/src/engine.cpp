@@ -118,6 +118,10 @@ int Engine::runFrame(long nowMs, Surface& screen) {
     }
   }
   lastFrameStart_ = nowMs;
+  if (realTime && sleepMs > 0) {  // Engine.run sleeps before the update, then runs a full minFrameTime tick
+    Sleep((DWORD)sleepMs);
+    sleepMs = 0;
+  }
   try {
     update();
   } catch (const JavaException& e) {

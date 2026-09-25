@@ -2,6 +2,7 @@
 #include <windows.h>
 #include <shellapi.h>
 #include <dbghelp.h>
+#include <mmsystem.h>
 
 #include <cstdio>
 #include <string>
@@ -58,7 +59,8 @@ static int midpKey(WPARAM vk) {
     case VK_RETURN: case VK_SPACE: return -5;
     case VK_F1: return -6;
     case VK_F2: case VK_ESCAPE: return -7;
-    case VK_MULTIPLY: return 42;
+    case VK_MULTIPLY: case VK_CONTROL: case 'E': return 42;  // melee
+    case VK_TAB: case 'Q': return 35;                        // weapon wheel
   }
   if (vk >= '0' && vk <= '9') return (int)vk;
   if (vk >= VK_NUMPAD0 && vk <= VK_NUMPAD9) return (int)(48 + vk - VK_NUMPAD0);
@@ -200,6 +202,8 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow) {
   if (!hwnd) return 0;
   ShowWindow(hwnd, nCmdShow);
 
+  timeBeginPeriod(1);  // 1 ms timer/Sleep resolution for steady frame pacing
+  g_game->realTime = true;
   MSG msg = {};
   while (!g_game->quit) {
     while (PeekMessageW(&msg, nullptr, 0, 0, PM_REMOVE)) {
@@ -207,7 +211,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow) {
       TranslateMessage(&msg);
       DispatchMessageW(&msg);
     }
-    int sleepMs = g_game->runFrame((long)GetTickCount64(), g_screen);
+    int sleepMs = g_game->runFrame((long)timeGetTime(), g_screen);
     HDC dc = GetDC(hwnd);
     present(dc);
     ReleaseDC(hwnd, dc);
