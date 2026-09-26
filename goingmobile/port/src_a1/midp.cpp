@@ -498,6 +498,7 @@ void SoundPlayer::loadAll() {
     String p = resourcePath(String("/") + kSoundFileNames[i] + ext);
     isWav_[i] = kSoundIsWav[i];
     soundFiles_[i] = fileExists(p) ? p : "";
+    if (soundFiles_[i].empty()) audioLog("sound file missing: " + p);
     if (kSoundIsWav[i] && !soundFiles_[i].empty()) {
       FILE* f = nullptr;
       if (fopen_s(&f, soundFiles_[i].c_str(), "rb") == 0 && f) {
@@ -514,6 +515,61 @@ void SoundPlayer::loadAll() {
   }
 }
 
+// --sound-test: plays every cue the way the game does and records what each call returned, plus the
+// audio devices Windows (or Wine) reports. Returns a short summary for the message box.
+std::string SoundPlayer::runSoundTest() {
+  audioLog("sound test: data folder '" + getDataDir() + "'");
+  WAVEOUTCAPSA woc;
+  UINT nWave = waveOutGetNumDevs(), nMidi = midiOutGetNumDevs();
+  audioLog("waveOut devices: " + std::to_string(nWave));
+  for (UINT i = 0; i < nWave; i++)
+    if (waveOutGetDevCapsA(i, &woc, sizeof woc) == MMSYSERR_NOERROR) audioLog(std::string("  ") + woc.szPname);
+  MIDIOUTCAPSA moc;
+  audioLog("midiOut devices: " + std::to_string(nMidi));
+  for (UINT i = 0; i < nMidi; i++)
+    if (midiOutGetDevCapsA(i, &moc, sizeof moc) == MMSYSERR_NOERROR) audioLog(std::string("  ") + moc.szPname);
+
+  int effectsOk = 0, effects = 0;
+  for (int i = 0; i < 6; i++) {
+    if (!isWav_[i]) continue;
+    effects++;
+    if (wavData_[i].empty()) {
+      audioLog(std::string(kSoundFileNames[i]) + ".wav: NOT LOADED (missing from the data folder?)");
+      continue;
+    }
+    BOOL ok = PlaySoundA(wavData_[i].data(), nullptr, SND_MEMORY | SND_SYNC | SND_NODEFAULT);
+    audioLog(std::string(kSoundFileNames[i]) + ".wav (" + std::to_string(wavData_[i].size()) + " bytes): PlaySound " +
+             (ok ? "OK" : "FAILED, error " + std::to_string(GetLastError())));
+    effectsOk += ok ? 1 : 0;
+  }
+
+  bool musicOk = false;
+  if (!soundFiles_[MENU].empty()) {
+    char msg[256] = {};
+    std::string open = "open \"" + soundFiles_[MENU] + "\" type sequencer alias racsnd_test";
+    MCIERROR e = mciSendStringA(open.c_str(), nullptr, 0, nullptr);
+    mciGetErrorStringA(e, msg, sizeof msg);
+    audioLog("menu.mid: MCI open " + (e ? "FAILED " + std::to_string(e) + " " + msg : std::string("OK")));
+    if (!e) {
+      e = mciSendStringA("play racsnd_test", nullptr, 0, nullptr);
+      audioLog("menu.mid: MCI play " + (e ? "FAILED " + std::to_string(e) : std::string("OK")));
+      musicOk = e == 0 && nMidi > 0;  // with no MIDI device MCI still says OK but plays nothing
+      Sleep(4000);
+      mciSendStringA("close racsnd_test", nullptr, 0, nullptr);
+    }
+  } else {
+    audioLog("menu.mid: NOT FOUND in the data folder");
+  }
+  if (nMidi == 0)
+    audioLog("note: no MIDI output device -- the music needs one (on Linux/Wine: install FluidSynth or TiMidity)");
+
+  std::string summary = "Sound effects: " + std::to_string(effectsOk) + " of " + std::to_string(effects) +
+                        " played.\nMusic (MIDI): " + (musicOk ? "started" : nMidi == 0 ? "no MIDI device" : "failed") +
+                        ", MIDI devices: " + std::to_string(nMidi) + "\n\nDetails: " + rmsDir() + "\\audio.log";
+  audioLog(summary);
+  return summary;
+}
+
 void SoundPlayer::queue(int id) { queue(id, 1); }
 
 void SoundPlayer::queue(int id, int loop) {
@@ -526,6 +582,26 @@ void SoundPlayer::queue(int id, int loop) {
 bool SoundPlayer::playMenuLoop(bool) {
   queue(MENU, -1);
   return true;
+}
+
+// Audio problems are silent by nature, so failures (and the whole --sound-test run) are written to
+// %LOCALAPPDATA%\rac-gm-port-a1\audio.log: that file is what to ask for in a "no sound" report.
+static std::mutex g_audioLogMutex;
+void audioLog(const std::string& line) {
+  std::lock_guard<std::mutex> lk(g_audioLogMutex);
+  static bool announced = false;
+  std::string dir = rmsDir();
+  CreateDirectoryA(dir.c_str(), nullptr);
+  FILE* f = nullptr;
+  if (fopen_s(&f, (dir + "\\audio.log").c_str(), "a") != 0 || !f) return;
+  if (!announced) {
+    announced = true;
+    SYSTEMTIME t;
+    GetLocalTime(&t);
+    fprintf(f, "---- %04d-%02d-%02d %02d:%02d:%02d\n", t.wYear, t.wMonth, t.wDay, t.wHour, t.wMinute, t.wSecond);
+  }
+  fprintf(f, "%s\n", line.c_str());
+  fclose(f);
 }
 
 // MCI open/play/close block for tens of ms (MIDI sequencer setup especially), so every
@@ -544,7 +620,14 @@ static void mciWorker() {
       g_mciCv.wait_for(lk, std::chrono::milliseconds(250), [] { return !g_mciQueue.empty(); });
       batch.swap(g_mciQueue);
     }
-    for (auto& c : batch) mciSendStringA(c.c_str(), nullptr, 0, nullptr);
+    for (auto& c : batch) {
+      MCIERROR e = mciSendStringA(c.c_str(), nullptr, 0, nullptr);
+      if (e) {
+        char msg[256] = {};
+        mciGetErrorStringA(e, msg, sizeof msg);
+        audioLog("MCI \"" + c + "\" failed: " + std::to_string(e) + " " + msg);
+      }
+    }
     if (g_mciLoop) {
       char mode[32] = {};
       mciSendStringA("status racsnd_a1 mode", mode, sizeof(mode), nullptr);
@@ -583,7 +666,9 @@ void SoundPlayer::update() {
   if (pendingSound_ > 5) { pendingSound_ = -1; return; }
   if (!wavData_[pendingSound_].empty()) {
     if (playing_) haltPlayer();
-    PlaySoundA(wavData_[pendingSound_].data(), nullptr, SND_MEMORY | SND_ASYNC | SND_NODEFAULT);
+    if (!PlaySoundA(wavData_[pendingSound_].data(), nullptr, SND_MEMORY | SND_ASYNC | SND_NODEFAULT))
+      audioLog(std::string("PlaySound failed for ") + kSoundFileNames[pendingSound_] + ".wav (error " +
+               std::to_string(GetLastError()) + ")");
     pendingSound_ = -1;
     return;
   }

@@ -38,6 +38,23 @@ Keyboard and gamepad (XInput) work; the mouse fires and opens the weapon
 wheel. Press Escape / Back in menus to go back.
 
 
+NO SOUND?
+---------
+
+Run the sound test: open a command prompt in this folder and run
+
+  bin\goingmobile_port_a1.exe --sound-test
+
+It plays every sound effect and the music, shows a summary, and writes the
+details to %LOCALAPPDATA%\rac-gm-port-a1udio.log (the game also writes any
+audio error there while you play). Attach that file to a bug report.
+
+The music is MIDI, so it needs a MIDI synthesizer. Windows has one built in.
+On Linux under Wine you need one installed (for example FluidSynth or
+TiMidity with a soundfont); without it the sound effects still play but
+the music is silent. Also check that sound is ON in the game's Settings.
+
+
 WHERE YOUR FILES GO
 -------------------
 

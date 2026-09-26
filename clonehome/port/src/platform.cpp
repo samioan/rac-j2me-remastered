@@ -5,6 +5,7 @@
 
 #include <condition_variable>
 #include <cstdio>
+#include <cstdlib>
 #include <deque>
 #include <functional>
 #include <mutex>
@@ -13,15 +14,30 @@
 
 namespace ch {
 
+// Audio problems are silent by nature, so failures (and the --sound-test run) go to
+// %LOCALAPPDATA%\rac-ch-port\audio.log: that file is what to ask for in a "no sound" report.
+void audioLog(const std::string& line) {
+  static std::mutex m;
+  static bool announced = false;
+  std::lock_guard<std::mutex> lk(m);
+  const char* local = std::getenv("LOCALAPPDATA");
+  std::string dir = local ? std::string(local) + "\\rac-ch-port" : std::string(".");
+  CreateDirectoryA(dir.c_str(), nullptr);
+  FILE* f = fopen((dir + "\\audio.log").c_str(), "a");
+  if (!f) return;
+  if (!announced) {
+    announced = true;
+    SYSTEMTIME t;
+    GetLocalTime(&t);
+    fprintf(f, "---- %04d-%02d-%02d %02d:%02d:%02d\n", t.wYear, t.wMonth, t.wDay, t.wHour, t.wMinute, t.wSecond);
+  }
+  fprintf(f, "%s\n", line.c_str());
+  fclose(f);
+}
+
 namespace {
 
-void audioLog(const char* what, int code) {
-  FILE* f = fopen("audio.log", "a");
-  if (f) {
-    fprintf(f, "%s: %d\n", what, code);
-    fclose(f);
-  }
-}
+void audioLog(const char* what, int code) { ch::audioLog(std::string(what) + ": " + std::to_string(code)); }
 
 // MCI and PlaySound calls can block for hundreds of milliseconds (the first MIDI open takes
 // seconds), so every one of them runs on this worker thread, in order. The game thread only

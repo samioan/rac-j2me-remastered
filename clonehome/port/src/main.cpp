@@ -18,6 +18,7 @@ static LONG WINAPI crashHandler(EXCEPTION_POINTERS* ep) {
   FILE* f = std::fopen("crash.txt", "w");
   if (!f) return EXCEPTION_EXECUTE_HANDLER;
   std::fprintf(f, "exception %08lx at %p\n", ep->ExceptionRecord->ExceptionCode, ep->ExceptionRecord->ExceptionAddress);
+#if defined(_M_X64)  // the stack walk below reads x64 registers; other builds log just the address
   HANDLE proc = GetCurrentProcess(), thread = GetCurrentThread();
   SymSetOptions(SYMOPT_LOAD_LINES | SYMOPT_UNDNAME);
   SymInitialize(proc, nullptr, TRUE);
@@ -44,6 +45,7 @@ static LONG WINAPI crashHandler(EXCEPTION_POINTERS* ep) {
                    hasLine ? line.FileName : "?", hasLine ? line.LineNumber : 0);
     }
   }
+#endif
   std::fclose(f);
   return EXCEPTION_EXECUTE_HANDLER;
 }
@@ -89,6 +91,70 @@ void Port::change(int row, int dir) {
 }  // namespace ch
 
 static Surface g_screen;
+
+// --sound-test: plays the game's seven audio resources (2091..2097) the way the game does and records what
+// each call returned, plus the audio devices Windows (or Wine) reports. Returns a summary for a message box.
+static std::string runSoundTest() {
+  audioLog("sound test: data folder '" + Platform::dataDir + "'");
+  Assets a;
+  if (!a.load(Platform::dataDir)) {
+    audioLog("could not read RP1..RP3");
+    return "Could not read the game files (RP1..RP3).";
+  }
+  UINT nWave = waveOutGetNumDevs(), nMidi = midiOutGetNumDevs();
+  audioLog("waveOut devices: " + std::to_string(nWave));
+  for (UINT i = 0; i < nWave; i++) {
+    WAVEOUTCAPSA c;
+    if (waveOutGetDevCapsA(i, &c, sizeof c) == MMSYSERR_NOERROR) audioLog(std::string("  ") + c.szPname);
+  }
+  audioLog("midiOut devices: " + std::to_string(nMidi));
+  for (UINT i = 0; i < nMidi; i++) {
+    MIDIOUTCAPSA c;
+    if (midiOutGetDevCapsA(i, &c, sizeof c) == MMSYSERR_NOERROR) audioLog(std::string("  ") + c.szPname);
+  }
+  int effects = 0, effectsOk = 0;
+  bool musicOk = false;
+  for (int id = 2091; id <= 2097; id++) {
+    Bytes b = a.resource(id);
+    std::string name = "cue " + std::to_string(id - 2091) + " (resource " + std::to_string(id) + ", " +
+                       std::to_string(b.n) + " bytes)";
+    if (a.type(id) == kWav) {
+      effects++;
+      BOOL ok = PlaySoundA((LPCSTR)b.p, nullptr, SND_MEMORY | SND_SYNC | SND_NODEFAULT);
+      audioLog(name + " wav: PlaySound " + (ok ? "OK" : "FAILED, error " + std::to_string(GetLastError())));
+      effectsOk += ok ? 1 : 0;
+    } else {
+      char tmp[MAX_PATH], path[MAX_PATH], msg[256] = {};
+      GetTempPathA(MAX_PATH, tmp);
+      snprintf(path, sizeof path, "%sch_soundtest.mid", tmp);
+      FILE* f = std::fopen(path, "wb");
+      if (!f) continue;
+      std::fwrite(b.p, 1, (size_t)b.n, f);
+      std::fclose(f);
+      std::string open = std::string("open \"") + path + "\" type sequencer alias chtest";
+      MCIERROR e = mciSendStringA(open.c_str(), nullptr, 0, nullptr);
+      mciGetErrorStringA(e, msg, sizeof msg);
+      audioLog(name + " midi: MCI open " + (e ? "FAILED " + std::to_string(e) + " " + msg : std::string("OK")));
+      if (!e) {
+        e = mciSendStringA("play chtest", nullptr, 0, nullptr);
+        audioLog(name + " midi: MCI play " + (e ? "FAILED " + std::to_string(e) : std::string("OK")));
+        musicOk = musicOk || (e == 0 && nMidi > 0);
+        Sleep(3000);
+        mciSendStringA("close chtest", nullptr, 0, nullptr);
+      }
+      DeleteFileA(path);
+    }
+  }
+  if (nMidi == 0)
+    audioLog("note: no MIDI output device -- the music needs one (on Linux/Wine: install FluidSynth or TiMidity)");
+  const char* local = std::getenv("LOCALAPPDATA");
+  std::string summary = "Sound effects: " + std::to_string(effectsOk) + " of " + std::to_string(effects) +
+                        " played.\nMusic (MIDI): " + (musicOk ? "started" : nMidi == 0 ? "no MIDI device" : "failed") +
+                        ", MIDI devices: " + std::to_string(nMidi) + "\n\nDetails: " +
+                        (local ? std::string(local) + "\\rac-ch-port\\audio.log" : std::string("audio.log"));
+  audioLog(summary);
+  return summary;
+}
 
 static void gameKeyDown(int code) { if (g_game) g_game->platformKey(code, true); }
 static void gameKeyUp(int code) { if (g_game) g_game->platformKey(code, false); }
@@ -216,6 +282,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int) {
   int fullscreenArg = -1;
   int headlessWidth = kScreenW;
   bool stats = false;
+  bool soundTest = false;
   bool watchEnemies = false;
   int simFps = 0;  // headless: run the real-time loop with a fake clock at this display rate (tests interpolation)
   int jumpWorld = -1, jumpSection = 0;
@@ -228,6 +295,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int) {
     else if (!wcscmp(argv[i], L"--dump")) dump = narrow(argv[++i]);
     else if (!wcscmp(argv[i], L"--frames")) frames = _wtoi(argv[++i]);
     else if (!wcscmp(argv[i], L"--stats")) stats = true;
+    else if (!wcscmp(argv[i], L"--sound-test")) soundTest = true;
     else if (!wcscmp(argv[i], L"--watch-enemies")) watchEnemies = true;
     else if (!wcscmp(argv[i], L"--sim-fps")) simFps = _wtoi(argv[++i]);
     else if (!wcscmp(argv[i], L"--width")) headlessWidth = _wtoi(argv[++i]);
@@ -249,7 +317,7 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int) {
     std::string dir = narrow(exe);
     dir = dir.substr(0, dir.find_last_of("\\/"));
     if (Platform::dataDir == ".") {
-      for (const char* rel : {"", "/data", "/../extracted", "/../../extracted", "/../../../clonehome/extracted"}) {
+      for (const char* rel : {"", "/data", "/../data", "/../extracted", "/../../extracted", "/../../../clonehome/extracted"}) {
         std::string cand = dir + rel;
         if (GetFileAttributesA((cand + "/RP1").c_str()) != INVALID_FILE_ATTRIBUTES) {
           Platform::dataDir = cand;
@@ -264,6 +332,11 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int) {
     }
   }
   SetUnhandledExceptionFilter(crashHandler);
+  if (soundTest) {  // audio diagnostics for "no sound" reports
+    std::string summary = runSoundTest();
+    MessageBoxA(nullptr, summary.c_str(), "Clone Home sound test", MB_ICONINFORMATION);
+    return 0;
+  }
   RatchetMIDlet* midlet = new RatchetMIDlet();
   g_game = RatchetMIDlet::game;
   if (!g_game->ok()) {

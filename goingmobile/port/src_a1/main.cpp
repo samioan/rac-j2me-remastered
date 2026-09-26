@@ -112,6 +112,7 @@ static void findDataDir(PWSTR cmdLine) {
   if (argv) LocalFree(argv);
   if (!given.empty() && setDataDir(given)) return;
   static const char* kCandidates[] = {
+      "../data",  // the release layout: bin\goingmobile_port_a1.exe next to the launcher's data\ (run by hand)
       "extracted_a1",          "../extracted_a1",          "../../extracted_a1",
       "../../../extracted_a1", "../../../../goingmobile/extracted_a1",
   };
@@ -126,6 +127,20 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR cmdLine, int) {
   _CrtSetReportHook2(_CRT_RPTHOOK_INSTALL, crtReportHook);
 #endif
   findDataDir(cmdLine);
+  if (getDataDir().empty()) {
+    MessageBoxW(nullptr,
+                L"Couldn't find the game files (mapData.txt and the rest of RAC-GoingMobile-a1.jar).\n"
+                L"Start the game from GoingMobile.exe, or pass the folder they are in.",
+                L"Ratchet & Clank: Going Mobile", MB_ICONERROR);
+    return 1;
+  }
+  if (cmdLine && wcsstr(cmdLine, L"--sound-test")) {  // audio diagnostics for "no sound" reports
+    SoundPlayer player;
+    player.loadAll();
+    std::string summary = player.runSoundTest();
+    MessageBoxA(nullptr, summary.c_str(), "Going Mobile sound test", MB_ICONINFORMATION);
+    return 0;
+  }
 
   screen::load();
   bool windowed = cmdLine && wcsstr(cmdLine, L"--windowed") != nullptr;

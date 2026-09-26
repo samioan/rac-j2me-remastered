@@ -35,6 +35,9 @@ class Display {
 
 // The port's own options shown in the game's Settings screens (Resolution, Fullscreen, Scaling, Speed).
 // Rows 0..3; implemented in main.cpp next to the window code.
+// Appends a line to %LOCALAPPDATA%\rac-ch-port\audio.log (audio failures and --sound-test results).
+void audioLog(const std::string& line);
+
 struct Port {
   static String label(int row);
   static void change(int row, int dir);

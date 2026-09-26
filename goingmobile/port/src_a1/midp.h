@@ -27,6 +27,9 @@ typedef int32_t  jint;
 typedef int64_t  jlong;
 
 typedef std::string String;       // Java String / StringBuffer (Latin-1 bytes)
+
+// Appends a line to %LOCALAPPDATA%\rac-gm-port-a1\audio.log (audio failures and --sound-test results).
+void audioLog(const std::string& line);
 typedef std::vector<std::byte> ByteArray;
 
 // ---- java.lang-ish helpers ---------------------------------------------
@@ -217,6 +220,7 @@ class SoundPlayer {
   bool playMenuLoop(bool loop);    // forces MENU to loop; always returns true
   void stop();
   void update();                  // call once per frame
+  std::string runSoundTest();     // --sound-test: plays every cue, logs results to audio.log
 
  private:
   String soundFiles_[6];
